@@ -1,6 +1,6 @@
 # Guitar Real-Time Overlay — Technical Plan
 
-Status: draft v2 (2026-10-11), which adds the owner decisions below. Owner: Chase. This is an opinionated plan; open
+Status: draft v3 (2026-10-11), which adds the owner decisions below (D1–D7). Owner: Chase. This is an opinionated plan; open
 questions are collected at the end (§10).
 
 ## Decisions (2026-10-11)
@@ -42,12 +42,57 @@ These decisions come from Chase (owner) and override anything below that conflic
     or Metal. Use fixed input shapes (1024×256), and check with the Xcode Core ML performance report (or
     `MLComputePlan`) that no layer falls back to the CPU.
 
+**D3. Guitars: electric only for now; all guitar types eventually.**
+- v1 data, training, and eval target 6-string electrics (Strat/Ibanez/LP/Tele-style, 21–24 frets, any inlay style
+  including ornate vines). Acoustic and classical clips may still be collected opportunistically, but they are tagged and
+  held out of the v1 training mix and acceptance metrics.
+- The diversity quota in §4 is overridden for v1: ~100% electric. Keep the inlay/wood/lighting/camera quotas.
+- Nothing in the label schema or geometry is electric-specific (`guitar.type` is already a field), so widening to
+  acoustic/classical later is a data job, not a redesign.
+
+**D4. Fret coverage: every fret visible in the camera, resilient to partial necks, including the nut NOT visible.**
+- The overlay must cover every fret wire in view (up to 22/24), not a fixed 0–15 window. Drawing range becomes
+  `[min_visible_fret − 1, max_visible_fret + 1]`, clipped to the frame and to `guitar.frets`.
+- **The anchor representation must resolve the fret index without the nut.** Fret slots are still named by absolute
+  index (`f1..f24`), but the fit must not assume the nut is present. Index is resolved from:
+  1. ~~Fret-spacing ratios~~ — **do not work on their own (found in M1).** Fret positions are a geometric
+     progression from the bridge: `u_{n+s} = 1 − 2^(−s/12)·(1 − u_n)`, so an index shift is an *affine* map of `u`
+     that any homography absorbs. Cross-ratios of fret positions are identical for every shift. Only two weak
+     geometric signals remain: the neck taper, and the *metric* shape of the board (fret gap ÷ board width changes
+     ~6% per fret, observable through `H` with roughly known camera intrinsics). On synthetic pinhole data the metric
+     cue is right ~90% of the time (`resolve_index_shift(image_size=…)`), but on the real M1 frames it was biased by
+     2–3 frets (nut width/scale uncertainty, lens distortion, binding vs. edge). Treat it as a tie-breaker at most.
+  2. **Inlay pattern (primary cue).** The single/double-dot pattern (3,5,7,9,12,15,…) or, for ornate inlays, the 12th-fret
+     "double"/larger motif and the inlay-to-inlay spacing. The model gets an inlay head (§2.2) whose detections vote on
+     `s`.
+  3. **Landmarks:** body joint/neck heel (≈ fret 16–17 on most electrics), last fret (`guitar.frets`), headstock.
+  4. **Per-session lock + hysteresis** (§2.4): once confident, the index is locked and only re-opened after track loss.
+- Labels for nut-less frames are fine: the annotator types the index of one wire (counted from the 12th-fret marker or
+  the last fret) and the tool fills the rest.
+- **First PoC exception:** the M1/M2 proof-of-concept may require the nut to be visible (index = count from the nut).
+  The fit library still implements the shift search from day one so the PoC isn't a dead end.
+
+**D5. No hand-occlusion handling needed. Drawing the overlay over the fingers is fine.**
+- The M6 "hand-occlusion mask" item is dropped (optional polish at most). The renderer draws on top of everything.
+- Occlusion still matters for *detection* (vis = 1 labels, aux line head, hand-paste augmentation); only the
+  *rendering* requirement is removed.
+
+**D6. Data policy: downloading YouTube/TikTok clips for internal training is OK. No commercial release is planned.**
+- `tools/collect.py` (yt-dlp) is approved for YouTube, TikTok, and Instagram reels. Raw media still stays out of git and
+  out of public demos.
+- Keep `source_url`, `uploader`, and `license` per clip anyway (cheap, and keeps takedowns and a future retrain-on-owned
+  path possible), but CC filtering is no longer a priority.
+
+**D7. The RTX 4090 PC can be used any time, including unattended overnight runs.**
+- Long queued runs and overnight sweeps (`queue.sh`) are fine. Auto-resume stays, for crashes and reboots.
+- Wake-on-LAN / Tailscale still needs a one-time setup; it's no longer a policy question.
+
 ## 0. Goal & constraints
 
 Draw a scale overlay onto a guitar fretboard from a live close-up camera, so that it matches `docs/reference-overlay.jpg`:
 semi-transparent cells between adjacent fret wires across all 6 strings, thin string lines, white inlay dots,
 highlighted target-note cells, correct perspective (trapezoids shrinking toward the body), stable across frames,
-frets ~1–15+ visible.
+every fret that's visible in the camera (D4), including partial necks with the nut out of frame.
 
 Hard constraints observed so far:
 
@@ -58,8 +103,9 @@ Hard constraints observed so far:
   inlays must not be treated as fret wires.
 - **Video**: 60 fps, 720p to ~950p. Budget latency for 60 fps and accept 30 fps model inference with propagation in
   between (§2.5).
-- **Training compute**: an RTX 4090 Windows box over ssh, available only when the owner has it on. Modal is a paid
+- **Training compute**: an RTX 4090 Windows box over ssh, usable any time including overnight (D7). Modal is a paid
   fallback to avoid.
+- **Guitars**: electric only for v1 (D3).
 - **Runtime target**: Chase's Apple Silicon MacBook with a webcam, using CoreML on the ANE or GPU. The 4090 PC with a
   webcam is used for early prototypes (D2).
 - **Handedness**: the model is right-handed only. Left-handed players use a mirror toggle (D1).
@@ -107,9 +153,11 @@ The fit, per frame:
    each point by its confidence.
 3. **Check the fret index (off-by-one guard).** Index errors are the classic failure: the nut is off-frame and the
    network shifts every slot by one.
-   - Re-fit with every slot shifted by `s ∈ {−2…+2}` and keep the lowest-cost shift.
-   - The cross-ratio of any 4 fret positions along the neck is perspective-invariant and depends on `n`, so the spacing
-     itself disambiguates the index once 4+ wires are visible.
+   - Re-fit with every slot shifted by `s ∈ {−2…+2}` (wider, e.g. `−6…+6`, when the nut is not visible; D4) and keep
+     the lowest-cost shift.
+   - **Correction (M1):** fret spacing does *not* disambiguate the index. An index shift is an affine map of `u`
+     (frets form a geometric progression from the bridge), so every shift fits equally well up to the weak taper and
+     metric-shape cues (D4). The absolute index has to come from the nut, inlays, or landmarks (body joint, last fret).
    - Tie-breaker: inlay positions (3, 5, 7, 9, 12, 15, 17…) from the auxiliary inlay head (§2.2).
 4. **Fit `τ` per session**, not per frame. Use a running median over high-confidence frames, initialized to 0.3.
 5. **Ignore radius and fret height** for v1. The fretboard radius (9.5–17″) moves points by ≲2 px at our scale. A
@@ -369,7 +417,7 @@ accessible.
 
 | Axis | Target mix |
 |---|---|
-| Guitar | ~55% electric, 30% steel acoustic, 15% classical/nylon |
+| Guitar | **v1: ~100% electric (D3).** Later: ~55% electric, 30% steel acoustic, 15% classical/nylon |
 | Inlays | dots, blocks, ornate (vine/tree/abalone), none/side-only — ≥15% ornate |
 | Fretboard wood | dark (rosewood/ebony) and light (maple) — ≥20% maple |
 | Handedness | No quota. Left-handed (and creator-mirrored) clips are welcome; they are flagged `mirrored` at ingest and become right-handed data (D1) |
@@ -392,12 +440,12 @@ accessible.
 - 1k frames from the owner's own setup (§6).
 
 **Licensing.**
-- Research and internal model training only. Raw media is never committed, redistributed, or shown in public demos.
+- Internal model training only; approved by Chase (D6), and no commercial release is planned. Raw media is never
+  committed, redistributed, or shown in public demos.
 - Keep `source_url` and uploader for every clip, so we can honour takedowns by purging the clip and its derived frames
   and retraining.
-- Prefer Creative Commons-licensed videos (YouTube `creativeCommons` filter) and creators who explicitly permit reuse.
-- Before any commercial release, re-evaluate: the safest route is to retrain on owned, CC, and commissioned footage
-  only. Track `license` per clip so that subset can be computed.
+- CC filtering is optional (D6). If a commercial release is ever planned, re-evaluate: the safest route is to retrain
+  on owned, CC, and commissioned footage only. Track `license` per clip so that subset can be computed.
 
 ## 5. Training on the RTX 4090
 
@@ -540,8 +588,7 @@ Everything is drawn in plane coordinates and projected through `H`, so perspecti
   multiplied by `H` in the vertex shader. Render as 4–8 subdivided quads per cell so later non-planar radius
   corrections can bend them.
 - Fade-in/out on track state.
-- Later: a hand-occlusion mask (a tiny segmentation head or MediaPipe hands) so the overlay sits *behind* the fingers.
-  This is a big perceived-quality win; it belongs to M6.
+- ~~Hand-occlusion mask.~~ Not needed (D5): drawing over the fingers is acceptable.
 
 ## 8. Milestones
 
@@ -553,20 +600,20 @@ Everything is drawn in plane coordinates and projected through `H`, so perspecti
 | **M3 — Real model** (2–3 wk) | Rotated-crop heatmap net with aux heads + spacing loss. Robust fit + One Euro + KLT propagation + gating/hysteresis. Synthetic 2.5D generator v1. **CoreML export smoke test on the Mac**: fixed shapes, residency report, first `bench.py` numbers, so ANE-hostile ops are caught before M4. Live prototype loop on the 4090 (TensorRT). | Beats baseline on PCK and cell IoU; index accuracy ≥ 98%; Stage 2 converts to CoreML with no CPU-fallback layers |
 | **M4 — Scale up & hit targets** (2–3 wk) | Pseudo-labeling rounds, 8–10k labeled frames, synthetic mix tuned, fine-tune on owner train split. Ablations (crop vs full frame, aux heads, spacing loss, synthetic ratio, h-flip on/off). | §6 accuracy targets met on `test-owner` |
 | **M5 — Mac real-time app** (2 wk) | Python desktop app on the MacBook: webcam capture → CoreML (ANE or GPU, chosen by bench) → GPU render. Same code runs on the 4090 with a TensorRT backend. **Left-handed / mirrored-camera toggle (D1).** UI for key/scale/tuning/style/fret range. `bench.py` latency report on M-series. Go native (Swift + AVFoundation + Metal) only if Python can't hold the latency target. | 60 fps live on Chase's MacBook (camera permitting) with ≤ 10 ms p95 compute; mirror round-trip < 0.1 px and `test-lefty` within 2% of `test-ext` on cell IoU; usable in a real practice session |
-| **M6 — Polish, then other platforms** (open) | Hand-occlusion masking. Per-guitar calibration (τ, fret count, inlay map), auto-saved. 7-string and capo robustness. Later (D2): port to web/WebGPU and/or iOS/CoreML. | Defined after M5 and the remaining §10 answers |
+| **M6 — Polish, then other platforms** (open) | Acoustic/classical support (D3). Per-guitar calibration (τ, fret count, inlay map), auto-saved. 7-string and capo robustness. Later (D2): port to web/WebGPU and/or iOS/CoreML. | Defined after M5 and the remaining §10 answers |
 
 ## 9. Risks
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| **Fret-index off-by-one** (nut off-frame, ornate inlays) | Overlay shifted a whole fret. Worst possible UX. | Cross-ratio index check, inlay aux head, hysteresis, per-session lock, zero-tolerance QA |
+| **Fret-index off-by-one** (nut off-frame, ornate inlays) | Overlay shifted a whole fret. Worst possible UX. Now a hard requirement to solve, since nut-less framing must work (D4) | Inlay aux head + body-joint/last-fret landmarks (spacing alone is shift-invariant, §1.2; metric-shape cue only as a tie-breaker), hysteresis, per-session lock, zero-tolerance QA. PoC may require the nut |
 | **Fretting-hand occlusion** exactly at the region of interest | Missing or wrong frets where the user looks | Occluded-but-inferable labels (vis = 1), parametric fit fills gaps, hand-paste augmentation |
 | **Ornate (vine) inlays** confused with wires or markers | False peaks, index errors | Line-map aux head, ornate inlays oversampled (≥15%), masked inlay loss, owner guitars in M4 fine-tune |
 | **Thin wires near the body** at webcam resolution | Large normalized error at high frets | Rotated crop from full-res frame, stride-4 heatmaps, report metrics per fret range |
 | **Domain gap** YouTube → home webcam (exposure, noise, compression) | Test-owner much worse than test-ext | Owner fine-tune split, webcam noise/compression augmentation, collect more owner-like clips |
 | **Agent annotation quality** | Noisy labels, silent index errors | Snap + fit + overlay verification, gold set gating, agents only `draft` |
 | **4090 availability** | Stalled training | Queue + auto-resume, WoL/Tailscale, Modal as a last resort with the same image |
-| **Licensing of scraped video** | Can't ship a commercially trained model | Per-clip license tracking, CC preference, retrain-on-owned path planned |
+| **Licensing of scraped video** | Low for now: internal use approved, no commercial release planned (D6) | Per-clip license tracking kept so a retrain-on-owned path stays possible |
 | **Planar assumption** (radius, neck relief, strings above the board) | Few-px errors on outer strings | Measure in cell IoU; add per-string `v` / height offset only if needed |
 | **Fast neck motion / motion blur** | Lag or lost track | One Euro β tuning, KLT coast, blur augmentation, 60 fps capture |
 | **CoreML/ANE op coverage** (layers falling back to the CPU, fp16 drift) | Misses the Mac latency target, or parity fails | CoreML smoke test from M3, crop sampling kept outside the graph, fixed shapes, per-export residency check, GPU compute units as a fallback |
@@ -579,23 +626,28 @@ Everything is drawn in plane coordinates and projected through `H`, so perspecti
    ANE/MPS), with the 4090 PC for early prototypes; web and iOS later.
 2. **Camera placement.** Is the home-office webcam angle in your videos *the* canonical setup, or should we support a
    phone on a tripod, neck cams, or over-the-shoulder? Narrower scope means a faster v1.
-3. **Guitars.** Only your Ibanez-style electrics, or acoustic/classical too? Fret counts (22/24)? Any 7-strings or
-   basses?
+3. ~~**Guitars.**~~ **Answered 2026-10-11 → D3.** Electric only for now; all types eventually. *Still open:* fret
+   counts of your guitars (22 vs 24), and any 7-strings?
 4. ~~**Left-handed support.**~~ **Answered 2026-10-11 → D1.** Required, as a UI mirror toggle; never inferred from
    video.
 5. **Scales and display.** Which scales and modes matter first? Note names, degrees, or plain dots? Is the reference's
    blue-cell look the target, or the "dots" style? Should a root or "target note" be user-selectable per exercise?
 6. **Tunings.** Standard only, or Drop D / Eb / open tunings? Capo support?
-7. **Fret range.** Is frets 0–15 enough, or the full neck to 22/24?
-8. **4090 logistics.** Is Wake-on-LAN or Tailscale acceptable? Is it okay to leave queued training running overnight?
-9. **Data policy.** Is research/internal-only use of scraped clips acceptable for now? Is a commercial release
-   planned, which would change the data strategy?
+7. ~~**Fret range.**~~ **Answered 2026-10-11 → D4.** Every fret visible in the camera, robust to partial necks and a
+   hidden nut (the first PoC may require the nut).
+8. ~~**4090 logistics.**~~ **Answered 2026-10-11 → D7.** Usable any time, including overnight.
+9. ~~**Data policy.**~~ **Answered 2026-10-11 → D6.** Downloading YouTube/TikTok clips for internal training is OK; no
+   commercial release planned.
 10. **Annotation budget.** How many hours can you personally spend on the gold set (~200 frames ≈ 3–4 h with the tool)
     and on QA review?
-11. **Hand occlusion.** Is drawing the overlay *behind* your fingers a must-have or a nice-to-have?
+11. ~~**Hand occlusion.**~~ **Answered 2026-10-11 → D5.** Drawing over the fingers is fine.
 12. **Reference video.** May we use the 18 s screen recording frames to tune the renderer style (colors, alpha,
     proportions)?
 13. **Which MacBook exactly?** Which chip (e.g. M3/M4 Pro or Max), how much RAM, and which macOS version? This sets
     the ANE-vs-GPU choice and which CoreML features we can use (e.g. `MLComputePlan` needs macOS 14.4+).
 14. **Which webcam on the Mac?** Built-in MacBook cameras are typically 30 fps. Is there an external 60 fps webcam,
     or is 30 fps acceptable for v1? Where does it sit relative to the guitar (this ties into Q2)?
+15. **Your own footage looks left-handed.** In all three owner videos the headstock is on the image left and the
+    "Ibanez" logo and background text read correctly, so the camera isn't mirrored: these are left-handed guitars
+    played left-handed. Per D1 these clips get `mirrored: true`, and the M1 demo exercises that path. Please confirm
+    (and confirm the live app will run with the toggle on by default for you).

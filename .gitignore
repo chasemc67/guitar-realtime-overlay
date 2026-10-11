@@ -1,4 +1,5 @@
 data/
+/data
 *.mp4
 *.mov
 *.mkv
@@ -9,3 +10,7 @@ weights/
 *.engine
 __pycache__/
 .venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+samples/out/*.mp4

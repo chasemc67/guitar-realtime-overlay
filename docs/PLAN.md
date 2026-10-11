@@ -508,6 +508,17 @@ finder; nut anchors only exist when the AI says the nut is visible). The rest ar
 from the fit). The worst crops are in `review/eval-auto-worst-anchors/`. Anchorable/cue misses: 08-30_10s
 (the GT says not anchorable, but the AI says the nut is visible) and 09-06_60s (cue 3-5-7 vs 9-12-15). Both predate D13.
 
+#### 3.5.2 Cross-neck fix (2026-10-11)
+
+Batch-002 review (Chase): wires + numbering mostly right, but 18/32 grids didn't span low E -> high E. Fix in
+`gro.auto.strings` / `detect`: a **width prior** (outer-string span / local px per scale length / physical span
+35.5 -> 52 mm is 0.80-1.15 on every GT and GOOD frame, 0.08-0.61 on the slivers) restricts the string comb, applied
+for every index shift the relative numbering allows and exactly after numbering; short wires are grown to their
+ridge ends; fallbacks comb -> edge inset (if in prior) -> prior span (flagged); a neck-coherence bonus against
+overlay text; optional cached AI span check (flag only). `scripts/eval_auto.py` reports the cross-neck error next to
+the fret-wire headline; 3 extra GT frames from the BAD set in `samples/anchors_crossneck/` (model-based outer strings,
+~3-5% of span). Results and open issues: `eval/crossneck_report.md`.
+
 ## 4. Data collection
 
 **Sources.** YouTube and TikTok guitar lessons and playthroughs with a close-up neck view: "scale lesson close up",

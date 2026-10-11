@@ -14,9 +14,10 @@ uv sync                                        # Python >= 3.10, numpy + opencv-
 uv run pytest                                  # theory, homography round-trip, index shift, mirror toggle, schema
 uv run python scripts/hand_anchors.py --debug  # rebuild samples/anchors/*.json from the hand clicks
 uv run python scripts/render_demo.py --resnap  # stills + 3 s LK-tracked demo (needs data/raw/*.mp4)
+uv run python scripts/review_sheet.py samples/anchors --batch batch-000-hand  # review images -> review/<batch>/
 ```
 
-(`make test|lint|anchors|demo` wrap the same commands.)
+(`make test|lint|anchors|demo|review` wrap the same commands.)
 
 Layout:
 
@@ -27,7 +28,10 @@ Layout:
 - `src/gro/render.py`: "reference"-style overlay (blue cells, strings, inlay dots, scale notes) and the
   left-handed/mirrored-camera helpers.
 - `src/gro/snap.py`: annotation assist that snaps clicks to fret-wire ridges and fits edges from wire ends.
-- `scripts/`: `zoom.py` (grid-labelled crops for annotating), `hand_anchors.py`, `render_demo.py`.
+- `src/gro/review.py`: annotation review images: contact sheets, full-res frames with anchors + fitted grid, zoomed
+  neck strips, fit stats (PLAN D8).
+- `scripts/`: `zoom.py` (grid-labelled crops for annotating), `hand_anchors.py`, `render_demo.py`, `review_sheet.py`.
+- `review/<batch>/`: review images for each annotation batch. Every batch gets these, and Chase reviews them (D8).
 - `samples/frames` (inputs), `samples/anchors` (labels), `samples/out` (renders; `demo.mp4` is gitignored).
 
 ![demo](samples/out/demo.gif)

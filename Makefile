@@ -1,4 +1,4 @@
-.PHONY: install test lint fmt anchors demo
+.PHONY: install test lint fmt anchors demo review
 
 install:
 	uv sync
@@ -19,3 +19,6 @@ anchors:
 
 demo:
 	uv run python scripts/render_demo.py --resnap
+
+review:
+	uv run python scripts/review_sheet.py samples/anchors --batch batch-000-hand

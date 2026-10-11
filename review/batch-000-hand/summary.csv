@@ -1,0 +1,4 @@
+item,file,frame,n_anchors,frets,mean_px,max_px,max_at,rmse_px,n_rejected,rejected,nut_visible,mirrored,tau,error,status,image
+2026-08-30_15-06-39_10s_f000,2026-08-30_15-06-39_10s.json,frame #0 t=10s,28,1-14,0.601,1.297,14t,0.666,0,,no,True,0.000,,draft,samples/frames/2026-08-30_15-06-39_10s.jpg
+2026-09-03_20-38-02_10s_f000,2026-09-03_20-38-02_10s.json,frame #0 t=10s,50,0-24,0.550,4.645,0t,0.876,0,,yes,True,0.400,,draft,samples/frames/2026-09-03_20-38-02_10s.jpg
+2026-09-06_09-00-01_10s_f000,2026-09-06_09-00-01_10s.json,frame #0 t=10s,48,1-24,0.642,2.785,12t,0.750,0,,no,True,0.000,,draft,samples/frames/2026-09-06_09-00-01_10s.jpg

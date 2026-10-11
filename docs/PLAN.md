@@ -1,6 +1,6 @@
 # Guitar Real-Time Overlay — Technical Plan
 
-Status: draft v3 (2026-10-11), which adds the owner decisions below (D1–D7). Owner: Chase. This is an opinionated plan; open
+Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D10). Owner: Chase. This is an opinionated plan; open
 questions are collected at the end (§10).
 
 ## Decisions (2026-10-11)
@@ -86,6 +86,39 @@ These decisions come from Chase (owner) and override anything below that conflic
 **D7. The RTX 4090 PC can be used any time, including unattended overnight runs.**
 - Long queued runs and overnight sweeps (`queue.sh`) are fine. Auto-resume stays, for crashes and reboots.
 - Wake-on-LAN / Tailscale still needs a one-time setup; it's no longer a policy question.
+
+**D8. Annotation quality is critical and needs Chase's review. Every annotation batch produces review images.**
+- Labels are the ceiling on everything downstream (index errors especially, D4), so no batch counts as done until
+  Chase has reviewed it. Chase reviews from screenshots, so the review artifact is a set of images, not a web app.
+- `scripts/review_sheet.py <labels_dir> --batch <name>` (`gro.review`) writes `review/<batch>/`:
+  - `contact_sheet_NN.jpg`: 3×3 tiles (configurable, ~2000 px wide), one per annotated frame, cropped to the board.
+  - `frames/<clip>_fNNN.jpg`: full-res frame with the clicked anchors (labelled `<fret><b|t>`, green = visible,
+    orange = occluded, red X = rejected by the fit) and the refitted grid (every fret wire and string; solid inside
+    the annotated range, dashed where extrapolated).
+  - `strips/<clip>_fNNN.jpg`: neck-aligned 3× zoom crops, raw above fit, to judge wire-by-wire alignment.
+  - `summary.csv`, plus a caption bar on every image: file, frame, inlier mean/max px error (and which anchor),
+    rejected points, nut visible, mirrored, τ. Captions turn orange when max error > 3 px or a point was rejected.
+- Commit `review/<batch>/` when the batch's images are < 5 MB in total. Otherwise gitignore the batch and commit only
+  the contact sheets.
+- A web viewer comes later, and only if the contact sheets stop scaling.
+- First batch: `batch-000-hand` (the 3 M1 frames). Inlier mean error is 0.55–0.64 px. The worst point is 4.65 px, at
+  the nut's treble anchor (`0t`) on 2026-09-03; it is flagged and waiting on Chase's review.
+
+**D9. Storage: keep the box light.**
+- Raw and scraped clips live on the Windows PC (lots of disk) and/or in the `Training data` subfolder of Chase's
+  Google Drive folder. This overrides "Google Drive is the archive" in §5: either location
+  is fine as the archive.
+- The box (this dev machine) keeps only working sets: the clips and frames of the batch being annotated or reviewed.
+  Delete them once they're synced back.
+- Git holds code, labels, manifests, and small review images (D8), never raw media.
+
+**D10. Data collection blocker: the box can't download from YouTube or TikTok.**
+- From the box, YouTube rejects every yt-dlp player client: HTTP 429 and "Sign in to confirm you're not a bot". The
+  box has a datacenter IP. yt-dlp's TikTok extractor is currently marked broken.
+- Plan: run `tools/collect.py` (yt-dlp) on the Windows PC or another home machine (residential IP), writing to the
+  PC's disk / Drive `Training data` (D9). Only the working set is synced to the box.
+- M1 learnings that shape annotation are in D4 and §1.2: fret spacing can't pin down the fret index. When the nut is
+  hidden (fret wrap on Chase's guitars), the index has to come from inlays, the body joint, or the last fret.
 
 ## 0. Goal & constraints
 
@@ -366,6 +399,8 @@ verification.
    - Track per-annotator error against a **gold set** of 200 frames labeled by Chase. Re-enable an agent's work only
      while its PCK@0.1 on the gold set stays ≥ 95%.
    - Index errors get zero tolerance and trigger a re-check of the whole clip.
+   - Every batch, human or agent, gets `scripts/review_sheet.py` contact sheets, and Chase reviews them before the
+     batch is accepted (D8).
 
 ### 3.4 Bootstrapping, pseudo-labels, synthetic data
 
@@ -426,7 +461,8 @@ accessible.
 | Strings | 6-string primary; a few 7-string clips for robustness (labeled, not targeted) |
 
 **Pipeline.**
-- `tools/collect.py` wraps `yt-dlp -f "bv*[height<=1080]"` and writes `data/manifest.csv` with these fields: `clip_id`,
+- `tools/collect.py` runs on the Windows PC or another residential-IP machine, not the box (D10). It wraps
+  `yt-dlp -f "bv*[height<=1080]"` and writes `data/manifest.csv` with these fields: `clip_id`,
   `source_url`, `uploader`, `license`, `download_date`, `duration`, `res`, `fps`, `mirrored`, tags.
 - Segment downloads into 5–20 s clips with PySceneDetect.
 - Prefilter clips with the M2 model (neck detected in >70% of frames). A human or agent then does a yes/no pass, which
@@ -463,7 +499,8 @@ accessible.
   via a Tailscale subnet router, so put the box on Tailscale. Confirm with Chase that waking it remotely is acceptable.
 
 **Data sync.**
-- Google Drive is the archive. The 4090 holds a working copy at `~/fret/data`.
+- The archive is the 4090 PC's disk and/or Chase's Google Drive `Training data` folder (D9). The box keeps only
+  working sets.
 - `tools/sync.sh` runs `rsync -az --partial` over ssh/Tailscale for clips, frames, and labels.
 - Labels and the manifest are small. Version them in git, or with DVC if they grow past ~50 MB.
 - Pre-extract training frames to JPEG q95 (plus a crop cache) so the GPU isn't starved decoding H.264.

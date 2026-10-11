@@ -1,6 +1,6 @@
 # Guitar Real-Time Overlay — Technical Plan
 
-Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D11). Owner: Chase. This is an opinionated plan; open
+Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D12). Owner: Chase. This is an opinionated plan; open
 questions are collected at the end (§10).
 
 ## Decisions (2026-10-11)
@@ -123,6 +123,8 @@ These decisions come from Chase (owner) and override anything below that conflic
 **D11. Absolute fret numbering without the nut: use the inlay pattern (Chase, 2026-10-11).**
 When the nut/headstock isn't visible, anchor absolute fret numbering on the inlay sequence 3-5-7-9-12: the double-width gap between the 9 and 12 markers stands out, and the 12th is often a double dot. The model should predict per-fret inlay presence (single/double/none) and the fitter matches that sequence against the fitted fret grid. Fret counts vary by guitar (21/22/24), so neck-body-joint and last-fret cues are secondary and less reliable. Accept that numbering may be impossible without inlays or a visible nut (e.g. blank boards, heavy occlusion); degrade gracefully by showing relative positions (pattern shape without absolute notes) or asking the user which fret a marker is on, and keep that answer per session.
 Annotation review of batch-000-hand: Chase says it looks great (2026-10-11). Collection runs on the Mac Mini (home IP) until the PC is back.
+
+**D12. Anchorability rule (refines D11, Chase 2026-10-11).** Absolute fret numbering requires at least one visible cue: (a) the headstock/nut, (b) the 9-12-15 inlay frets, or (c) all of the 3-5-7 inlay frets. Otherwise fall back to relative positions. Every annotated frame carries `anchorable: bool` and `anchor_cue: "nut" | "inlay_9_12_15" | "inlay_3_5_7" | null` (first matching cue in that order); review sheets show the flag in each caption, and eval reports absolute-numbering accuracy only on anchorable frames.
 
 ## 0. Goal & constraints
 

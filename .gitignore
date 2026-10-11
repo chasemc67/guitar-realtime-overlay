@@ -16,3 +16,6 @@ __pycache__/
 samples/out/*.mp4
 .env
 .cache/
+# Auto batches exceed the D8 5 MB budget: commit only their contact sheets + summary.csv
+review/batch-*-auto-*/frames/
+review/batch-*-auto-*/strips/

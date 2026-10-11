@@ -1,0 +1,256 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "IZJdHyfkrsg_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/IZJdHyfkrsg_08.jpg",
+    "w": 1280,
+    "h": 960,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            1050.31,
+            211.92,
+            2
+          ],
+          "treble": [
+            1064.03,
+            259.28,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            955.78,
+            227.25,
+            2
+          ],
+          "treble": [
+            971.41,
+            274.98,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            855.55,
+            243.49,
+            2
+          ],
+          "treble": [
+            872.17,
+            291.82,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            761.29,
+            258.76,
+            2
+          ],
+          "treble": [
+            778.12,
+            307.78,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            672.66,
+            273.12,
+            2
+          ],
+          "treble": [
+            690.45,
+            322.65,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            589.46,
+            286.6,
+            2
+          ],
+          "treble": [
+            607.05,
+            336.8,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            511.41,
+            299.25,
+            2
+          ],
+          "treble": [
+            528.42,
+            350.15,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            435.13,
+            311.61,
+            2
+          ],
+          "treble": [
+            453.81,
+            362.81,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            365.65,
+            322.87,
+            2
+          ],
+          "treble": [
+            382.98,
+            374.83,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            298.46,
+            333.75,
+            2
+          ],
+          "treble": [
+            316.69,
+            386.07,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            235.04,
+            344.03,
+            2
+          ],
+          "treble": [
+            253.03,
+            396.87,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            174.1,
+            353.9,
+            2
+          ],
+          "treble": [
+            192.23,
+            407.19,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            118.6,
+            362.89,
+            2
+          ],
+          "treble": [
+            135.37,
+            416.84,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            63.59,
+            371.81,
+            2
+          ],
+          "treble": [
+            80.85,
+            426.09,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            12.03,
+            380.16,
+            2
+          ],
+          "treble": [
+            29.78,
+            434.76,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1884.25539558,
+            15.43618143,
+            1066.34938341
+          ],
+          [
+            298.52987537,
+            46.58067946,
+            234.05622125
+          ],
+          [
+            -0.03400056,
+            -0.00102411,
+            1.0
+          ]
+        ],
+        "tau": 0.24999999999999997,
+        "rmse_px": 0.773,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/IZJdHyfkrsg_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.85,
+          "nut_visible": true,
+          "reasoning": "The inlays anchor the count. The double-dot 12th-fret marker sits in the cell between W12 and W13, so W13 is fret 12. Single dots lie in the W3\u2013W4, W5\u2013W6, W7\u2013W8 and W9\u2013W10 cells, which makes W4, W6, W8 and W10 frets 3, 5, 7 and 9. Counting back gives W1 = fret 0, so W1 is the nut bar itself at the headstock edge rather than a fret wire."
+        },
+        "n_candidates": 569,
+        "grid_score": 14.96,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 12,
+          "reason": "Close-up of a Stratocaster-style electric guitar with a maple fingerboard spanning the frame, showing about 12 fret wires with inlay dots clearly visible, and the fingers cover only a small part."
+        }
+      }
+    }
+  ]
+}

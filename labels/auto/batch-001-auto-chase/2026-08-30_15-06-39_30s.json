@@ -1,0 +1,316 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "2026-08-30_15-06-39_30s",
+  "video": {
+    "path": "/workspace/guitar-overlay/data/raw/2026-08-30_15-06-39.mp4",
+    "w": 1294,
+    "h": 954,
+    "fps": 59.855,
+    "mirrored": true
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 30.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_3_5_7",
+      "kpts": {
+        "f1": {
+          "bass": [
+            1139.68,
+            193.77,
+            2
+          ],
+          "treble": [
+            1142.9,
+            237.6,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1074.36,
+            204.24,
+            2
+          ],
+          "treble": [
+            1077.85,
+            249.62,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1014.63,
+            213.82,
+            2
+          ],
+          "treble": [
+            1018.8,
+            260.53,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            961.47,
+            222.34,
+            2
+          ],
+          "treble": [
+            965.13,
+            270.45,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            912.54,
+            230.19,
+            2
+          ],
+          "treble": [
+            915.68,
+            279.58,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            867.88,
+            237.34,
+            2
+          ],
+          "treble": [
+            870.91,
+            287.86,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            826.12,
+            244.04,
+            2
+          ],
+          "treble": [
+            830.3,
+            295.36,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            788.05,
+            250.14,
+            2
+          ],
+          "treble": [
+            792.14,
+            302.41,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            753.05,
+            255.75,
+            2
+          ],
+          "treble": [
+            757.48,
+            308.82,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            720.71,
+            260.94,
+            2
+          ],
+          "treble": [
+            724.62,
+            314.89,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            690.43,
+            265.79,
+            2
+          ],
+          "treble": [
+            695.13,
+            320.34,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            664.24,
+            269.99,
+            2
+          ],
+          "treble": [
+            667.1,
+            325.52,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            638.2,
+            274.16,
+            2
+          ],
+          "treble": [
+            640.98,
+            330.35,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            614.56,
+            277.95,
+            2
+          ],
+          "treble": [
+            619.04,
+            334.4,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            534.08,
+            290.86,
+            1
+          ],
+          "treble": [
+            537.14,
+            349.54,
+            1
+          ]
+        },
+        "f19": {
+          "bass": [
+            517.38,
+            293.53,
+            1
+          ],
+          "treble": [
+            520.39,
+            352.63,
+            1
+          ]
+        },
+        "f20": {
+          "bass": [
+            501.8,
+            296.03,
+            1
+          ],
+          "treble": [
+            504.76,
+            355.52,
+            1
+          ]
+        },
+        "f21": {
+          "bass": [
+            487.24,
+            298.36,
+            1
+          ],
+          "treble": [
+            490.15,
+            358.22,
+            1
+          ]
+        },
+        "f22": {
+          "bass": [
+            473.63,
+            300.55,
+            1
+          ],
+          "treble": [
+            476.51,
+            360.74,
+            1
+          ]
+        },
+        "f23": {
+          "bass": [
+            460.91,
+            302.59,
+            1
+          ],
+          "treble": [
+            463.74,
+            363.1,
+            1
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -843.90180293,
+            1.49702015,
+            1212.02592689
+          ],
+          [
+            300.17729152,
+            47.49691306,
+            203.44433388
+          ],
+          [
+            0.37463898,
+            -0.00241856,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 1.352,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/auto/batch-001-auto-chase/2026-08-30_15-06-39_30s.jpg",
+      "frame_index": 1796,
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_3_5_7",
+          "confidence": 0.75,
+          "nut_visible": false,
+          "reasoning": "The fingerboard edge at W1 has one more empty cell of about one fret spacing (~100 px) to its left before the headstock and locking-nut area. That cell is the nut-to-fret-1 cell, so W1 is fret 1. This fits the vine inlay: the larger leaf shapes fall in the cells W2-W3, W4-W5, W6-W7 and W8-W9, which are the cells of frets 3, 5, 7 and 9. Counting on, W24 is fret 24, and the inferred W25 and W26 near the body are extra detections."
+        },
+        "n_candidates": 883,
+        "grid_score": 21.43,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 20,
+          "reason": "An electric guitar with a tremolo bridge is shown with most of the fingerboard, including inlays and fret wires, clearly visible and in focus, with only the fretting hand covering a small part."
+        }
+      }
+    }
+  ]
+}

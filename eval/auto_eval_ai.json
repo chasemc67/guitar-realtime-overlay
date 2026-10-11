@@ -1,0 +1,288 @@
+{
+ "summary": {
+  "frames": 5,
+  "pooled": {
+   "all": {
+    "n": 224,
+    "mean": 3.436775546030014,
+    "median": 2.371647147753578,
+    "max": 18.198492842819892
+   },
+   "vis2": {
+    "n": 210,
+    "mean": 3.4039674887830818,
+    "median": 2.3458925950262395,
+    "max": 18.198492842819892
+   },
+   "bass": {
+    "n": 112,
+    "mean": 5.5781175139569585,
+    "median": 4.972094793362746,
+    "max": 11.292895436367807
+   },
+   "treble": {
+    "n": 112,
+    "mean": 1.2954335781030706,
+    "median": 0.9184482279536469,
+    "max": 18.198492842819892
+   },
+   "perp": {
+    "n": 224,
+    "mean": 0.645259573664422,
+    "median": 0.3638158165752583,
+    "max": 17.455060694827292
+   }
+  },
+  "numbering_acc": 1.0,
+  "numbering_acc_anchorable": 1.0,
+  "anchorable_acc": 0.8,
+  "cue_acc": 0.6,
+  "ai": {
+   "calls": 0,
+   "cached": 5,
+   "failed": 0,
+   "input_tokens": 0,
+   "output_tokens": 0,
+   "cost_usd": 0.0,
+   "by_task": {
+    "numbering": {
+     "calls": 0,
+     "cached": 5,
+     "cost_usd": 0.0
+    }
+   }
+  }
+ },
+ "frames": [
+  {
+   "item": "2026-08-30_15-06-39_10s#0",
+   "source": "manual",
+   "n_gt": 28,
+   "recall": 1.0,
+   "err": {
+    "n": 28,
+    "mean": 2.9846980828837184,
+    "median": 1.806309322168127,
+    "max": 9.707618738717514
+   },
+   "err_vis2": {
+    "n": 26,
+    "mean": 3.1860177419320945,
+    "median": 1.9789828464515027,
+    "max": 9.707618738717514
+   },
+   "err_bass": {
+    "n": 14,
+    "mean": 5.255063433283851,
+    "median": 5.329209266113621,
+    "max": 9.707618738717514
+   },
+   "err_treble": {
+    "n": 14,
+    "mean": 0.7143327324835849,
+    "median": 0.4173213140181735,
+    "max": 3.039106259513679
+   },
+   "err_perp": {
+    "n": 28,
+    "mean": 0.6081303309162672,
+    "median": 0.40400606020065644,
+    "max": 3.031142017497141
+   },
+   "index_offset": 0,
+   "numbering_ok": true,
+   "numbering_source": "ai",
+   "numbering_cue": "nut",
+   "gt_anchorable": false,
+   "gt_cue": null,
+   "pred_anchorable": true,
+   "pred_cue": "nut",
+   "flags": [],
+   "seconds": 5.05
+  },
+  {
+   "item": "2026-09-03_20-38-02_10s#0",
+   "source": "manual",
+   "n_gt": 50,
+   "recall": 1.0,
+   "err": {
+    "n": 50,
+    "mean": 2.1324500269030913,
+    "median": 2.4143063546651975,
+    "max": 9.258976206567676
+   },
+   "err_vis2": {
+    "n": 50,
+    "mean": 2.1324500269030913,
+    "median": 2.4143063546651975,
+    "max": 9.258976206567676
+   },
+   "err_bass": {
+    "n": 25,
+    "mean": 3.560814797734643,
+    "median": 3.667044648333301,
+    "max": 4.42385121990957
+   },
+   "err_treble": {
+    "n": 25,
+    "mean": 0.7040852560715402,
+    "median": 0.32204122600334817,
+    "max": 9.258976206567676
+   },
+   "err_perp": {
+    "n": 50,
+    "mean": 0.4615892583186163,
+    "median": 0.22013746616793844,
+    "max": 9.238364005908146
+   },
+   "index_offset": 0,
+   "numbering_ok": true,
+   "numbering_source": "ai",
+   "numbering_cue": "nut",
+   "gt_anchorable": true,
+   "gt_cue": "nut",
+   "pred_anchorable": true,
+   "pred_cue": "nut",
+   "flags": [],
+   "seconds": 4.36
+  },
+  {
+   "item": "2026-09-06_09-00-01_10s#0",
+   "source": "manual",
+   "n_gt": 48,
+   "recall": 1.0,
+   "err": {
+    "n": 48,
+    "mean": 3.487190258869745,
+    "median": 2.2920028242867203,
+    "max": 9.739585749015774
+   },
+   "err_vis2": {
+    "n": 48,
+    "mean": 3.487190258869745,
+    "median": 2.2920028242867203,
+    "max": 9.739585749015774
+   },
+   "err_bass": {
+    "n": 24,
+    "mean": 5.3756971501408115,
+    "median": 5.783763134621518,
+    "max": 9.739585749015774
+   },
+   "err_treble": {
+    "n": 24,
+    "mean": 1.5986833675986787,
+    "median": 1.663107221304357,
+    "max": 3.3785816081417317
+   },
+   "err_perp": {
+    "n": 48,
+    "mean": 0.5752832909421018,
+    "median": 0.4640730588952664,
+    "max": 3.2594847710769357
+   },
+   "index_offset": 0,
+   "numbering_ok": true,
+   "numbering_source": "ai",
+   "numbering_cue": "nut",
+   "gt_anchorable": true,
+   "gt_cue": "inlay_9_12_15",
+   "pred_anchorable": true,
+   "pred_cue": "inlay_9_12_15",
+   "flags": [],
+   "seconds": 5.2
+  },
+  {
+   "item": "2026-09-03_20-38-02_60s#0",
+   "source": "manual",
+   "n_gt": 50,
+   "recall": 1.0,
+   "err": {
+    "n": 50,
+    "mean": 3.562541303638738,
+    "median": 3.94284817276783,
+    "max": 18.198492842819892
+   },
+   "err_vis2": {
+    "n": 44,
+    "mean": 3.5850253769086353,
+    "median": 3.94284817276783,
+    "max": 18.198492842819892
+   },
+   "err_bass": {
+    "n": 25,
+    "mean": 5.052087961448721,
+    "median": 5.003184016158257,
+    "max": 8.326515048815827
+   },
+   "err_treble": {
+    "n": 25,
+    "mean": 2.0729946458287567,
+    "median": 1.5433208698565621,
+    "max": 18.198492842819892
+   },
+   "err_perp": {
+    "n": 50,
+    "mean": 1.040836849414042,
+    "median": 0.37903519508797645,
+    "max": 17.455060694827292
+   },
+   "index_offset": 0,
+   "numbering_ok": true,
+   "numbering_source": "ai",
+   "numbering_cue": "nut",
+   "gt_anchorable": true,
+   "gt_cue": "nut",
+   "pred_anchorable": true,
+   "pred_cue": "nut",
+   "flags": [],
+   "seconds": 4.86
+  },
+  {
+   "item": "2026-09-06_09-00-01_60s#0",
+   "source": "manual",
+   "n_gt": 48,
+   "recall": 1.0,
+   "err": {
+    "n": 48,
+    "mean": 4.877739104940411,
+    "median": 4.327756838103172,
+    "max": 11.292895436367807
+   },
+   "err_vis2": {
+    "n": 42,
+    "mean": 4.767808595222151,
+    "median": 2.8493759375193406,
+    "max": 11.292895436367807
+   },
+   "err_bass": {
+    "n": 24,
+    "mean": 8.618290538093408,
+    "median": 9.22832923399038,
+    "max": 11.292895436367807
+   },
+   "err_treble": {
+    "n": 24,
+    "mean": 1.1371876717874165,
+    "median": 1.0289666572424778,
+    "max": 4.568056541626703
+   },
+   "err_perp": {
+    "n": 48,
+    "mean": 0.5161581642358597,
+    "median": 0.3284302874857342,
+    "max": 4.47552749417773
+   },
+   "index_offset": 0,
+   "numbering_ok": true,
+   "numbering_source": "ai",
+   "numbering_cue": "last_fret",
+   "gt_anchorable": true,
+   "gt_cue": "inlay_3_5_7",
+   "pred_anchorable": true,
+   "pred_cue": "inlay_9_12_15",
+   "flags": [],
+   "seconds": 3.94
+  }
+ ]
+}

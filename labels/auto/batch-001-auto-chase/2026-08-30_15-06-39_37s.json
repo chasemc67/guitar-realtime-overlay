@@ -1,0 +1,304 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "2026-08-30_15-06-39_37s",
+  "video": {
+    "path": "/workspace/guitar-overlay/data/raw/2026-08-30_15-06-39.mp4",
+    "w": 1294,
+    "h": 954,
+    "fps": 59.855,
+    "mirrored": true
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 37.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_3_5_7",
+      "kpts": {
+        "f1": {
+          "bass": [
+            1125.85,
+            183.06,
+            2
+          ],
+          "treble": [
+            1132.09,
+            237.8,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1059.53,
+            196.39,
+            2
+          ],
+          "treble": [
+            1065.1,
+            251.82,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            999.51,
+            208.46,
+            2
+          ],
+          "treble": [
+            1005.01,
+            264.4,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            944.59,
+            219.51,
+            2
+          ],
+          "treble": [
+            950.97,
+            275.71,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            895.45,
+            229.39,
+            2
+          ],
+          "treble": [
+            901.3,
+            286.11,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            850.67,
+            238.4,
+            2
+          ],
+          "treble": [
+            855.97,
+            295.6,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            808.76,
+            246.83,
+            2
+          ],
+          "treble": [
+            815.01,
+            304.18,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            771.31,
+            254.36,
+            2
+          ],
+          "treble": [
+            777.01,
+            312.13,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            735.94,
+            261.47,
+            2
+          ],
+          "treble": [
+            742.12,
+            319.44,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            703.88,
+            267.92,
+            2
+          ],
+          "treble": [
+            710.02,
+            326.16,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            673.81,
+            273.97,
+            2
+          ],
+          "treble": [
+            680.44,
+            332.35,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            647.14,
+            279.33,
+            2
+          ],
+          "treble": [
+            652.69,
+            338.16,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            620.87,
+            284.61,
+            2
+          ],
+          "treble": [
+            627.46,
+            343.44,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            597.64,
+            289.29,
+            2
+          ],
+          "treble": [
+            603.66,
+            348.42,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            575.56,
+            293.73,
+            1
+          ],
+          "treble": [
+            581.58,
+            353.05,
+            1
+          ]
+        },
+        "f16": {
+          "bass": [
+            556.32,
+            297.6,
+            2
+          ],
+          "treble": [
+            560.64,
+            357.43,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            518.84,
+            305.13,
+            2
+          ],
+          "treble": [
+            524.78,
+            364.94,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            501.09,
+            308.7,
+            2
+          ],
+          "treble": [
+            508.68,
+            368.31,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            486.97,
+            311.54,
+            2
+          ],
+          "treble": [
+            492.87,
+            371.62,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -836.38833885,
+            5.32934963,
+            1201.35672973
+          ],
+          [
+            353.67809651,
+            54.32731874,
+            195.56584387
+          ],
+          [
+            0.41171142,
+            -0.00039304,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 0.459,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/auto/batch-001-auto-chase/2026-08-30_15-06-39_37s.jpg",
+      "frame_index": 2215,
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.85,
+          "nut_visible": false,
+          "reasoning": "The locking-nut clamp blocks are visible at the left of the strip, with a black dampener band just after them. W1 sits one normal first-fret spacing (about 110 px) beyond the nut, consistent with the W1\u2013W2 and W2\u2013W3 gaps, so W1 is fret 1. This matches the vine inlay: the larger leaf shapes fall in the cells for frets 3 (W2\u2013W3), 5, 7 and 9, and the large motif in W11\u2013W12 corresponds to fret 12."
+        },
+        "n_candidates": 854,
+        "grid_score": 20.41,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 20,
+          "reason": "An electric guitar with a tremolo bridge and humbuckers is shown with nearly the whole fingerboard, including vine inlays and many fret wires, visible and in reasonable focus, with only a few fingers covering part of it."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "2026-09-03_20-38-02_80s",
+  "video": {
+    "path": "/workspace/guitar-overlay/data/raw/2026-09-03_20-38-02.mp4",
+    "w": 1280,
+    "h": 720,
+    "fps": 60.0,
+    "mirrored": true
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 80.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            969.57,
+            249.85,
+            2
+          ],
+          "treble": [
+            980.63,
+            314.56,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            905.92,
+            260.32,
+            2
+          ],
+          "treble": [
+            916.79,
+            325.53,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            849.36,
+            269.45,
+            2
+          ],
+          "treble": [
+            860.7,
+            335.33,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            795.59,
+            278.12,
+            2
+          ],
+          "treble": [
+            807.87,
+            344.57,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            746.65,
+            286.02,
+            2
+          ],
+          "treble": [
+            758.91,
+            353.13,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            700.78,
+            293.43,
+            2
+          ],
+          "treble": [
+            713.98,
+            360.98,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            656.54,
+            300.57,
+            2
+          ],
+          "treble": [
+            669.49,
+            368.75,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            620.26,
+            306.42,
+            1
+          ],
+          "treble": [
+            632.5,
+            375.22,
+            1
+          ]
+        },
+        "f8": {
+          "bass": [
+            583.83,
+            312.3,
+            2
+          ],
+          "treble": [
+            595.55,
+            381.68,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            549.84,
+            317.79,
+            2
+          ],
+          "treble": [
+            561.54,
+            387.63,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            518.18,
+            322.9,
+            2
+          ],
+          "treble": [
+            530.33,
+            393.08,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            488.64,
+            327.67,
+            2
+          ],
+          "treble": [
+            501.24,
+            398.16,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            461.04,
+            332.12,
+            2
+          ],
+          "treble": [
+            473.62,
+            402.99,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            435.71,
+            336.21,
+            2
+          ],
+          "treble": [
+            447.33,
+            407.59,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            411.63,
+            340.1,
+            2
+          ],
+          "treble": [
+            423.71,
+            411.72,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            388.17,
+            343.88,
+            2
+          ],
+          "treble": [
+            401.64,
+            415.58,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            367.99,
+            347.14,
+            2
+          ],
+          "treble": [
+            380.04,
+            419.35,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            347.77,
+            350.4,
+            2
+          ],
+          "treble": [
+            360.27,
+            422.81,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            329.71,
+            353.32,
+            2
+          ],
+          "treble": [
+            341.26,
+            426.13,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            311.45,
+            356.27,
+            2
+          ],
+          "treble": [
+            324.38,
+            429.08,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            295.16,
+            358.89,
+            2
+          ],
+          "treble": [
+            307.62,
+            432.01,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            280.36,
+            361.28,
+            2
+          ],
+          "treble": [
+            291.87,
+            434.76,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            265.57,
+            363.67,
+            2
+          ],
+          "treble": [
+            277.54,
+            437.27,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            252.14,
+            365.84,
+            2
+          ],
+          "treble": [
+            264.1,
+            439.62,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            239.5,
+            367.88,
+            2
+          ],
+          "treble": [
+            250.98,
+            441.91,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -922.34677882,
+            10.28002744,
+            972.68097461
+          ],
+          [
+            240.01094937,
+            64.11161049,
+            282.58074288
+          ],
+          [
+            0.19049547,
+            -0.00171629,
+            1.0
+          ]
+        ],
+        "tau": 0.39999999999999997,
+        "rmse_px": 0.683,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/auto/batch-001-auto-chase/2026-09-03_20-38-02_80s.jpg",
+      "frame_index": 4800,
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.93,
+          "nut_visible": true,
+          "reasoning": "The nut bar is visible at the far left of the strip, where the fingerboard meets the headstock, and there is no wrap. W1 is the first wire after it, and the nut-to-W1 gap of about 99 px fits a first-fret cell next to the W1\u2013W2 and W2\u2013W3 spacings, so W1 is fret 1. Counting on, W24 is fret 24, the last real fret, and the dashed W25 at the fingerboard end, next to the pickup, is not a fret wire."
+        },
+        "n_candidates": 639,
+        "grid_score": 21.97,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 18,
+          "reason": "A white Ibanez JEM-style electric guitar fills the frame, and the whole fingerboard with its vine inlays and many fret wires is visible and mostly in focus, with only a few frets covered by the fretting hand."
+        }
+      }
+    }
+  ]
+}

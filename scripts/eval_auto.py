@@ -70,6 +70,32 @@ def compare(gt: list[A.Anchor], pred: list[A.Anchor]) -> dict:
     return {"offset": d, "rows": rows}
 
 
+def worst_crops(canon, rows, offset, pred, k: int = 6, half: int = 18, zoom: int = 6):
+    """Zoom crops (canonical orientation) around the k worst GT anchors: GT = green circle, auto = red cross."""
+    pa = {(p.fret, p.side): p for p in pred}
+    worst = sorted((r for r in rows if r[1] is not None), key=lambda r: -r[1])[:k]
+    tiles = []
+    for g, e, _ in worst:
+        p = pa[(g.fret + offset, g.side)]
+        cx, cy = int(round(0.5 * (g.x + p.x))), int(round(0.5 * (g.y + p.y)))
+        x0, y0 = cx - half, cy - half
+        crop = cv2.copyMakeBorder(canon, half, half, half, half, cv2.BORDER_CONSTANT)[y0 + half : y0 + 3 * half,
+                                                                                      x0 + half : x0 + 3 * half]
+        t = cv2.resize(crop, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
+
+        def P(q, x0=x0, y0=y0):
+            return int((q.x - x0 + 0.5) * zoom), int((q.y - y0 + 0.5) * zoom)
+
+        cv2.circle(t, P(g), 9, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.drawMarker(t, P(p), (0, 0, 255), cv2.MARKER_CROSS, 18, 2, cv2.LINE_AA)
+        cv2.putText(t, f"{g.fret}{g.side[0]} {e:.1f}px", (4, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 4)
+        cv2.putText(t, f"{g.fret}{g.side[0]} {e:.1f}px", (4, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1)
+        tiles.append(t)
+    if not tiles:
+        return np.zeros((10, 10, 3), np.uint8)
+    return np.hstack([np.pad(t, ((2, 2), (2, 2), (0, 0))) for t in tiles])
+
+
 def stats(v):
     v = np.asarray([x for x in v if x is not None], float)
     if len(v) == 0:
@@ -111,6 +137,7 @@ def main() -> None:
     ap.add_argument("--offline", action="store_true", help="AI answers from the cache only")
     ap.add_argument("--model", default=None)
     ap.add_argument("--json", type=Path, default=None)
+    ap.add_argument("--crops", type=Path, default=None, help="write GT-vs-auto zoom crops of the worst anchors here")
     a = ap.parse_args()
     dirs = a.gt or [d for d in (ROOT / "samples/anchors", ROOT / "samples/anchors_extra") if d.exists()]
     ai = None if a.no_ai else AIClient(**({"model": a.model} if a.model else {}), offline=a.offline)
@@ -163,6 +190,10 @@ def main() -> None:
             "seconds": round(dt, 2),
         }
         results.append(r)
+        if a.crops:
+            a.crops.mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(str(a.crops / f"{lf.clip_id}_f{i:03d}.jpg"), worst_crops(canon, rows, cmp_["offset"], pred),
+                        [cv2.IMWRITE_JPEG_QUALITY, 88])
     if not results:
         sys.exit("no GT frames")
 

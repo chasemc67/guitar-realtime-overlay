@@ -1,0 +1,3 @@
+item,file,frame,n_anchors,frets,mean_px,max_px,max_at,rmse_px,n_rejected,rejected,anchorable,anchor_cue,nut_visible,mirrored,tau,error,status,image
+2026-09-03_20-38-02_60s_f000,2026-09-03_20-38-02_60s.json,frame #0 t=60s,50,0-24,0.498,1.899,5t,0.641,1,0t,True,nut,yes,True,0.400,,draft,samples/frames/2026-09-03_20-38-02_60s.jpg
+2026-09-06_09-00-01_60s_f000,2026-09-06_09-00-01_60s.json,frame #0 t=60s,48,1-24,0.472,2.674,12t,0.750,0,,True,inlay_3_5_7,no,True,0.250,,draft,samples/frames/2026-09-06_09-00-01_60s.jpg

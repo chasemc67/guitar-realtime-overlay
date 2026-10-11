@@ -1,0 +1,318 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "3FoeHtEf0P0_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/3FoeHtEf0P0_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f1": {
+          "bass": [
+            1233.79,
+            290.15,
+            2
+          ],
+          "treble": [
+            1254.58,
+            370.36,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1146.11,
+            303.28,
+            2
+          ],
+          "treble": [
+            1163.02,
+            385.23,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1066.67,
+            315.18,
+            2
+          ],
+          "treble": [
+            1081.55,
+            398.47,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            992.89,
+            326.23,
+            2
+          ],
+          "treble": [
+            1006.94,
+            410.59,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            925.33,
+            336.35,
+            2
+          ],
+          "treble": [
+            937.48,
+            421.88,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            861.73,
+            345.88,
+            2
+          ],
+          "treble": [
+            874.78,
+            432.07,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            802.24,
+            354.79,
+            2
+          ],
+          "treble": [
+            817.31,
+            441.41,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            652.05,
+            377.28,
+            2
+          ],
+          "treble": [
+            660.89,
+            466.82,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            609.63,
+            383.64,
+            2
+          ],
+          "treble": [
+            618.44,
+            473.72,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            568.67,
+            389.77,
+            2
+          ],
+          "treble": [
+            578.54,
+            480.2,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            531.06,
+            395.41,
+            2
+          ],
+          "treble": [
+            539.9,
+            486.48,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            496.46,
+            400.59,
+            2
+          ],
+          "treble": [
+            504.83,
+            492.18,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            462.68,
+            405.65,
+            2
+          ],
+          "treble": [
+            471.64,
+            497.57,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            432.1,
+            410.23,
+            2
+          ],
+          "treble": [
+            440.64,
+            502.61,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            403.52,
+            414.51,
+            2
+          ],
+          "treble": [
+            411.66,
+            507.32,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            377.33,
+            418.43,
+            2
+          ],
+          "treble": [
+            384.06,
+            511.8,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            351.8,
+            422.25,
+            2
+          ],
+          "treble": [
+            359.21,
+            515.84,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            328.93,
+            425.68,
+            2
+          ],
+          "treble": [
+            334.98,
+            519.77,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            307.0,
+            428.97,
+            2
+          ],
+          "treble": [
+            313.24,
+            523.31,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            285.97,
+            432.12,
+            2
+          ],
+          "treble": [
+            291.92,
+            526.77,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1384.44516197,
+            1.0585493,
+            1338.49069219
+          ],
+          [
+            349.9262491,
+            75.74999284,
+            315.25494067
+          ],
+          [
+            0.25530608,
+            -0.0133539,
+            1.0
+          ]
+        ],
+        "tau": 0.49999999999999994,
+        "rmse_px": 0.789,
+        "index_shift": 0
+      },
+      "flags": [
+        "index_unresolved"
+      ],
+      "notes": "AI numbering failed (unparsable answer (4000 output tokens)); relative numbering",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/3FoeHtEf0P0_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "relative",
+          "resolved": false,
+          "cue": null,
+          "confidence": 0.0,
+          "nut_visible": false,
+          "reasoning": ""
+        },
+        "n_candidates": 589,
+        "grid_score": 17.99,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 18,
+          "reason": "An offset-body electric guitar (Jazzmaster style) has its rosewood fingerboard with block inlays clearly visible across the frame, with only a few frets partly covered by the fretting hand."
+        }
+      }
+    }
+  ]
+}

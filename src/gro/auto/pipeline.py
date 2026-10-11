@@ -128,9 +128,15 @@ def _nut_anchors(model: FretboardModel, gray: np.ndarray) -> list[A.Anchor]:
 
 
 def annotate_frame(
-    img: np.ndarray, ai: AIClient | None, cfg: AutoConfig, t: float | None = None, extra: dict | None = None
+    img: np.ndarray,
+    ai: AIClient | None,
+    cfg: AutoConfig,
+    t: float | None = None,
+    extra: dict | None = None,
+    numbering_hint=None,
 ) -> FrameResult:
-    """`img` is in canonical orientation (mirror it first for `video.mirrored` clips, D1)."""
+    """`img` is in canonical orientation (mirror it first for `video.mirrored` clips, D1). `numbering_hint(det)` may
+    return a Numbering (e.g. the session lock from the tracker), which is used instead of an AI call."""
     notes: list[str] = []
     flags: list[str] = []
     use_ai = cfg.use_ai and ai is not None and ai.available
@@ -166,7 +172,9 @@ def annotate_frame(
         return FrameResult(lab, det, None, None, usab, notes)
 
     gray = prep_gray(img)
-    numbering = ask_numbering(ai, img, det, cfg.frets, cfg.numbering_model) if use_ai else None
+    numbering = numbering_hint(det) if numbering_hint is not None else None
+    if numbering is None and use_ai:
+        numbering = ask_numbering(ai, img, det, cfg.frets, cfg.numbering_model)
     if numbering is None:
         numbering = relative_numbering(det)
         flags.append("index_unresolved")

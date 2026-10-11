@@ -1,4 +1,4 @@
-.PHONY: install test lint fmt anchors demo review
+.PHONY: install test lint fmt anchors demo review eval-auto
 
 install:
 	uv sync
@@ -22,3 +22,7 @@ demo:
 
 review:
 	uv run python scripts/review_sheet.py samples/anchors --batch batch-000-hand
+
+eval-auto:
+	uv run python scripts/eval_auto.py --json eval/auto_eval_ai.json
+	uv run python scripts/eval_auto.py --no-ai --json eval/auto_eval_noai.json

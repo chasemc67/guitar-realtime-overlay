@@ -1,0 +1,352 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "2026-09-06_09-00-01_90s",
+  "video": {
+    "path": "/workspace/guitar-overlay/data/raw/2026-09-06_09-00-01.mp4",
+    "w": 1280,
+    "h": 720,
+    "fps": 60.0,
+    "mirrored": true
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 90.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f1": {
+          "bass": [
+            977.08,
+            290.19,
+            2
+          ],
+          "treble": [
+            987.07,
+            341.14,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            922.62,
+            300.58,
+            2
+          ],
+          "treble": [
+            932.77,
+            352.07,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            872.38,
+            310.17,
+            2
+          ],
+          "treble": [
+            883.1,
+            362.06,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            826.1,
+            319.0,
+            2
+          ],
+          "treble": [
+            836.22,
+            371.49,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            784.18,
+            327.0,
+            2
+          ],
+          "treble": [
+            793.28,
+            380.13,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            741.67,
+            335.12,
+            2
+          ],
+          "treble": [
+            754.36,
+            387.97,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            671.31,
+            348.54,
+            2
+          ],
+          "treble": [
+            686.35,
+            401.65,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            641.36,
+            354.26,
+            2
+          ],
+          "treble": [
+            650.19,
+            408.93,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            611.76,
+            359.91,
+            2
+          ],
+          "treble": [
+            620.45,
+            414.91,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            584.66,
+            365.08,
+            2
+          ],
+          "treble": [
+            592.75,
+            420.49,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            558.47,
+            370.08,
+            2
+          ],
+          "treble": [
+            566.88,
+            425.69,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            534.96,
+            374.56,
+            2
+          ],
+          "treble": [
+            542.78,
+            430.54,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            512.07,
+            378.93,
+            2
+          ],
+          "treble": [
+            520.23,
+            435.08,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            491.63,
+            382.83,
+            2
+          ],
+          "treble": [
+            498.74,
+            439.4,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            471.55,
+            386.66,
+            2
+          ],
+          "treble": [
+            479.5,
+            443.28,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            452.71,
+            390.26,
+            2
+          ],
+          "treble": [
+            461.52,
+            446.89,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            436.61,
+            393.33,
+            2
+          ],
+          "treble": [
+            443.87,
+            450.44,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            420.03,
+            396.49,
+            2
+          ],
+          "treble": [
+            427.7,
+            453.7,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            404.47,
+            399.46,
+            2
+          ],
+          "treble": [
+            412.54,
+            456.75,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            390.89,
+            402.06,
+            2
+          ],
+          "treble": [
+            398.39,
+            459.6,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            377.71,
+            404.57,
+            2
+          ],
+          "treble": [
+            384.63,
+            462.36,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            365.3,
+            406.94,
+            2
+          ],
+          "treble": [
+            372.16,
+            464.88,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            352.54,
+            409.37,
+            2
+          ],
+          "treble": [
+            360.84,
+            467.15,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -833.99272787,
+            3.76332877,
+            1040.59168324
+          ],
+          [
+            273.49137474,
+            47.36868266,
+            304.09540609
+          ],
+          [
+            0.21657178,
+            -0.00731563,
+            1.0
+          ]
+        ],
+        "tau": 0.44999999999999996,
+        "rmse_px": 0.818,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/auto/batch-001-auto-chase/2026-09-06_09-00-01_90s.jpg",
+      "frame_index": 5400,
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.85,
+          "nut_visible": false,
+          "reasoning": "A black fret wrap covers the area at the nut. Extrapolating the fret spacing back from W1 (about 92 px to W2, shrinking about 5.6% per fret) puts the nut about 97 px left of W1, which is under the wrap, so W1 is fret 1. This fits the vine inlay: the bright 12th-fret motif sits between W11 and W12. It also fits the body end: W24 is fret 24, and the very narrow gap to W25 marks W25 as the fingerboard end."
+        },
+        "n_candidates": 799,
+        "grid_score": 21.98,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 17,
+          "reason": "An Ibanez electric guitar with a sunburst body is shown close up, and the fretboard with its vine inlays is in clear view, with many fret wires visible and only a few partly covered by the fretting hand."
+        }
+      }
+    }
+  ]
+}

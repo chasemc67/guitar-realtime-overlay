@@ -705,7 +705,7 @@ def cell_lines(gray, segs: list[np.ndarray], side: int, max_lines: int = 6, min_
     return out
 
 
-def _clamp_edge(edge, lines, segs, side, min_support: float = 0.6):
+def _clamp_edge(edge, lines, segs, side, min_support: float = 0.6, overshoot_px: float = 4.0):
     """If the wire-end edge lies outside the outermost well-supported long line (board-edge highlight / outer
     string), the extra wire length is the visible side of the neck (fret tangs): use that line instead."""
     strong = [ln for ln in lines if ln[0] >= min_support]
@@ -721,7 +721,7 @@ def _clamp_edge(edge, lines, segs, side, min_support: float = 0.6):
             hits_l.append(np.dot(intersect((m, d), (c, u)) - m, d))
         except np.linalg.LinAlgError:
             continue
-    if hits_e and np.median(np.subtract(hits_e, hits_l)) > 1.0:
+    if hits_e and np.median(np.subtract(hits_e, hits_l)) > overshoot_px:
         return (c, u), True
     return edge, False
 
@@ -739,7 +739,7 @@ def anchors_from_segments(
     headstock text) and are dropped (returned in info["rejected"]). `edge_lines` (bass, treble) overrides the edges."""
     ends: dict[int, tuple[np.ndarray, np.ndarray]] = {}
     for f, (seg, vis) in segs.items():
-        if vis != 2:
+        if vis != 2 or np.linalg.norm(seg[1] - seg[0]) < 8:
             continue
         ext = wire_extent(gray, seg[0], seg[1])
         if ext is None:
@@ -948,6 +948,8 @@ def _wires_to_model(gray, rough: dict[int, np.ndarray], core: set[int], nrm_down
     """Snap the rough wires, decide visibility, measure the board edges, fit the fretboard model."""
     wires: dict[int, WireObs] = {}
     for n, seg in sorted(rough.items()):
+        if np.linalg.norm(seg[1] - seg[0]) < 8:  # degenerate (e.g. a wire predicted at the image border)
+            continue
         sn, score = snap_wire_fast(gray, seg[0], seg[1], search=P.snap_search, step=0.5)
         sn = _bass_first(sn, nrm_down)
         med, sup = wire_support(gray, sn[0], sn[1])

@@ -6,7 +6,8 @@ the anchor is the intersection with the hand-fitted fretboard edge line. Chase's
 camera is not mirrored, so per PLAN D1 the clips are flagged `mirrored: true` and the stored keypoints are in the
 mirrored (canonical, right-handed) frame.
 
-    uv run python scripts/hand_anchors.py [--debug]
+    uv run python scripts/hand_anchors.py [--debug]          # samples/anchors (M1 GT)
+    uv run python scripts/hand_anchors.py --extra [--debug]  # samples/anchors_extra (extra eval GT)
 """
 
 from __future__ import annotations
@@ -24,6 +25,7 @@ from gro.snap import anchors_from_wires
 ROOT = Path(__file__).resolve().parents[1]
 FRAMES = ROOT / "samples" / "frames"
 OUT = ROOT / "samples" / "anchors"
+OUT_EXTRA = ROOT / "samples" / "anchors_extra"
 
 V, OCC = A.VIS_VISIBLE, A.VIS_OCCLUDED
 
@@ -146,7 +148,111 @@ CLICKS: dict[str, dict] = {
 }
 
 
-def build(name: str, spec: dict, debug: bool) -> A.LabelFile:
+# Extra GT for the auto-annotation eval (scripts/eval_auto.py), written to samples/anchors_extra/. Read the same way
+# (grid-labelled zoom crops of the raw frame, snapped); no auto output was overlaid while reading them.
+CLICKS_EXTRA: dict[str, dict] = {
+    # Nut visible (locking nut); 24 wires up to the board end.
+    "2026-09-03_20-38-02_60s": {
+        "video": "2026-09-03_20-38-02.mp4",
+        "t": 60.0,
+        "guitar": {"type": "electric", "frets": 24, "inlay": "vine", "strings": 6, "model": "Ibanez JEM (white)"},
+        "notes": "fretting hand over frets 4-7",
+        "bass_edge": [
+            (338, 257),
+            (386, 265),
+            (432, 272),
+            (591, 299),
+            (625, 304),
+            (747, 324),
+            (821.6, 337),
+            (904, 349),
+            (985, 362),
+        ],
+        "treble_edge": [(329.4, 316), (648, 376), (734, 395), (808, 408), (908, 429), (971, 438)],
+        "wires": {
+            0: ((287, 252), (291, 308), V),
+            1: ((338, 258), (329.4, 316), V),
+            2: ((386, 266), (376, 326), V),
+            3: ((432, 273), (422, 330), V),
+            4: ((475, 280), (465, 337), OCC),
+            5: ((516, 287), (507, 344), OCC),
+            6: ((553, 294), (545, 350), OCC),
+            7: ((591, 299), (583, 355), V),
+            8: ((625, 305), (616, 364), V),
+            9: ((658, 310), (648, 376), V),
+            10: ((689, 315), (678, 383), V),
+            11: ((718, 320), (706, 389), V),
+            12: ((747, 324), (734, 395), V),
+            13: ((773, 329), (761, 399), V),
+            14: ((798, 332), (786, 405), V),
+            15: ((821.6, 337), (808, 408), V),
+            16: ((843.6, 340), (830, 414), V),
+            17: ((865, 343), (851, 418), V),
+            18: ((885, 346), (871, 423), V),
+            19: ((904, 349), (890, 425), V),
+            20: ((922, 352), (908, 429), V),
+            21: ((939, 355), (925, 432), V),
+            22: ((955, 357), (941, 434), V),
+            23: ((971, 360), (957, 436), V),
+            24: ((985, 362), (971, 438), V),
+        },
+    },
+    # Nut under the fret wrap; fret 1 = first wire right of the wrap (spacing extrapolates the nut under it, and the
+    # count reaches 24 one gap before the fingerboard end at x ~ 941). Fret 11 is under a finger.
+    "2026-09-06_09-00-01_60s": {
+        "video": "2026-09-06_09-00-01.mp4",
+        "t": 60.0,
+        "guitar": {"type": "electric", "frets": 24, "inlay": "vine", "strings": 6, "model": "Ibanez (sunburst)"},
+        "notes": "nut hidden under fret wrap; fretting hand over frets 9-13",
+        "bass_edge": [
+            (291.3, 323.8),
+            (348.8, 331.3),
+            (402.5, 340),
+            (495, 352.5),
+            (610, 366.3),
+            (725, 381.25),
+            (940, 410),
+        ],
+        "treble_edge": [
+            (278.8, 397.5),
+            (390, 410),
+            (482.5, 423.8),
+            (597.5, 438.8),
+            (762.5, 462.5),
+            (875, 480),
+            (912.5, 483.75),
+        ],
+        "wires": {
+            1: ((291.3, 323.8), (278.8, 397.5), V),
+            2: ((348.8, 331.3), (337.5, 401.3), V),
+            3: ((402.5, 340), (390, 410), V),
+            4: ((450, 345), (437.5, 416.3), V),
+            5: ((495, 352.5), (482.5, 423.8), V),
+            6: ((536.3, 357.5), (523.8, 430), V),
+            7: ((575, 361.3), (562.5, 432.5), V),
+            8: ((610, 366.3), (597.5, 438.8), V),
+            9: ((642.5, 370), (630, 442), OCC),
+            10: ((671.3, 373.8), (661, 447.5), V),
+            11: ((698, 378), (686, 451), OCC),
+            12: ((725, 381.2), (712, 455.4), OCC),
+            13: ((749, 384.5), (736, 458.8), V),
+            14: ((772.5, 387.6), (759.5, 462.1), V),
+            15: ((794, 390.5), (781, 465.1), V),
+            16: ((814, 393.1), (801, 467.9), V),
+            17: ((832.5, 395.6), (819.5, 470.5), V),
+            18: ((850, 398.0), (837, 473.0), V),
+            19: ((865, 400.0), (852, 475.1), V),
+            20: ((880, 402.0), (867, 477.2), V),
+            21: ((894, 403.8), (881, 479.2), V),
+            22: ((907.5, 405.7), (894.5, 481.1), V),
+            23: ((920, 407.3), (907, 482.9), V),
+            24: ((931, 408.8), (918, 484.4), V),
+        },
+    },
+}
+
+
+def build(name: str, spec: dict, debug: bool, annotator: str = "agent:claude-m1") -> A.LabelFile:
     img = cv2.imread(str(FRAMES / f"{name}.jpg"))
     h, w = img.shape[:2]
     gray = cv2.GaussianBlur(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), (3, 3), 0)
@@ -177,7 +283,7 @@ def build(name: str, spec: dict, debug: bool) -> A.LabelFile:
         anchors=canon,
         fit=fit,
         source="manual",
-        annotator="agent:claude-m1",
+        annotator=annotator,
         status="draft",
         notes="; ".join(
             filter(
@@ -202,15 +308,19 @@ def build(name: str, spec: dict, debug: bool) -> A.LabelFile:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--debug", action="store_true")
+    ap.add_argument("--extra", action="store_true", help="build the extra eval GT (samples/anchors_extra)")
     ap.add_argument("names", nargs="*")
     a = ap.parse_args()
-    OUT.mkdir(parents=True, exist_ok=True)
-    for name, spec in CLICKS.items():
+    clicks, out, who = (
+        (CLICKS_EXTRA, OUT_EXTRA, "agent:claude-auto-eval") if a.extra else (CLICKS, OUT, "agent:claude-m1")
+    )
+    out.mkdir(parents=True, exist_ok=True)
+    for name, spec in clicks.items():
         if a.names and name not in a.names:
             continue
-        lf = build(name, spec, a.debug)
-        A.save(lf, OUT / f"{name}.json")
-        print("wrote", OUT / f"{name}.json", len(lf.frames[0].anchors), "anchors")
+        lf = build(name, spec, a.debug, who)
+        A.save(lf, out / f"{name}.json")
+        print("wrote", out / f"{name}.json", len(lf.frames[0].anchors), "anchors")
 
 
 if __name__ == "__main__":

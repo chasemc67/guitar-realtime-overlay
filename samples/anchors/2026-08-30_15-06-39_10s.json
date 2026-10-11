@@ -23,6 +23,8 @@
       "status": "draft",
       "qa_reviewer": null,
       "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
       "kpts": {
         "f1": {
           "bass": [

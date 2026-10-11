@@ -23,6 +23,8 @@
       "status": "draft",
       "qa_reviewer": null,
       "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
       "kpts": {
         "nut": {
           "bass": [

@@ -23,6 +23,8 @@
       "status": "draft",
       "qa_reviewer": null,
       "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
       "kpts": {
         "f1": {
           "bass": [

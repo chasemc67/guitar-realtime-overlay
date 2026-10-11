@@ -7,7 +7,8 @@ orientation (mirrored clips are un-mirrored with `H_img = M . H_canon`, D1):
   by the robust fit);
 - the refitted grid: every fret wire 0..`guitar.frets` and the 6 string lines, solid inside the annotated fret range
   and dashed where extrapolated, plus the two board edges;
-- a caption bar: file, frame, inlier mean/max px error, rejected points, nut visible, mirrored, tau.
+- a caption bar: file, frame, D12 anchorability (`anchor: <cue>` or `anchor: NONE (relative only)`), inlier mean/max
+  px error, rejected points, nut visible, mirrored, tau.
 
 Outputs under `review/<batch>/`: `frames/<item>.jpg` (full res), `strips/<item>.jpg` (zoomed, neck-aligned crops,
 raw above overlay, so wire alignment can be judged), `contact_sheet_NN.jpg` (tiled crops of the board) and
@@ -79,6 +80,7 @@ class ReviewItem:
         worst = max(r_in, key=r_in.get) if r_in else None
         rejected = [] if m is None else sorted(m.outliers, key=lambda a: (a.fret, a.side))
         nut = [a for a in self.frame.present() if a.fret == 0]
+        anchorable, cue = self.frame.anchorability()
         return {
             "item": self.name,
             "file": self.label_path.name,
@@ -91,6 +93,8 @@ class ReviewItem:
             "rmse_px": m.rmse_px if m else float("nan"),
             "n_rejected": len(rejected),
             "rejected": " ".join(f"{a.fret}{a.side[0]}" for a in rejected),
+            "anchorable": anchorable,
+            "anchor_cue": cue or "",
             "nut_visible": "yes" if any(a.vis == 2 for a in nut) else ("occluded" if nut else "no"),
             "mirrored": self.lf.mirrored,
             "tau": m.tau if m else float("nan"),
@@ -308,9 +312,16 @@ def caption_bar(width: int, lines: list[str], scale: float, bg=CAPTION_BG) -> np
     return bar
 
 
+def anchor_label(s: dict) -> str:
+    return f"anchor: {s['anchor_cue']}" if s["anchorable"] else "anchor: NONE (relative only)"
+
+
 def caption_lines(it: ReviewItem) -> list[str]:
     s = it.stats()
-    l1 = f"{s['file']} | {s['frame']} | {s['n_anchors']} anchors, frets {s['frets']} | status {s['status']}"
+    l1 = (
+        f"{s['file']} | {s['frame']} | {s['n_anchors']} anchors, frets {s['frets']} | {anchor_label(s)} | "
+        f"status {s['status']}"
+    )
     if it.model is None:
         return [l1, f"FIT: {it.error or 'n/a'}"]
     l2 = (

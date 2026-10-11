@@ -4,6 +4,11 @@ A label file holds one clip; each frame has `kpts`: slot name -> {"bass": [x, y,
 Slots are `nut` (= fret 0) and `f1`..`f24`. Coordinates are full-frame pixels in the *canonical* (right-handed)
 orientation: if `video.mirrored` is true, they refer to the horizontally mirrored frame (D1).
 vis: 2 = visible, 1 = occluded but inferable, 0 = absent / out of frame.
+
+Each frame also carries `anchorable` / `anchor_cue` (PLAN D12): absolute fret numbering needs a visible cue, checked
+in order: the nut, the 9-12-15 inlay frets, or all of the 3-5-7 inlay frets. A cue counts only if every fret it
+names has at least one anchor with vis 2. If a file leaves the fields unset, they are derived from the anchors;
+explicit values that differ from the derived ones are kept as an override.
 """
 
 from __future__ import annotations
@@ -17,6 +22,8 @@ SCHEMA = "fretboard-kpts/v1"
 SIDES = ("bass", "treble")
 MAX_FRETS = 24
 VIS_ABSENT, VIS_OCCLUDED, VIS_VISIBLE = 0, 1, 2
+# D12 anchor cues in priority order: cue name -> frets whose anchors must all be visible.
+ANCHOR_CUES: dict[str, tuple[int, ...]] = {"nut": (0,), "inlay_9_12_15": (9, 12, 15), "inlay_3_5_7": (3, 5, 7)}
 
 
 def slot_name(fret: int) -> str:
@@ -58,6 +65,8 @@ class FrameLabel:
     annotator: str = ""
     status: str = "draft"
     neck_present: bool = True
+    anchorable: bool | None = None  # None = derive from the anchors (D12)
+    anchor_cue: str | None = None
     fit: dict[str, Any] | None = None
     flags: list[str] = field(default_factory=list)
     notes: str = ""
@@ -65,6 +74,20 @@ class FrameLabel:
 
     def present(self) -> list[Anchor]:
         return [a for a in self.anchors if a.vis > 0]
+
+    def derived_anchor_cue(self) -> str | None:
+        """First D12 cue whose frets all have a visible (vis 2) anchor, or None."""
+        if not self.neck_present:
+            return None
+        seen = {a.fret for a in self.anchors if a.vis == VIS_VISIBLE}
+        return next((cue for cue, frets in ANCHOR_CUES.items() if seen.issuperset(frets)), None)
+
+    def anchorability(self) -> tuple[bool, str | None]:
+        """(anchorable, anchor_cue): the explicit values if set, else derived from the anchors."""
+        if self.anchorable is None:
+            cue = self.derived_anchor_cue()
+            return cue is not None, cue
+        return self.anchorable, self.anchor_cue
 
     def kpts_dict(self) -> dict[str, dict[str, list]]:
         out: dict[str, dict[str, list]] = {}
@@ -116,34 +139,62 @@ def validate(d: dict[str, Any]) -> None:
                     raise ValueError(f"bad triplet {trip!r} in {name}.{side}")
                 if trip[2] > 0 and (trip[0] is None or trip[1] is None):
                     raise ValueError(f"visible point without coordinates in {name}.{side}")
+        anchorable, cue = fr.get("anchorable"), fr.get("anchor_cue")
+        if anchorable is not None and not isinstance(anchorable, bool):
+            raise ValueError(f"anchorable must be a bool, got {anchorable!r}")
+        if cue is not None and cue not in ANCHOR_CUES:
+            raise ValueError(f"bad anchor_cue {cue!r}")
+        if anchorable is not None and anchorable != (cue is not None):
+            raise ValueError(f"anchorable={anchorable} inconsistent with anchor_cue={cue!r}")
 
 
-_FRAME_KEYS = {"t", "kpts", "source", "annotator", "status", "neck_present", "fit", "flags", "notes"}
+_FRAME_KEYS = {
+    "t",
+    "kpts",
+    "source",
+    "annotator",
+    "status",
+    "neck_present",
+    "anchorable",
+    "anchor_cue",
+    "fit",
+    "flags",
+    "notes",
+}
+
+
+def _frame_from_dict(fr: dict[str, Any]) -> FrameLabel:
+    label = FrameLabel(
+        t=fr.get("t"),
+        anchors=parse_kpts(fr.get("kpts", {})),
+        source=fr.get("source", "manual"),
+        annotator=fr.get("annotator", ""),
+        status=fr.get("status", "draft"),
+        neck_present=fr.get("neck_present", True),
+        fit=fr.get("fit"),
+        flags=list(fr.get("flags", [])),
+        notes=fr.get("notes", ""),
+        extra={k: v for k, v in fr.items() if k not in _FRAME_KEYS},
+    )
+    if fr.get("anchorable") is not None or fr.get("anchor_cue") is not None:
+        cue = fr.get("anchor_cue")
+        explicit = (cue is not None, cue)
+        # Stored values that match the anchors stay derived, so they follow later kpt edits.
+        if explicit != label.anchorability():
+            label.anchorable, label.anchor_cue = explicit
+    return label
 
 
 def from_dict(d: dict[str, Any]) -> LabelFile:
     validate(d)
-    frames = [
-        FrameLabel(
-            t=fr.get("t"),
-            anchors=parse_kpts(fr.get("kpts", {})),
-            source=fr.get("source", "manual"),
-            annotator=fr.get("annotator", ""),
-            status=fr.get("status", "draft"),
-            neck_present=fr.get("neck_present", True),
-            fit=fr.get("fit"),
-            flags=list(fr.get("flags", [])),
-            notes=fr.get("notes", ""),
-            extra={k: v for k, v in fr.items() if k not in _FRAME_KEYS},
-        )
-        for fr in d["frames"]
-    ]
+    frames = [_frame_from_dict(fr) for fr in d["frames"]]
     return LabelFile(d["clip_id"], d["video"], d.get("guitar", {}), frames)
 
 
 def to_dict(lf: LabelFile) -> dict[str, Any]:
     frames = []
     for fr in lf.frames:
+        anchorable, cue = fr.anchorability()
         frames.append(
             {
                 "t": fr.t,
@@ -152,6 +203,8 @@ def to_dict(lf: LabelFile) -> dict[str, Any]:
                 "status": fr.status,
                 "qa_reviewer": None,
                 "neck_present": fr.neck_present,
+                "anchorable": anchorable,
+                "anchor_cue": cue,
                 "kpts": fr.kpts_dict(),
                 "fit": fr.fit,
                 "flags": fr.flags,

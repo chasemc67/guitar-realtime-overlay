@@ -5,7 +5,7 @@ import numpy as np
 
 from gro import anchors as A
 from gro.geometry import dlt, fret_u, model_from_h, plane_point
-from gro.review import run_review
+from gro.review import caption_lines, load_batch, run_review
 
 
 def _model():
@@ -59,8 +59,11 @@ def test_review_batch(tmp_path):
     clean, lefty = stats["clean_f000"], stats["lefty_f000"]
     assert clean["max_px"] < 0.1 and clean["n_rejected"] == 0 and clean["nut_visible"] == "no"
     assert lefty["n_rejected"] == 1 and lefty["rejected"] == "7b" and lefty["mean_px"] < 0.1
+    # Frets 2-12 with 5 occluded: no nut, no 15, and 3-5-7 incomplete -> not anchorable (D12).
+    assert clean["anchorable"] is False and clean["anchor_cue"] == ""
     rows = list(csv.DictReader((out / "summary.csv").open()))
     assert [r["item"] for r in rows] == ["clean_f000", "lefty_f000"]
+    assert rows[0]["anchorable"] == "False"
 
     # Full-res review image = caption bar + the frame at native resolution.
     a = cv2.imread(str(out / "frames" / "clean_f000.jpg"))
@@ -72,3 +75,12 @@ def test_review_two_sheets(tmp_path):
         _label(tmp_path, f"c{i}", mirrored=False, outlier=False)
     run_review(tmp_path, tmp_path / "review", "b", bases=[tmp_path], cols=1, rows=2, width=800)
     assert (tmp_path / "review" / "b" / "contact_sheet_02.jpg").exists()
+
+
+def test_caption_shows_anchor_flag(tmp_path):
+    _label(tmp_path, "c", mirrored=False, outlier=False)
+    it = load_batch(tmp_path, [tmp_path])[0]
+    assert "anchor: NONE (relative only)" in caption_lines(it)[0]
+    it.frame.anchors = [a for a in it.frame.anchors if a.fret != 5]
+    it.frame.anchors += [A.Anchor(5, "bass", 1.0, 1.0)]
+    assert "anchor: inlay_3_5_7" in caption_lines(it)[0]

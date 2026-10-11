@@ -48,7 +48,11 @@ def main() -> None:
     for s in res["items"]:
         mean, mx = s["mean_px"], s["max_px"]
         err = f"mean {mean:.2f}px max {mx:.2f}px @{s['max_at']}" if not math.isnan(mean) else s["error"]
-        print(f"{s['item']}: {s['n_anchors']} anchors, {err}, rejected {s['n_rejected']}, nut {s['nut_visible']}")
+        print(
+            f"{s['item']}: {s['n_anchors']} anchors, {err}, "
+            f"rejected {s['n_rejected']}, nut {s['nut_visible']}, "
+            f"anchor {s['anchor_cue'] or 'none'}"
+        )
     total = sum(p.stat().st_size for p in res["files"])
     print(f"wrote {len(res['files'])} files to {res['out']} ({total / 1e6:.2f} MB)")
     for p in res["files"]:

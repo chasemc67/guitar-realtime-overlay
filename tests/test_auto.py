@@ -107,11 +107,13 @@ def test_detect_synthetic_board():
         if best is None or e < best[0]:
             best = (e, s)
     assert best[0] < 0.6
-    # Treble anchors land on the true treble edge.
+    # D13: anchors land on the outer strings (synthetic strings at y = 0.08 / 0.92), not on the board edges.
     s = best[1]
-    tr = [a for a in det.anchors if a.side == "treble" and a.vis == 2 and 1 <= a.fret + s <= 22]
-    err = [np.linalg.norm(m.project_fy(a.fret + s, 1.0) - [a.x, a.y]) for a in tr]
-    assert np.median(err) < 1.5
+    for side, y in (("bass", 0.08), ("treble", 0.92)):
+        an = [a for a in det.anchors if a.side == side and a.vis == 2 and 1 <= a.fret + s <= 22]
+        err = [np.linalg.norm(m.project_fy(a.fret + s, y) - [a.x, a.y]) for a in an]
+        assert np.median(err) < 1.0, (side, np.median(err))
+    assert det.debug["strings_source"] == "comb"
 
 
 def test_parse_json_and_offline_cache(tmp_path):

@@ -25,207 +25,219 @@
       "anchorable": false,
       "anchor_cue": null,
       "kpts": {
-        "f5": {
+        "f4": {
           "bass": [
-            885.09,
-            48.15,
+            921.25,
+            0.32,
             2
           ],
           "treble": [
-            922.93,
-            101.07,
+            960.36,
+            56.39,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            877.99,
+            38.22,
+            2
+          ],
+          "treble": [
+            918.85,
+            95.37,
             2
           ]
         },
         "f6": {
           "bass": [
-            844.18,
-            84.62,
+            836.62,
+            74.46,
             2
           ],
           "treble": [
-            884.61,
-            138.88,
+            879.63,
+            132.19,
             2
           ]
         },
         "f7": {
           "bass": [
-            805.56,
-            119.05,
+            797.94,
+            108.34,
             2
           ],
           "treble": [
-            846.47,
-            176.53,
+            840.84,
+            168.61,
             2
           ]
         },
         "f8": {
           "bass": [
-            768.14,
-            152.4,
+            760.13,
+            141.47,
             2
           ],
           "treble": [
-            811.26,
-            211.27,
+            804.8,
+            202.45,
             2
           ]
         },
         "f9": {
           "bass": [
-            733.16,
-            183.59,
+            725.14,
+            172.12,
             2
           ],
           "treble": [
-            776.48,
-            245.6,
+            769.49,
+            235.6,
             2
           ]
         },
         "f10": {
           "bass": [
-            699.42,
-            213.67,
+            691.09,
+            201.94,
             2
           ],
           "treble": [
-            744.5,
-            277.16,
+            736.79,
+            266.31,
             2
           ]
         },
         "f14": {
           "bass": [
-            578.85,
-            321.15,
+            569.5,
+            308.46,
             2
           ],
           "treble": [
-            629.84,
-            390.32,
+            619.56,
+            376.38,
             2
           ]
         },
         "f15": {
           "bass": [
-            553.18,
-            344.03,
+            543.71,
+            331.05,
             2
           ],
           "treble": [
-            604.9,
-            414.94,
+            594.16,
+            400.22,
             2
           ]
         },
         "f16": {
           "bass": [
-            527.31,
-            367.09,
+            517.65,
+            353.88,
             2
           ],
           "treble": [
-            580.16,
-            439.36,
+            568.89,
+            423.95,
             2
           ]
         },
         "f17": {
           "bass": [
-            504.25,
-            387.64,
+            494.58,
+            374.09,
             2
           ],
           "treble": [
-            557.27,
-            461.94,
+            545.7,
+            445.73,
             2
           ]
         },
         "f18": {
           "bass": [
-            480.24,
-            409.05,
+            469.91,
+            395.71,
             2
           ],
           "treble": [
-            536.83,
-            482.12,
+            524.25,
+            465.87,
             2
           ]
         },
         "f19": {
           "bass": [
-            459.66,
-            427.39,
+            449.58,
+            413.51,
             2
           ],
           "treble": [
-            515.03,
-            503.63,
+            502.46,
+            486.33,
             2
           ]
         },
         "f20": {
           "bass": [
-            438.8,
-            445.99,
+            428.48,
+            432.0,
             2
           ],
           "treble": [
-            495.51,
-            522.89,
+            482.42,
+            505.14,
             2
           ]
         },
         "f21": {
           "bass": [
-            419.2,
-            463.45,
+            408.48,
+            449.52,
             2
           ],
           "treble": [
-            478.13,
-            540.05,
+            464.34,
+            522.12,
             2
           ]
         },
         "f22": {
           "bass": [
-            401.89,
-            478.89,
+            391.47,
+            464.42,
             2
           ],
           "treble": [
-            459.32,
-            558.61,
+            445.66,
+            539.65,
             2
           ]
         },
         "f23": {
           "bass": [
-            383.75,
-            495.05,
+            372.84,
+            480.73,
             2
           ],
           "treble": [
-            443.83,
-            573.9,
+            429.38,
+            554.94,
             2
           ]
         },
         "f24": {
           "bass": [
-            367.19,
-            509.82,
+            356.15,
+            495.36,
             2
           ],
           "treble": [
-            428.01,
-            589.52,
+            413.21,
+            570.13,
             2
           ]
         }
@@ -233,38 +245,36 @@
       "fit": {
         "H": [
           [
-            -1035.66328341,
-            35.81197054,
-            1130.86368327
+            -1046.86258114,
+            36.68159891,
+            1130.469803
           ],
           [
-            838.70803819,
-            48.28184548,
-            -138.1787063
+            829.61737721,
+            48.97949962,
+            -143.63200397
           ],
           [
-            -0.14402443,
-            0.00089875,
+            -0.1360583,
+            0.00224348,
             1.0
           ]
         ],
-        "tau": 0.6,
-        "rmse_px": 1.744,
+        "tau": 0.5499999999999999,
+        "rmse_px": 0.585,
         "index_shift": 0
       },
-      "flags": [
-        "fit_rmse_high"
-      ],
+      "flags": [],
       "notes": "",
       "frame_file": "/workspace/guitar-overlay/data/scraped/frames/XyBfN5WNo9g_08.jpg",
       "auto": {
         "numbering": {
           "source": "ai",
           "resolved": true,
-          "cue": "inlay_9_12_15",
-          "confidence": 0.8,
+          "cue": "last_fret",
+          "confidence": 0.85,
           "nut_visible": false,
-          "reasoning": "The inlay sequence anchors the count. The dots sit in cells W10\u2013W11, W12\u2013W13, W14\u2013W15 and W16\u2013W17, then two cells are skipped and a double dot appears in W19\u2013W20. This fits frets 15, 17, 19, 21 and 24, so W20 is fret 24 and W11 is fret 15. The earlier dots also fit: the cell just left of W1 is fret 5, W2\u2013W3 is fret 7 and W4\u2013W5 is fret 9. Counting W1 back from W11 (fret 15), with three unlabelled wires under the hand between W6 and W10, gives W1 = fret 5."
+          "reasoning": "Anchor is the double dot in the cell between W20 and W21, which gives fret 24, so W21 = fret 24. The three unlabelled wires between W7 and W11 are W8 to W10. Counting back, the single dots fall in the cells for frets 5 (W1-W2), 7 (W3-W4), 9 (W5-W6), 15 (W11-W12), 17 (W13-W14), 19 (W15-W16) and 21 (W17-W18), and the fret-12 double sits under the hand, all consistent. This gives W1 = fret 4."
         },
         "n_candidates": 867,
         "grid_score": 15.49,

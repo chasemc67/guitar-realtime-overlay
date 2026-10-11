@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
-from gro.geometry import NUT_WIDTH_U, FretboardModel, fret_u, mirror_model, string_y
+from gro.geometry import BOARD_PAD, NUT_WIDTH_U, FretboardModel, fret_u, mirror_model, string_y
 from gro.theory import ScaleNote
 
 SINGLE_INLAYS = (3, 5, 7, 9, 15, 17, 19, 21)
@@ -105,7 +105,7 @@ def render_overlay(
     layer = np.zeros_like(out)
     mask = np.zeros((h, w), np.uint8)
     for n in range(f0, f1 + 1):
-        q = model.cell_quad(n, 0.0, 1.0, inset_u=style.cell_gap)
+        q = model.cell_quad(n, -BOARD_PAD, 1.0 + BOARD_PAD, inset_u=style.cell_gap)
         _poly(layer, q, style.cell_color)
         _poly(mask, q, 255)
     _blend(out, layer, mask, style.cell_alpha)
@@ -142,8 +142,7 @@ def render_overlay(
         half = 0.5 * float(string_y(1, model.n_strings) - string_y(0, model.n_strings))
         color = style.root_color if note.is_root else style.note_color
         if style.outline_cells:
-            y0 = 0.0 if note.string == 0 else ys - half
-            y1 = 1.0 if note.string == model.n_strings - 1 else ys + half
+            y0, y1 = max(ys - half, -BOARD_PAD), min(ys + half, 1.0 + BOARD_PAD)
             thick = 2 if model.fret_width_px(note.fret - 1, ys) >= 22 else 1
             _poly(out, model.cell_quad(note.fret, y0, y1, inset_u=style.cell_gap), color, thick)
         ua, ub = fret_u(note.fret - 1), fret_u(note.fret)

@@ -25,177 +25,176 @@
       "anchorable": false,
       "anchor_cue": null,
       "kpts": {
-        "f7": {
-          "bass": [
-            665.39,
-            261.23,
-            2
-          ],
-          "treble": [
-            664.54,
-            287.44,
-            2
-          ]
-        },
         "f8": {
           "bass": [
-            650.75,
-            271.94,
+            592.35,
+            319.87,
             1
           ],
           "treble": [
-            648.99,
-            300.03,
+            583.98,
+            362.65,
             1
           ]
         },
-        "f10": {
+        "f11": {
           "bass": [
-            621.06,
-            293.67,
+            559.11,
+            338.02,
             1
           ],
           "treble": [
-            618.78,
-            324.48,
+            548.5,
+            390.41,
             1
           ]
         },
-        "f13": {
+        "f12": {
           "bass": [
-            577.23,
-            325.75,
+            547.69,
+            344.26,
             1
           ],
           "treble": [
-            574.09,
-            360.65,
+            536.27,
+            399.97,
             1
           ]
         },
         "f14": {
           "bass": [
-            563.2,
-            336.01,
+            524.25,
+            357.05,
             2
           ],
           "treble": [
-            560.24,
-            371.86,
+            511.21,
+            419.58,
             2
           ]
         },
-        "f16": {
+        "f15": {
           "bass": [
-            534.79,
-            356.81,
+            513.95,
+            362.68,
+            2
+          ],
+          "treble": [
+            498.8,
+            429.29,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            488.76,
+            376.43,
             1
           ],
           "treble": [
-            530.68,
-            395.78,
+            472.92,
+            449.54,
             1
           ]
         },
         "f18": {
           "bass": [
-            507.65,
-            376.67,
+            476.64,
+            383.05,
             2
           ],
           "treble": [
-            503.01,
-            418.18,
+            459.33,
+            460.17,
             2
           ]
         },
         "f19": {
           "bass": [
-            494.26,
-            386.47,
+            464.68,
+            389.58,
             1
           ],
           "treble": [
-            489.12,
-            429.41,
+            446.9,
+            469.9,
             1
           ]
         },
         "f20": {
           "bass": [
-            481.1,
-            396.1,
-            2
+            452.61,
+            396.17,
+            1
           ],
           "treble": [
-            475.36,
-            440.55,
-            2
+            433.82,
+            480.13,
+            1
           ]
         },
         "f21": {
           "bass": [
-            468.49,
-            405.33,
+            441.72,
+            402.12,
             2
           ],
           "treble": [
-            462.86,
-            450.67,
+            421.79,
+            489.55,
             2
+          ]
+        },
+        "f22": {
+          "bass": [
+            428.51,
+            409.33,
+            1
+          ],
+          "treble": [
+            407.65,
+            500.61,
+            1
           ]
         },
         "f23": {
           "bass": [
-            443.94,
-            423.3,
-            1
+            416.03,
+            416.14,
+            2
           ],
           "treble": [
-            437.37,
-            471.3,
-            1
-          ]
-        },
-        "f24": {
-          "bass": [
-            432.1,
-            431.96,
-            1
-          ],
-          "treble": [
-            425.18,
-            481.17,
-            1
+            394.08,
+            511.23,
+            2
           ]
         }
       },
       "fit": {
         "H": [
           [
-            -713.5130755,
-            -7.26513861,
-            767.44404401
+            -670.91901686,
+            -9.10252046,
+            659.51795738
           ],
           [
-            70.14264888,
-            15.45199836,
-            195.29919654
+            -141.08265265,
+            23.79414952,
+            293.64455586
           ],
           [
-            -0.60967795,
-            -0.01009286,
+            -0.80227073,
+            -0.00678587,
             1.0
           ]
         ],
-        "tau": 0.44999999999999996,
-        "rmse_px": 0.234,
+        "tau": 0.6,
+        "rmse_px": 0.818,
         "index_shift": 0
       },
       "flags": [
         "ai_unusable",
-        "few_wires",
-        "numbering_low_conf"
+        "few_wires"
       ],
       "notes": "AI usability: This is a close-up of an electric guitar with a maple fingerboard, but the extreme angle, foreshortening, motion blur and the hand covering much of the neck make the fret wires hard to resolve reliably.",
       "frame_file": "/workspace/guitar-overlay/data/scraped/frames/NN224KF8WxU_08.jpg",
@@ -204,9 +203,9 @@
           "source": "ai",
           "resolved": true,
           "cue": "inlay_9_12_15",
-          "confidence": 0.45,
+          "confidence": 0.6,
           "nut_visible": false,
-          "reasoning": "On this maple board I take the two dots at different heights near x\u22481100-1140 to be the 12th-fret double dot, sitting between the 5th and 6th clearly visible real wires. Counting back, the single dot near x\u2248710 falls in the fret-9 cell and the large dot at the far left falls in the fret-7 cell. That makes the first real wire, which W1 most likely marks, fret 7. The labels do not line up cleanly with the visible wires, and many of the 37 detected labels must be false because the guitar has only 24 frets. I could not single out which labels are false, so that list is left empty and confidence is moderate."
+          "reasoning": "The double-dot 12th-fret inlay sits in the cell just right of the real wire near W11, so the wire near W11 is fret 11 and the wire near W14 is fret 12. Counting real wires leftward gives W9 near fret 10, W5/W6 near fret 9 and W2 as fret 8. The single dot between W2 and the fret-9 wire is the 9th-fret marker, which confirms this. W1 is an inferred, dashed wire just left of fret 8, so it is fret 7. Its drawn position sits right of the visible fret-7 wire, which lowers confidence."
         },
         "n_candidates": 386,
         "grid_score": 10.87,

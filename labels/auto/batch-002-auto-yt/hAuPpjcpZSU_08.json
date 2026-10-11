@@ -25,92 +25,91 @@
       "anchorable": false,
       "anchor_cue": null,
       "kpts": {
+        "f18": {
+          "bass": [
+            442.96,
+            393.93,
+            1
+          ],
+          "treble": [
+            451.7,
+            420.01,
+            1
+          ]
+        },
+        "f19": {
+          "bass": [
+            425.13,
+            398.15,
+            1
+          ],
+          "treble": [
+            431.57,
+            424.04,
+            1
+          ]
+        },
         "f20": {
           "bass": [
-            453.18,
-            405.61,
+            409.89,
+            401.76,
             2
           ],
           "treble": [
-            455.42,
-            425.27,
+            413.88,
+            427.58,
             2
           ]
         },
         "f21": {
           "bass": [
-            440.8,
-            403.41,
-            1
+            393.46,
+            405.66,
+            2
           ],
           "treble": [
-            442.76,
-            423.91,
-            1
+            397.74,
+            430.81,
+            2
           ]
         },
         "f22": {
           "bass": [
-            427.75,
-            401.1,
-            2
+            381.63,
+            408.46,
+            1
           ],
           "treble": [
-            430.85,
-            422.63,
-            2
-          ]
-        },
-        "f23": {
-          "bass": [
-            416.76,
-            399.15,
-            2
-          ],
-          "treble": [
-            417.16,
-            421.15,
-            2
-          ]
-        },
-        "f24": {
-          "bass": [
-            402.07,
-            396.54,
-            2
-          ],
-          "treble": [
-            406.03,
-            419.95,
-            2
+            382.93,
+            433.77,
+            1
           ]
         }
       },
       "fit": {
         "H": [
           [
-            -667.27071539,
-            1.44093099,
-            649.91251742
+            22238.32229628,
+            -801.92721865,
+            -42567.24305105
           ],
           [
-            -389.78856963,
-            6.67082587,
-            443.36507537
+            -54481.11608855,
+            -2079.174058,
+            9793.9125801
           ],
           [
-            -0.84017077,
-            0.00182803,
+            -98.32983649,
+            -1.3810344,
             1.0
           ]
         ],
-        "tau": 0.6,
-        "rmse_px": 0.662,
+        "tau": 0.19999999999999998,
+        "rmse_px": 0.0,
         "index_shift": 0
       },
       "flags": [
-        "few_wires",
-        "numbering_low_conf"
+        "few_wires"
       ],
       "notes": "",
       "frame_file": "/workspace/guitar-overlay/data/scraped/frames/hAuPpjcpZSU_08.jpg",
@@ -119,12 +118,12 @@
           "source": "ai",
           "resolved": true,
           "cue": "last_fret",
-          "confidence": 0.3,
+          "confidence": 0.7,
           "nut_visible": false,
-          "reasoning": "No nut or clear inlay is visible in the zoomed strip, so the anchor is the last fret. The strip shows seven real fret wires, the last at x\u2248775, and the fingerboard ends at x\u2248850. With 24 frets, these wires would be frets 18\u201324. The labelled ticks do not line up well with the real wires. W1 (x\u2248332) falls nearest the real wire at x\u2248365, which is fret 20. A rough scale estimate from the full frame suggests about fret 19, so this is uncertain."
+          "reasoning": "The nut is far off to the right of the frame, so the dot inlays are the anchor. Three dots sit two cells apart, which fits the 17/19/21 pattern. The last dot sits between W3 and W4, so W4 is fret 21 and W5 is fret 22, just before the fingerboard ends. This guitar shows 22 frets, not the 24 stated, because there is no room for a 24th-fret marker cell. The dot between W1 and W2 makes W2 fret 19, so W1 is fret 18. Everything from W6 onward sits over the pickguard and pickups, so those are not fret wires."
         },
         "n_candidates": 706,
-        "grid_score": 16.43,
+        "grid_score": 22.94,
         "usability": {
           "usable": true,
           "guitar": "electric",

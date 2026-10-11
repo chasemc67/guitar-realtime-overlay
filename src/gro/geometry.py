@@ -19,7 +19,10 @@ from gro.anchors import Anchor
 
 DEFAULT_TAU = 0.30  # half-width taper: 43 mm nut -> ~56 mm at the 24th fret
 NUT_WIDTH_U = 43.0 / 648.0  # nut width as a fraction of scale length (for drawing round markers)
-STRING_MARGIN = 0.08  # distance of the outer strings from the edge, as a fraction of fretboard width
+# D13: anchors (y = 0 / 1) sit on the outer strings, so the strings span exactly y in [0, 1]. The visible board
+# extends about half a string spacing beyond them (BOARD_PAD, used for the drawn cells).
+STRING_MARGIN = 0.0
+BOARD_PAD = 0.1
 N_STRINGS = 6
 
 

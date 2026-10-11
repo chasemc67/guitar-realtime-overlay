@@ -42,7 +42,7 @@ FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 LEGEND = (
     "anchors: green = visible, orange = occluded (vis 1), red X = rejected | grid: cyan = fret wires (magenta = nut), "
-    "white = strings, yellow = board edges; solid = within annotated frets, dashed = extrapolated"
+    "white = strings, yellow = anchor lines (outer strings, D13); solid = within annotated frets, dashed = extrapolated"
 )
 
 

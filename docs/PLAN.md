@@ -1,6 +1,6 @@
 # Guitar Real-Time Overlay — Technical Plan
 
-Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D12). Owner: Chase. This is an opinionated plan; open
+Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D12; D13 provisional). Owner: Chase. This is an opinionated plan; open
 questions are collected at the end (§10).
 
 ## Decisions (2026-10-11)
@@ -126,6 +126,21 @@ Annotation review of batch-000-hand: Chase says it looks great (2026-10-11). Col
 
 **D12. Anchorability rule (refines D11, Chase 2026-10-11).** Absolute fret numbering requires at least one visible cue: (a) the headstock/nut, (b) the 9-12-15 inlay frets, or (c) all of the 3-5-7 inlay frets. Otherwise fall back to relative positions. Every annotated frame carries `anchorable: bool` and `anchor_cue: "nut" | "inlay_9_12_15" | "inlay_3_5_7" | null` (first matching cue in that order); review sheets show the flag in each caption, and eval reports absolute-numbering accuracy only on anchorable frames.
 
+**D13. Anchors sit on the outer strings, not the board edges (provisional, 2026-10-11; pending Chase on Q16).** Each
+anchor is where a fret wire crosses an outermost *string*: the low-E string on the bass side and the high-E string
+on the treble side. Canonical y = 0 / 1 are the low-E / high-E strings (`string_y` margin 0), and the drawn board
+extends `BOARD_PAD` = 0.1 (half a string spacing) beyond them. Why: the overlay needs the strings, strings are visible
+against dark shirts where the bass board edge isn't, and it no longer matters whether the side of the neck shows.
+Board edges become optional derived fields (`board_edge_kpts` on the re-derived GT frames). All GT in
+`samples/anchors` and `samples/anchors_extra` was re-derived this way (`scripts/rederive_gt_strings.py`; check crops
+in `review/d13-gt-strings/`). Before that, *neither* GT side followed one convention. The treble side sat at the wire
+end (board edge), 1–6 px outside the high-E. The bass side sat at a wire-ridge dip that was usually one string in (on
+the A string, 4–19 px from the low-E), not on the low-E. The old note that "GT bass = low-E" was wrong. On the
+09-06 guitar, a bright line along the bass edge continues past the board end onto the body, which shows it's the
+low-E and not binding (`review/d13-gt-strings/`). Caveat: the re-derived GT uses the same string detector as the
+auto pipeline, applied to the GT wire lines. Along-wire GT/auto agreement is therefore partly self-consistency, and
+only Chase's review of the crops makes it independent. The perpendicular-to-wire error stays independent.
+
 ## 0. Goal & constraints
 
 Draw a scale overlay onto a guitar fretboard from a live close-up camera, so that it matches `docs/reference-overlay.jpg`:
@@ -155,7 +170,7 @@ Hard constraints observed so far:
 
 **A. Raw keypoints.** Fixed slots: the nut and each fret wire `n = 1..24`, with one point where the wire meets the
 bass-side fretboard edge (low E) and one where it meets the treble-side edge (high E). That is 50 slots, each with a
-visibility flag.
+visibility flag. (D13: in the labels these points are where the wire crosses the low-E / high-E *strings*.)
 
 **B. Parametric model.** A homography `H` maps fretboard-plane coordinates to the image, plus a fret-position model.
 Plane coordinates are:
@@ -462,12 +477,34 @@ verification.
   (later keyframes align to the propagated grid, no AI call); flags `fit_jump`, `wires_lost`, `keyframe_unaligned`,
   `keyframe_detect_failed`, `klt_lost`.
 - **Eval** (`scripts/eval_auto.py`, 3 M1 GT frames + 2 extra hand-read frames in `samples/anchors_extra/`):
-  numbering 5/5 exact with AI; wire position (across-wire) 0.65 px; treble anchors 1.3 px; bass anchors 5.6 px.
-- **Open: where is the bass edge?** In Chase's footage the bass edge has no contrast (dark board on a dark shirt)
-  and the side of the neck is often visible, so the wires continue past the face as fret tangs. The hand tool's
-  `wire_extent` stops at the dip where the low-E string crosses each wire, so GT bass edges sit at roughly the
-  low-E string. The auto edge sits at the wire end or the outermost long line. Neither is clearly the face edge
-  (`review/eval-auto-worst-anchors/`). See §10 Q16.
+  before D13 (edge-convention GT): numbering 5/5 exact with AI; across-wire 0.65 px; treble 1.3 px; bass 5.6 px.
+- **Strings, not edges (D13).** `gro.auto.strings`: the first (board-edge) fit gives a plane model. The board is
+  resampled in plane coordinates, where strings are straight lines. Per fret cell, take the median across-neck ridge
+  profile, soft-saturated so inlays don't dominate and the strongest string keeps a sharp peak. A line-score table
+  S(c, d) sums these profiles over all cells. A 6-tooth comb (evenly spaced at every u, linear in u) is searched on
+  S. A wire-presence term stops teeth from sitting where the wires have ended: the wire must continue on both sides
+  of each string, so a tooth can't land off the board. The outer teeth are refined sub-sample. Anchors = snapped wire
+  x outer string line; then refit. If the comb is weak (score <= 0.3), the strings fall back to the edges inset by
+  8.5% (`EDGE_INSET`). Learnings: (1) when the strongest string is hard-clipped, the peak becomes a plateau and the
+  argmax picks its edge (1.2 px bias), so use soft saturation. (2) With the high-E hidden, the comb slides one
+  string outward unless teeth outside the wire ends are penalised. (3) The sampled v range must cover strongly
+  diverging strings (tau≈0 board fits). (4) Refit tau on string anchors is 0.5–0.6, i.e. the string spread taper,
+  not the board taper. Runtime is ~2.5x per frame (~13 s/frame on the eval frames, no AI).
+- **Eval after D13** (string-convention GT; see D13 caveat): see the table in §3.5.1.
+
+#### 3.5.1 Eval (2026-10-11, D13)
+
+5 GT frames (220 anchors, 224 with AI-added nut anchors); string-convention GT. `eval/auto_eval_{ai,noai}.json`.
+
+| run | mean px | median | max | bass mean | treble mean | across-wire | numbering exact | anchorable acc | cue acc |
+|---|---|---|---|---|---|---|---|---|---|
+| with AI | 0.88 | 0.53 | 16.0 | 0.72 | 1.04 | 0.70 | 5/5 | 4/5 | 3/5 |
+| no AI | 0.75 | 0.51 | 7.13 | 0.67 | 0.84 | 0.58 | relative only | 1/5 | 1/5 |
+
+With AI, the max (16 px) and most of the gap to no-AI come from the auto *nut* anchors on 2026-09-03_60s (the nut-step
+finder; nut anchors only exist when the AI says the nut is visible). The rest are wires under fingers (vis 1, predicted
+from the fit). The worst crops are in `review/eval-auto-worst-anchors/`. Anchorable/cue misses: 08-30_10s
+(the GT says not anchorable, but the AI says the nut is visible) and 09-06_60s (cue 3-5-7 vs 9-12-15). Both predate D13.
 
 ## 4. Data collection
 
@@ -727,3 +764,5 @@ Everything is drawn in plane coordinates and projected through `H`, so perspecti
     the face, or (c) wherever the outermost string/edge highlight runs? The auto pipeline disagrees with GT by ~5 px
     along the wire only on this side (treble 1.3 px, wire position 0.65 px). One convention for both GT and auto would
     make the numbers comparable (§3.5, `review/eval-auto-worst-anchors/`).
+    *Provisionally answered by D13 (anchors on the outer strings). Please check `review/d13-gt-strings/`: dashed
+    lines are the detected strings, red the outer two, green circles the old anchors. Confirm or overrule.*

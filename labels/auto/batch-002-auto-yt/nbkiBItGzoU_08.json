@@ -25,143 +25,333 @@
       "anchorable": false,
       "anchor_cue": null,
       "kpts": {
-        "f6": {
+        "f1": {
           "bass": [
-            516.29,
-            319.65,
+            132.59,
+            629.26,
+            2
+          ],
+          "treble": [
+            125.2,
+            643.26,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            158.85,
+            629.47,
             1
           ],
           "treble": [
-            512.64,
-            312.72,
+            153.6,
+            643.42,
             1
+          ]
+        },
+        "f3": {
+          "bass": [
+            184.31,
+            629.66,
+            1
+          ],
+          "treble": [
+            179.7,
+            643.57,
+            1
+          ]
+        },
+        "f4": {
+          "bass": [
+            208.45,
+            629.85,
+            2
+          ],
+          "treble": [
+            202.98,
+            643.71,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            229.1,
+            630.01,
+            2
+          ],
+          "treble": [
+            228.89,
+            643.86,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            250.87,
+            630.18,
+            2
+          ],
+          "treble": [
+            249.78,
+            643.98,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            270.79,
+            630.33,
+            2
+          ],
+          "treble": [
+            270.94,
+            644.1,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            289.8,
+            630.48,
+            1
+          ],
+          "treble": [
+            287.82,
+            644.19,
+            1
+          ]
+        },
+        "f9": {
+          "bass": [
+            307.19,
+            630.62,
+            1
+          ],
+          "treble": [
+            305.64,
+            644.3,
+            1
+          ]
+        },
+        "f10": {
+          "bass": [
+            323.53,
+            630.74,
+            1
+          ],
+          "treble": [
+            322.37,
+            644.39,
+            1
+          ]
+        },
+        "f11": {
+          "bass": [
+            338.01,
+            630.85,
+            2
+          ],
+          "treble": [
+            337.87,
+            644.48,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            353.31,
+            630.97,
+            1
+          ],
+          "treble": [
+            352.87,
+            644.57,
+            1
+          ]
+        },
+        "f13": {
+          "bass": [
+            367.08,
+            631.08,
+            2
+          ],
+          "treble": [
+            366.81,
+            644.65,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            378.28,
+            631.17,
+            2
+          ],
+          "treble": [
+            379.01,
+            644.72,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            391.63,
+            631.27,
+            1
+          ],
+          "treble": [
+            392.1,
+            644.79,
+            1
+          ]
+        },
+        "f16": {
+          "bass": [
+            402.55,
+            631.35,
+            2
+          ],
+          "treble": [
+            403.1,
+            644.85,
+            2
           ]
         },
         "f17": {
           "bass": [
-            404.9,
-            356.57,
+            413.54,
+            631.44,
             1
           ],
           "treble": [
-            414.72,
-            377.31,
+            414.54,
+            644.92,
             1
           ]
         },
         "f18": {
           "bass": [
-            388.0,
-            362.18,
+            423.54,
+            631.52,
             1
           ],
           "treble": [
-            399.66,
-            387.25,
+            424.77,
+            644.98,
             1
           ]
         },
         "f19": {
           "bass": [
-            369.23,
-            368.4,
+            432.95,
+            631.59,
             1
           ],
           "treble": [
-            382.88,
-            398.31,
+            434.4,
+            645.03,
             1
           ]
         },
         "f20": {
           "bass": [
-            348.32,
-            375.33,
+            441.81,
+            631.66,
             1
           ],
           "treble": [
-            364.11,
-            410.69,
+            443.47,
+            645.08,
+            1
+          ]
+        },
+        "f21": {
+          "bass": [
+            450.15,
+            631.72,
+            1
+          ],
+          "treble": [
+            452.01,
+            645.13,
             1
           ]
         },
         "f22": {
           "bass": [
-            299.73,
-            391.44,
-            2
+            458.01,
+            631.78,
+            1
           ],
           "treble": [
-            320.27,
-            439.61,
-            2
+            460.04,
+            645.18,
+            1
           ]
         },
         "f23": {
           "bass": [
-            266.83,
-            402.34,
-            2
+            465.41,
+            631.84,
+            1
           ],
           "treble": [
-            289.87,
-            459.66,
-            2
+            467.62,
+            645.22,
+            1
           ]
         },
         "f24": {
           "bass": [
-            235.83,
-            412.62,
-            2
+            472.38,
+            631.9,
+            1
           ],
           "treble": [
-            262.03,
-            478.02,
-            2
+            474.75,
+            645.26,
+            1
           ]
         }
       },
       "fit": {
         "H": [
           [
-            -666.72833068,
-            2.10134736,
-            540.05469325
+            536.81548296,
+            -9.05087123,
+            99.21089338
           ],
           [
-            -308.70445754,
-            5.8282712,
-            303.44678641
+            56.96391263,
+            -2.76449315,
+            635.96777191
           ],
           [
-            -1.11805603,
-            -0.0027779,
+            0.08395647,
+            -0.02652598,
             1.0
           ]
         ],
-        "tau": 0.6,
-        "rmse_px": 2.011,
+        "tau": 0.0,
+        "rmse_px": 0.89,
         "index_shift": 0
       },
       "flags": [
-        "fit_rmse_high",
-        "few_wires",
-        "numbering_low_conf"
+        "index_unresolved"
       ],
-      "notes": "",
+      "notes": "AI numbering failed (no answer); relative numbering",
       "frame_file": "/workspace/guitar-overlay/data/scraped/frames/nbkiBItGzoU_08.jpg",
       "auto": {
         "numbering": {
-          "source": "ai",
-          "resolved": true,
-          "cue": "inlay_9_12_15",
-          "confidence": 0.45,
+          "source": "relative",
+          "resolved": false,
+          "cue": null,
+          "confidence": 0.0,
           "nut_visible": false,
-          "reasoning": "Anchor is the double-dot 12th-fret inlay near the middle of the strip, which lies between the wires at top x\u2248970 (fret 11) and x\u22481055 (fret 12). Counting right gives W12 as fret 14, and the next single dots fall in the W12\u2013W13 (15), W14\u2013W15 (17), W16\u2013W17 (19) and W18\u2013W19 (21) cells. Counting left, the single dots confirm frets 9, 7 and 5. The dashed, inferred W1 tick sits in the lower part of the board on the fret-6 wire, just past the fret-5 dot cell. Because 11 labels between W1 and W12 do not match only 8 physical wires, the intermediate detections are unreliable and confidence is limited."
+          "reasoning": ""
         },
         "n_candidates": 1019,
-        "grid_score": 20.91,
+        "grid_score": 12.88,
         "usability": {
           "usable": true,
           "guitar": "electric",

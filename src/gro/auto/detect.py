@@ -27,6 +27,7 @@ import cv2
 import numpy as np
 
 from gro import anchors as A
+from gro.auto.strings import detect_strings, inset_lines
 from gro.geometry import FitError, FretboardModel, fit_fretboard, fret_u
 from gro.snap import fit_line, intersect, robust_line, wire_extent
 
@@ -925,6 +926,8 @@ def _wire_stage(gray, det: Detection, P: DetectParams) -> None:
             break
         model, wires, info = model2, wires2, info2
     det.model, det.wires, det.edges = model, wires, info.get("edges")
+    det.debug["board_edges"], det.debug["strings"] = info.get("board_edges"), info.get("strings")
+    det.debug["strings_source"] = info.get("strings_source")
     det.anchors = info["anchors"]
     det.ok = True
 
@@ -969,6 +972,20 @@ def _wires_to_model(gray, rough: dict[int, np.ndarray], core: set[int], nrm_down
         model = fit_fretboard(anchors, tau=None)
     except FitError as e:
         return None, wires, {"reason": str(e)}
+    # D13: anchors on the outer strings. The board edges above give a first model; find the string comb on it.
+    keep2 = {n: v for n, v in vis2.items() if n not in info["rejected"]}
+    board = info["lines"]
+    sf = detect_strings(gray, model, sorted(keep2))
+    if sf is not None and sf.ok:
+        lines, src = sf.lines, "comb"
+    else:
+        lines, src = inset_lines(*board, [keep2[n][0] for n in sorted(keep2)]), "edge_inset"
+    try:
+        anchors, info2 = anchors_from_segments(gray, keep2, nrm_down, edge_lines=lines)
+        model = fit_fretboard(anchors, tau=None)
+    except (FitError, np.linalg.LinAlgError) as e:
+        return None, wires, {"reason": f"string refit: {e}"}
+    info.update(lines=info2["lines"], board_edges=board, strings=sf, strings_source=src)
     for n in info["rejected"]:
         wires.pop(n, None)
     bad = {a.fret for a in model.outliers}
@@ -1013,6 +1030,11 @@ def refit_subset(gray: np.ndarray, det: Detection, keep: set[int], params: Detec
         strip=det.strip,
         hyp=det.hyp,
         n_candidates=det.n_candidates,
-        debug=det.debug,
+        debug={
+            **det.debug,
+            "board_edges": info.get("board_edges"),
+            "strings": info.get("strings"),
+            "strings_source": info.get("strings_source"),
+        },
     )
     return out

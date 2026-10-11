@@ -28,6 +28,201 @@
       "kpts": {
         "f1": {
           "bass": [
+            1114.53,
+            159.68,
+            2
+          ],
+          "treble": [
+            1121.77,
+            222.96,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1049.01,
+            174.15,
+            2
+          ],
+          "treble": [
+            1056.31,
+            238.13,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            990.24,
+            187.13,
+            2
+          ],
+          "treble": [
+            997.35,
+            251.79,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            937.16,
+            198.86,
+            2
+          ],
+          "treble": [
+            943.75,
+            264.2,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            889.65,
+            209.35,
+            1
+          ],
+          "treble": [
+            896.04,
+            275.26,
+            1
+          ]
+        },
+        "f6": {
+          "bass": [
+            843.77,
+            219.48,
+            2
+          ],
+          "treble": [
+            850.49,
+            285.81,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            803.1,
+            228.47,
+            2
+          ],
+          "treble": [
+            809.95,
+            295.2,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            766.18,
+            236.62,
+            2
+          ],
+          "treble": [
+            772.62,
+            303.85,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            731.12,
+            244.37,
+            2
+          ],
+          "treble": [
+            738.23,
+            311.82,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            699.7,
+            251.31,
+            2
+          ],
+          "treble": [
+            706.71,
+            319.12,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            670.66,
+            257.72,
+            2
+          ],
+          "treble": [
+            677.44,
+            325.9,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            643.55,
+            263.71,
+            2
+          ],
+          "treble": [
+            649.34,
+            332.41,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            618.6,
+            269.22,
+            2
+          ],
+          "treble": [
+            624.53,
+            338.16,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            595.71,
+            274.28,
+            2
+          ],
+          "treble": [
+            600.43,
+            343.74,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -818.92512093,
+            4.03609322,
+            1190.91576542
+          ],
+          [
+            383.52939052,
+            61.53450502,
+            184.55868058
+          ],
+          [
+            0.41229423,
+            -0.00264124,
+            1.0
+          ]
+        ],
+        "tau": 0.0,
+        "rmse_px": 0.667,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "hand-read from zoomed crops, snapped to wire ridges (scripts/hand_anchors.py); nut hidden under fret wrap; overexposed; frets > 14 not annotated; D13: re-derived onto the outer strings (scripts/rederive_gt_strings.py: GT wire lines x string comb); old edge-convention anchors in board_edge_kpts",
+      "frame_file": "samples/frames/2026-08-30_15-06-39_10s.jpg",
+      "board_edge_kpts": {
+        "f1": {
+          "bass": [
             1115.73,
             170.15,
             2
@@ -194,32 +389,7 @@
             2
           ]
         }
-      },
-      "fit": {
-        "H": [
-          [
-            -818.92512093,
-            4.03609322,
-            1190.91576542
-          ],
-          [
-            383.52939052,
-            61.53450502,
-            184.55868058
-          ],
-          [
-            0.41229423,
-            -0.00264124,
-            1.0
-          ]
-        ],
-        "tau": 0.0,
-        "rmse_px": 0.667,
-        "index_shift": 0
-      },
-      "flags": [],
-      "notes": "hand-read from zoomed crops, snapped to wire ridges (scripts/hand_anchors.py); nut hidden under fret wrap; overexposed; frets > 14 not annotated",
-      "frame_file": "samples/frames/2026-08-30_15-06-39_10s.jpg"
+      }
     }
   ]
 }

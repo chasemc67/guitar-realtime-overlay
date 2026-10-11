@@ -25,171 +25,207 @@
       "anchorable": true,
       "anchor_cue": "inlay_9_12_15",
       "kpts": {
-        "f2": {
+        "f5": {
           "bass": [
-            928.89,
-            136.86,
+            822.49,
+            156.27,
             2
           ],
           "treble": [
-            941.3,
-            189.29,
+            834.42,
+            204.75,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            781.63,
+            163.63,
+            2
+          ],
+          "treble": [
+            793.2,
+            212.99,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            743.58,
+            170.49,
+            2
+          ],
+          "treble": [
+            753.83,
+            220.86,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            707.75,
+            176.95,
+            2
+          ],
+          "treble": [
+            717.48,
+            228.13,
             2
           ]
         },
         "f9": {
           "bass": [
-            675.02,
-            184.1,
+            675.03,
+            182.85,
             2
           ],
           "treble": [
-            684.12,
-            241.18,
+            682.96,
+            235.04,
             2
           ]
         },
         "f10": {
           "bass": [
-            643.63,
-            189.94,
+            642.97,
+            188.63,
             2
           ],
           "treble": [
-            652.1,
-            247.64,
+            651.62,
+            241.3,
             2
           ]
         },
         "f11": {
           "bass": [
-            614.17,
-            195.43,
+            614.08,
+            193.84,
             2
           ],
           "treble": [
-            622.31,
-            253.65,
+            621.48,
+            247.33,
             2
           ]
         },
         "f12": {
           "bass": [
-            586.76,
-            200.53,
+            586.23,
+            198.86,
             2
           ],
           "treble": [
-            593.57,
-            259.45,
+            592.91,
+            253.05,
             2
           ]
         },
         "f13": {
           "bass": [
-            560.62,
-            205.39,
+            560.34,
+            203.53,
             2
           ],
           "treble": [
-            567.16,
-            264.78,
+            566.31,
+            258.36,
             2
           ]
         },
         "f14": {
           "bass": [
-            537.15,
-            209.76,
+            536.98,
+            207.74,
             2
           ],
           "treble": [
-            542.3,
-            269.8,
+            541.74,
+            263.28,
             2
           ]
         },
         "f15": {
           "bass": [
-            512.56,
-            214.34,
+            512.34,
+            212.18,
             2
           ],
           "treble": [
-            518.82,
-            274.53,
+            518.14,
+            268.0,
             2
           ]
         },
         "f16": {
           "bass": [
-            491.75,
-            218.21,
+            491.57,
+            215.92,
             2
           ],
           "treble": [
-            496.36,
-            279.07,
+            495.86,
+            272.45,
             2
           ]
         },
         "f17": {
           "bass": [
-            470.77,
-            222.11,
+            470.58,
+            219.71,
             2
           ],
           "treble": [
-            475.55,
-            283.26,
+            475.03,
+            276.62,
             2
           ]
         },
         "f18": {
           "bass": [
-            452.17,
-            225.57,
+            452.01,
+            223.06,
             2
           ],
           "treble": [
-            456.15,
-            287.18,
+            455.71,
+            280.48,
             2
           ]
         },
         "f19": {
           "bass": [
-            434.68,
-            228.83,
+            434.57,
+            226.2,
             2
           ],
           "treble": [
-            437.31,
-            290.98,
+            437.03,
+            284.22,
             2
           ]
         },
         "f20": {
           "bass": [
-            417.23,
-            232.08,
+            417.08,
+            229.35,
             2
           ],
           "treble": [
-            420.47,
-            294.38,
+            420.11,
+            287.6,
             2
           ]
         },
         "f21": {
           "bass": [
-            401.65,
-            234.98,
+            401.59,
+            232.15,
             2
           ],
           "treble": [
-            402.96,
-            297.91,
+            402.82,
+            291.06,
             2
           ]
         }
@@ -197,23 +233,23 @@
       "fit": {
         "H": [
           [
-            -929.7699028,
-            -5.81185664,
-            1027.2790298
+            -928.36704581,
+            -7.30537658,
+            1078.35925736
           ],
           [
-            147.26203447,
-            47.58318946,
-            144.92154384
+            204.52686194,
+            40.18111111,
+            132.71823573
           ],
           [
-            -0.09580195,
-            -0.02000174,
+            0.08335329,
+            -0.02197178,
             1.0
           ]
         ],
-        "tau": 0.15,
-        "rmse_px": 1.264,
+        "tau": 0.49999999999999994,
+        "rmse_px": 0.353,
         "index_shift": 0
       },
       "flags": [],
@@ -224,9 +260,9 @@
           "source": "ai",
           "resolved": true,
           "cue": "inlay_9_12_15",
-          "confidence": 0.6,
+          "confidence": 0.9,
           "nut_visible": false,
-          "reasoning": "The anchor is the double-dot 12th-fret inlay, which sits between W10 and W11, so W11 is fret 12. Single dots between W3/W4, W5/W6 and W7/W8 give frets 5, 7 and 9, and dots between W13/W14, W15/W16, W17/W18 and W19/W20 give 15, 17, 19 and 21, which is consistent. Counting back from W11 = 12 by label index gives W2 = 3 and W1 = 2. However, W1 sits very close to W2 (about 33 px apart, versus about 108 px for the next gap), so the fret-2 wire may really be under the fingers and W1's position may be off. W22 lines up with the neck pickup edge, not a fret."
+          "reasoning": "The double-dot 12th-fret inlay sits between W7 and W8, so W8 is fret 12. Counting back, W7=11 down to W1=5. The single dots fit this numbering: fret 5 is just left of W1, then 7 (W2\u2013W3), 9 (W4\u2013W5), 15 (W10\u2013W11), 17 (W12\u2013W13), 19 (W14\u2013W15) and 21 (W16\u2013W17). The fingerboard appears to end just after W17 (fret 21), which conflicts with the stated 24 frets, so W19 on the pickguard/pickup is not a fret wire."
         },
         "n_candidates": 1145,
         "grid_score": 12.43,

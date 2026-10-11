@@ -158,6 +158,11 @@ class FretboardModel:
         p = self.project_fy(np.array([n, n + 1]), np.array([y, y]))
         return float(np.linalg.norm(p[1] - p[0]))
 
+    def fret_widths_px(self, n: np.ndarray, y: np.ndarray) -> np.ndarray:
+        """Vectorized `fret_width_px`."""
+        n, y = np.broadcast_arrays(np.asarray(n, float), np.asarray(y, float))
+        return np.linalg.norm(self.project_fy(n + 1, y) - self.project_fy(n, y), axis=-1)
+
     def visible_frets(self, width: int, height: int, pad: float = 0.0) -> list[int]:
         """Fret wires 0..n_frets whose midpoint projects inside the image (with orientation sanity)."""
         out = []
@@ -239,13 +244,15 @@ def fit_fretboard(
 
     src, dst, w = _correspondences(anchors, tau, shift)
     n = len(anchors)
+    a_fret = np.array([a.fret + shift for a in anchors], float)
+    a_y = np.array([a.y_canon for a in anchors])
     rng = np.random.default_rng(seed)
 
     def score(H):
         m = FretboardModel(H, tau, n_frets)
         try:
             r = np.linalg.norm(apply_h(H, src) - dst, axis=1)
-            fw = np.array([m.fret_width_px(a.fret + shift, a.y_canon) for a in anchors])
+            fw = m.fret_widths_px(a_fret, a_y)
         except FloatingPointError:
             return None
         if not np.all(np.isfinite(r)) or not np.all(np.isfinite(fw)):
@@ -285,7 +292,7 @@ def fit_fretboard(
         sel = np.flatnonzero(best_inl)
         H = dlt(src[sel], dst[sel], w[sel])
         m0 = FretboardModel(H, tau, n_frets)
-        huber = max(min_inlier_px, 0.1 * np.median([m0.fret_width_px(anchors[i].fret + shift) for i in sel]))
+        huber = max(min_inlier_px, 0.1 * np.median(m0.fret_widths_px(a_fret[sel], 0.5)))
         H = _refine(H, src[sel], dst[sel], w[sel], huber)
         sc = score(H)
         if sc is None:

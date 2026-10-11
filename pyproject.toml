@@ -9,6 +9,11 @@ dependencies = [
     "opencv-python>=4.9",
 ]
 
+[project.optional-dependencies]
+ai = [
+    "openai>=3.29.0",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=8",

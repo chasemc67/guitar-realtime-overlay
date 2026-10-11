@@ -1,0 +1,292 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "QYoiaH5lId8_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/QYoiaH5lId8_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f5": {
+          "bass": [
+            1260.69,
+            303.67,
+            2
+          ],
+          "treble": [
+            1262.44,
+            332.56,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            1166.56,
+            308.18,
+            2
+          ],
+          "treble": [
+            1167.18,
+            337.44,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            1074.9,
+            312.57,
+            2
+          ],
+          "treble": [
+            1075.01,
+            342.17,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            985.69,
+            316.85,
+            2
+          ],
+          "treble": [
+            986.43,
+            346.71,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            898.46,
+            321.03,
+            2
+          ],
+          "treble": [
+            900.37,
+            351.12,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            814.88,
+            325.04,
+            2
+          ],
+          "treble": [
+            815.73,
+            355.46,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            733.7,
+            328.93,
+            2
+          ],
+          "treble": [
+            734.61,
+            359.62,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            656.05,
+            332.65,
+            2
+          ],
+          "treble": [
+            655.95,
+            363.66,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            580.71,
+            336.26,
+            2
+          ],
+          "treble": [
+            581.2,
+            367.49,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            507.71,
+            339.76,
+            2
+          ],
+          "treble": [
+            509.29,
+            371.18,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            438.07,
+            343.1,
+            2
+          ],
+          "treble": [
+            440.21,
+            374.72,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            371.73,
+            346.28,
+            2
+          ],
+          "treble": [
+            373.91,
+            378.12,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            308.06,
+            349.33,
+            2
+          ],
+          "treble": [
+            310.78,
+            381.35,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            248.68,
+            352.18,
+            2
+          ],
+          "treble": [
+            249.93,
+            384.47,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            190.85,
+            354.95,
+            2
+          ],
+          "treble": [
+            191.14,
+            387.49,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            135.36,
+            357.61,
+            2
+          ],
+          "treble": [
+            137.18,
+            390.25,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            83.04,
+            360.12,
+            2
+          ],
+          "treble": [
+            82.93,
+            393.03,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            32.26,
+            362.55,
+            2
+          ],
+          "treble": [
+            35.12,
+            395.49,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -2450.72671917,
+            1.30096313,
+            1788.33968515
+          ],
+          [
+            13.75859883,
+            26.67977108,
+            291.98813326
+          ],
+          [
+            -0.28318615,
+            0.0004622,
+            1.0
+          ]
+        ],
+        "tau": 0.0,
+        "rmse_px": 1.117,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/QYoiaH5lId8_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_3_5_7",
+          "confidence": 0.85,
+          "nut_visible": false,
+          "reasoning": "Block inlays sit in the cells W2-W3, W4-W5, W7-W8, W10-W11, W12-W13, W14-W15 and W16-W17. The gaps between them (2,3,3,2,2,2 frets) match the standard pattern 7, 9, 12, 15, 17, 19, 21. So the W2-W3 cell is fret 7, which makes W3 fret 7, W2 fret 6 and W1 fret 5. A partial block at the frame edge just past W1 is consistent with the fret-5 marker."
+        },
+        "n_candidates": 966,
+        "grid_score": 17.97,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 14,
+          "reason": "Close-up of a Les Paul-style electric guitar with a dark fingerboard, block inlays and many fret wires clearly visible across the frame, with fingers covering only a small part."
+        }
+      }
+    }
+  ]
+}

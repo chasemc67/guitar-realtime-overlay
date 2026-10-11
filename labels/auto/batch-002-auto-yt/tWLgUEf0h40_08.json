@@ -1,0 +1,268 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "tWLgUEf0h40_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/tWLgUEf0h40_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f3": {
+          "bass": [
+            671.63,
+            517.8,
+            2
+          ],
+          "treble": [
+            682.48,
+            554.5,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            622.22,
+            527.82,
+            2
+          ],
+          "treble": [
+            628.94,
+            566.84,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            484.8,
+            555.68,
+            2
+          ],
+          "treble": [
+            489.42,
+            598.98,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            449.77,
+            562.78,
+            2
+          ],
+          "treble": [
+            452.15,
+            607.57,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            411.88,
+            570.46,
+            2
+          ],
+          "treble": [
+            412.4,
+            616.73,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            376.71,
+            577.59,
+            2
+          ],
+          "treble": [
+            374.93,
+            625.36,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            341.93,
+            584.64,
+            2
+          ],
+          "treble": [
+            339.54,
+            633.51,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            307.96,
+            591.53,
+            2
+          ],
+          "treble": [
+            307.95,
+            640.79,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            277.4,
+            597.72,
+            2
+          ],
+          "treble": [
+            276.85,
+            647.96,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            248.13,
+            603.66,
+            2
+          ],
+          "treble": [
+            247.94,
+            654.62,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            222.72,
+            608.81,
+            2
+          ],
+          "treble": [
+            219.05,
+            661.27,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            197.54,
+            613.91,
+            2
+          ],
+          "treble": [
+            192.55,
+            667.38,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            174.33,
+            618.62,
+            2
+          ],
+          "treble": [
+            167.58,
+            673.13,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            151.49,
+            623.25,
+            2
+          ],
+          "treble": [
+            144.83,
+            678.38,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            129.4,
+            627.73,
+            2
+          ],
+          "treble": [
+            123.76,
+            683.23,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            109.53,
+            631.75,
+            2
+          ],
+          "treble": [
+            102.69,
+            688.09,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1083.60018948,
+            -7.95457042,
+            846.2031375
+          ],
+          [
+            217.75184706,
+            23.15233099,
+            499.26924795
+          ],
+          [
+            -0.02465076,
+            -0.02340492,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 1.326,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/tWLgUEf0h40_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.7,
+          "nut_visible": false,
+          "reasoning": "A black fret-wrap/dampener band sits on the neck right where the fingerboard meets the headstock, hiding the nut. The bright wire just right of the band (x\u2248130 in the strip) is fret 1, and the next unlabelled wire (x\u2248255) is fret 2. Their spacing (\u2248125, 115, 108 px) follows normal fret geometry, so W1 is fret 3. Inlays are too blurred to confirm this."
+        },
+        "n_candidates": 474,
+        "grid_score": 19.95,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 15,
+          "reason": "A Stratocaster-style electric guitar is shown close up with the whole neck, from body to headstock, in view and with many fret wires visible, though the angle is oblique and the fretting hand covers a few frets."
+        }
+      }
+    }
+  ]
+}

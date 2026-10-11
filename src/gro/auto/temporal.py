@@ -34,6 +34,7 @@ class TrackConfig:
     jump_px: float = 1.5
     min_wire_frac: float = 0.6
     snap_search: float = 3.0
+    ai_min_interval_s: float = 5.0  # with a session lock, re-ask the AI for numbering at most this often
 
 
 def board_mask(model: FretboardModel, shape, f_lo: int, f_hi: int, shrink: float = 0.06) -> np.ndarray:
@@ -90,26 +91,33 @@ def resnap(
     return m, anchors, len(segs)
 
 
-def _align_shift(det: Detection, model: FretboardModel) -> tuple[int | None, float]:
+def _align_shift(det: Detection, model: FretboardModel, min_match: int = 5) -> tuple[int | None, float]:
     """Index shift that maps the detection's relative wires onto the propagated (absolute) model, and the fraction
-    of wires that agree (midpoint within 25% of the local fret gap)."""
-    best = (None, 0.0)
+    of wires that agree (segment midpoint within 25% of the local fret gap of the propagated wire line). Ambiguous
+    alignments (fewer than `min_match` matches, or a runner-up shift nearly as good) return (None, 0)."""
     mids = {n: 0.5 * (w.seg[0] + w.seg[1]) for n, w in det.wires.items() if w.vis == 2}
     if not mids:
-        return best
+        return None, 0.0
+    scores = []
     for s in range(-30, 31):
-        ok = 0
+        ok, res = 0, 0.0
         for n, p in mids.items():
             f = n + s
             if not 0 <= f <= model.n_frets:
                 continue
-            q = model.project_fy(f, 0.5)
-            if np.linalg.norm(p - q) < 0.25 * model.fret_width_px(max(f - 1, 0)):
+            a, b = model.fret_line(f)
+            d = (b - a) / np.linalg.norm(b - a)
+            # Across-wire distance (detected segments needn't be centred on the board along the wire).
+            r = abs(d[0] * (p - a)[1] - d[1] * (p - a)[0]) / model.fret_width_px(max(f - 1, 0))
+            if r < 0.25:
                 ok += 1
-        frac = ok / len(mids)
-        if frac > best[1]:
-            best = (s, frac)
-    return best
+                res += r
+        scores.append((ok, -res, s))
+    scores.sort(reverse=True)
+    (ok, _, s), (ok2, _, _) = scores[0], scores[1]
+    if ok < min_match or ok2 > 0.7 * ok:
+        return None, 0.0
+    return s, ok / len(mids)
 
 
 def annotate_clip(
@@ -136,6 +144,7 @@ def annotate_clip(
     prev = None
     rms_hist: deque = deque(maxlen=15)
     bad_run = 0
+    last_ai_t = -1e9
     k = 0
     idx = i0
     while idx <= int(round(t1 * fps)):
@@ -150,6 +159,7 @@ def annotate_clip(
         t = idx / fps
         extra = {"frame_index": idx}
         is_key = model is None or k % key_every == 0 or bad_run >= 3
+        key_ok = unaligned = False
         prop = None
         if model is not None and prev is not None:
             G = klt_homography(prev, gray, board_mask(model, gray.shape, min(frets), max(frets)))
@@ -161,17 +171,26 @@ def annotate_clip(
                 if lock is None or not lock.resolved:
                     return None
                 if prop is None:
+                    log("    lock: no propagated model")
                     return None
                 s, frac = _align_shift(det, prop)
+                log(f"    lock align: shift {s} frac {frac:.2f}")
                 if s is None or frac < 0.6:
                     return None
                 return Numbering(s, True, "session_lock", lock.cue, lock.confidence, lock.nut_visible)
 
             # Usability is a clip-level question: ask on the first keyframe only.
             kcfg = cfg if not labels else AutoConfig(**{**cfg.__dict__, "ai_usability": False})
+            if lock is not None and t - last_ai_t < T.ai_min_interval_s:
+                kcfg = AutoConfig(**{**kcfg.__dict__, "use_ai": False})
             res = annotate_frame(img, ai, kcfg, t=t, extra=extra, numbering_hint=hint)
             lab = res.label
-            if res.model is not None and lab.anchors:
+            if res.numbering is not None and res.numbering.source == "ai":
+                last_ai_t = t
+            key_ok = res.model is not None and bool(lab.anchors)
+            unaligned = key_ok and lock is not None and res.numbering is not None and not res.numbering.resolved
+            key_ok = key_ok and not unaligned
+            if key_ok:
                 if prop is not None and lock is not None and res.numbering and res.numbering.source != "session_lock":
                     s, frac = _align_shift(res.det, prop) if res.det else (None, 0)
                     if s is not None and frac >= 0.6 and s != res.numbering.shift:
@@ -182,12 +201,11 @@ def annotate_clip(
                 frets = sorted({a.fret for a in lab.anchors if a.vis == 2})
                 rms_hist.append(model.rmse_px)
                 bad_run = 0
-            else:
-                bad_run += 1
-            lab.extra["keyframe"] = True
-        else:
+                lab.extra["keyframe"] = True
+        if not is_key or not key_ok:
+            # Propagated frame (or a keyframe whose detection failed: keep tracking instead).
             m2, anchors, n_ok = (None, [], 0) if prop is None else resnap(gray, prop, frets, T)
-            flags = []
+            flags = [] if not is_key else ["keyframe_unaligned" if unaligned else "keyframe_detect_failed"]
             if prop is None:
                 flags.append("klt_lost")
             if m2 is None:

@@ -98,7 +98,7 @@
    "pred_anchorable": true,
    "pred_cue": "nut",
    "flags": [],
-   "seconds": 5.05
+   "seconds": 5.11
   },
   {
    "item": "2026-09-03_20-38-02_10s#0",
@@ -144,7 +144,7 @@
    "pred_anchorable": true,
    "pred_cue": "nut",
    "flags": [],
-   "seconds": 4.36
+   "seconds": 4.2
   },
   {
    "item": "2026-09-06_09-00-01_10s#0",
@@ -190,7 +190,7 @@
    "pred_anchorable": true,
    "pred_cue": "inlay_9_12_15",
    "flags": [],
-   "seconds": 5.2
+   "seconds": 4.98
   },
   {
    "item": "2026-09-03_20-38-02_60s#0",
@@ -236,7 +236,7 @@
    "pred_anchorable": true,
    "pred_cue": "nut",
    "flags": [],
-   "seconds": 4.86
+   "seconds": 4.96
   },
   {
    "item": "2026-09-06_09-00-01_60s#0",
@@ -282,7 +282,7 @@
    "pred_anchorable": true,
    "pred_cue": "inlay_9_12_15",
    "flags": [],
-   "seconds": 3.94
+   "seconds": 4.13
   }
  ]
 }

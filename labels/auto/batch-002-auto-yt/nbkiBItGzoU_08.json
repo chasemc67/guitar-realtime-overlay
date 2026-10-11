@@ -1,0 +1,176 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "nbkiBItGzoU_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/nbkiBItGzoU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f6": {
+          "bass": [
+            516.29,
+            319.65,
+            1
+          ],
+          "treble": [
+            512.64,
+            312.72,
+            1
+          ]
+        },
+        "f17": {
+          "bass": [
+            404.9,
+            356.57,
+            1
+          ],
+          "treble": [
+            414.72,
+            377.31,
+            1
+          ]
+        },
+        "f18": {
+          "bass": [
+            388.0,
+            362.18,
+            1
+          ],
+          "treble": [
+            399.66,
+            387.25,
+            1
+          ]
+        },
+        "f19": {
+          "bass": [
+            369.23,
+            368.4,
+            1
+          ],
+          "treble": [
+            382.88,
+            398.31,
+            1
+          ]
+        },
+        "f20": {
+          "bass": [
+            348.32,
+            375.33,
+            1
+          ],
+          "treble": [
+            364.11,
+            410.69,
+            1
+          ]
+        },
+        "f22": {
+          "bass": [
+            299.73,
+            391.44,
+            2
+          ],
+          "treble": [
+            320.27,
+            439.61,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            266.83,
+            402.34,
+            2
+          ],
+          "treble": [
+            289.87,
+            459.66,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            235.83,
+            412.62,
+            2
+          ],
+          "treble": [
+            262.03,
+            478.02,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -666.72833068,
+            2.10134736,
+            540.05469325
+          ],
+          [
+            -308.70445754,
+            5.8282712,
+            303.44678641
+          ],
+          [
+            -1.11805603,
+            -0.0027779,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 2.011,
+        "index_shift": 0
+      },
+      "flags": [
+        "fit_rmse_high",
+        "few_wires",
+        "numbering_low_conf"
+      ],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/nbkiBItGzoU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.45,
+          "nut_visible": false,
+          "reasoning": "Anchor is the double-dot 12th-fret inlay near the middle of the strip, which lies between the wires at top x\u2248970 (fret 11) and x\u22481055 (fret 12). Counting right gives W12 as fret 14, and the next single dots fall in the W12\u2013W13 (15), W14\u2013W15 (17), W16\u2013W17 (19) and W18\u2013W19 (21) cells. Counting left, the single dots confirm frets 9, 7 and 5. The dashed, inferred W1 tick sits in the lower part of the board on the fret-6 wire, just past the fret-5 dot cell. Because 11 labels between W1 and W12 do not match only 8 physical wires, the intermediate detections are unreliable and confidence is limited."
+        },
+        "n_candidates": 1019,
+        "grid_score": 20.91,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 15,
+          "reason": "A sunburst electric guitar with a maple fingerboard fills the frame, and well over 6 fret wires are clearly visible and in focus, with only some fingers covering part of the neck."
+        }
+      }
+    }
+  ]
+}

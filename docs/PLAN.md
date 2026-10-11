@@ -441,6 +441,34 @@ verification.
 - Occlusion: random hand-cutout pastes and cutout boxes.
 - Crop: crop-jitter for Stage 2, so it tolerates tracker drift.
 
+### 3.5 Auto-annotation pipeline (status 2026-10-11)
+
+`src/gro/auto/` + `scripts/auto_annotate.py` produce `fretboard-kpts/v1` drafts (`source: pseudo` / `interp`,
+`annotator: auto:gro-cv-v1`) without a trained model; every batch still goes through D8 review.
+
+- **Classical CV, deterministic.** LSD segments that are bright thin ridges -> RANSAC neck axis over pairs of
+  parallel, similar-length segments -> a strip sampled along the wires' vanishing point (wires exactly vertical) ->
+  column ridge profile -> 1D projective fit of the 12th-root-of-2 positions (RANSAC over 3 peaks and small index
+  gaps). Learnings: (1) a reversed geometric sequence is a projective image of itself (x -> 1/x), so the fit can't
+  tell the nut direction; the prior "image spacing shrinks with the index" (physical ratio fret 1 : fret 24 = 3.8x)
+  decides it. (2) Board-end edges and pickup edges pass every wire test; they're removed once numbering is known
+  (index > `guitar.frets`) or when the AI names them.
+- **AI only for targeted calls** (Vercel AI Gateway, `anthropic/claude-opus-5.5` for numbering,
+  `claude-sonnet-5.5` for usability; cached in `.cache/ai/`): the fret number of the first labelled wire on a
+  rectified strip (nut / inlays / last fret; ~$0.02-0.04 per frame), frame usability (~$0.003), and a rough
+  fingerboard box when detection fails. Without a key the pipeline runs fully, with relative numbering
+  (`index_unresolved`, never anchorable).
+- **Temporal.** Keyframes every 1 s; KLT propagation + per-wire re-snap in between; the numbering is a session lock
+  (later keyframes align to the propagated grid, no AI call); flags `fit_jump`, `wires_lost`, `keyframe_unaligned`,
+  `keyframe_detect_failed`, `klt_lost`.
+- **Eval** (`scripts/eval_auto.py`, 3 M1 GT frames + 2 extra hand-read frames in `samples/anchors_extra/`):
+  numbering 5/5 exact with AI; wire position (across-wire) 0.65 px; treble anchors 1.3 px; bass anchors 5.6 px.
+- **Open: where is the bass edge?** In Chase's footage the bass edge has no contrast (dark board on a dark shirt)
+  and the side of the neck is often visible, so the wires continue past the face as fret tangs. The hand tool's
+  `wire_extent` stops at the dip where the low-E string crosses each wire, so GT bass edges sit at roughly the
+  low-E string. The auto edge sits at the wire end or the outermost long line. Neither is clearly the face edge
+  (`review/eval-auto-worst-anchors/`). See §10 Q16.
+
 ## 4. Data collection
 
 **Sources.** YouTube and TikTok guitar lessons and playthroughs with a close-up neck view: "scale lesson close up",
@@ -694,3 +722,8 @@ Everything is drawn in plane coordinates and projected through `H`, so perspecti
     "Ibanez" logo and background text read correctly, so the camera isn't mirrored: these are left-handed guitars
     played left-handed. Per D1 these clips get `mirrored: true`, and the M1 demo exercises that path. Please confirm
     (and confirm the live app will run with the toggle on by default for you).
+16. **Bass-edge convention for labels.** Where should the bass (low-E) board edge go when the board edge itself
+    isn't visible: (a) at the low-E string line, which is what the current GT does, (b) where the fret wire ends on
+    the face, or (c) wherever the outermost string/edge highlight runs? The auto pipeline disagrees with GT by ~5 px
+    along the wire only on this side (treble 1.3 px, wire position 0.65 px). One convention for both GT and auto would
+    make the numbers comparable (§3.5, `review/eval-auto-worst-anchors/`).

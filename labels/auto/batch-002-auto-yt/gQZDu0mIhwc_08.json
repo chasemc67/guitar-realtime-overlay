@@ -1,0 +1,354 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "gQZDu0mIhwc_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/gQZDu0mIhwc_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            925.36,
+            556.89,
+            2
+          ],
+          "treble": [
+            928.38,
+            588.22,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            890.79,
+            558.22,
+            2
+          ],
+          "treble": [
+            893.6,
+            589.73,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            856.12,
+            559.46,
+            2
+          ],
+          "treble": [
+            857.66,
+            591.38,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            823.02,
+            560.66,
+            2
+          ],
+          "treble": [
+            825.72,
+            592.85,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            792.68,
+            561.75,
+            2
+          ],
+          "treble": [
+            795.48,
+            594.23,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            765.12,
+            562.74,
+            2
+          ],
+          "treble": [
+            767.23,
+            595.53,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            742.39,
+            563.56,
+            1
+          ],
+          "treble": [
+            745.24,
+            596.54,
+            1
+          ]
+        },
+        "f7": {
+          "bass": [
+            721.07,
+            564.33,
+            2
+          ],
+          "treble": [
+            723.29,
+            597.55,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            697.73,
+            565.17,
+            2
+          ],
+          "treble": [
+            701.35,
+            598.56,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            676.23,
+            565.94,
+            2
+          ],
+          "treble": [
+            681.33,
+            599.48,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            658.43,
+            566.59,
+            2
+          ],
+          "treble": [
+            660.34,
+            600.44,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            638.93,
+            567.29,
+            2
+          ],
+          "treble": [
+            642.83,
+            601.24,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            623.11,
+            567.86,
+            2
+          ],
+          "treble": [
+            625.59,
+            602.03,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            606.83,
+            568.44,
+            2
+          ],
+          "treble": [
+            609.35,
+            602.78,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            592.03,
+            568.98,
+            2
+          ],
+          "treble": [
+            594.59,
+            603.46,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            579.32,
+            569.44,
+            2
+          ],
+          "treble": [
+            580.28,
+            604.11,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            565.76,
+            569.92,
+            2
+          ],
+          "treble": [
+            567.28,
+            604.71,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            554.72,
+            570.32,
+            2
+          ],
+          "treble": [
+            555.1,
+            605.27,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            542.0,
+            570.78,
+            2
+          ],
+          "treble": [
+            544.12,
+            605.77,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            531.73,
+            571.15,
+            2
+          ],
+          "treble": [
+            533.86,
+            606.25,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            521.82,
+            571.51,
+            1
+          ],
+          "treble": [
+            523.92,
+            606.7,
+            1
+          ]
+        },
+        "f21": {
+          "bass": [
+            510.97,
+            571.9,
+            2
+          ],
+          "treble": [
+            514.67,
+            607.13,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            504.92,
+            572.12,
+            2
+          ],
+          "treble": [
+            505.83,
+            607.53,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -507.61324057,
+            0.36254464,
+            926.86568093
+          ],
+          [
+            116.73443588,
+            29.6869316,
+            572.52911
+          ],
+          [
+            0.15715659,
+            -0.00286772,
+            1.0
+          ]
+        ],
+        "tau": 0.35,
+        "rmse_px": 1.25,
+        "index_shift": 0
+      },
+      "flags": [
+        "ai_unusable"
+      ],
+      "notes": "AI usability: The red Stratocaster-style electric guitar is visible, but it is a medium shot of a person sitting in a room. The neck is small and thin in the frame, so the fret wires are too tiny to label reliably, and it is not a close-up.",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/gQZDu0mIhwc_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.95,
+          "nut_visible": true,
+          "reasoning": "The nut bar is clearly visible as the light bar just left of W1, with no wrap present, so W1 is fret 1. The inlays confirm this: a dot sits between W2 and W3 (fret 3), between W4 and W5 (fret 5), and the double dot sits between W11 and W12 (fret 12)."
+        },
+        "n_candidates": 537,
+        "grid_score": 23.9,
+        "usability": {
+          "usable": false,
+          "guitar": "electric",
+          "close_up": false,
+          "neck_clear": true,
+          "visible_frets_estimate": 17,
+          "reason": "The red Stratocaster-style electric guitar is visible, but it is a medium shot of a person sitting in a room. The neck is small and thin in the frame, so the fret wires are too tiny to label reliably, and it is not a close-up."
+        }
+      }
+    }
+  ]
+}

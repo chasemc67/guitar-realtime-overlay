@@ -1,0 +1,139 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "hAuPpjcpZSU_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/hAuPpjcpZSU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f20": {
+          "bass": [
+            453.18,
+            405.61,
+            2
+          ],
+          "treble": [
+            455.42,
+            425.27,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            440.8,
+            403.41,
+            1
+          ],
+          "treble": [
+            442.76,
+            423.91,
+            1
+          ]
+        },
+        "f22": {
+          "bass": [
+            427.75,
+            401.1,
+            2
+          ],
+          "treble": [
+            430.85,
+            422.63,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            416.76,
+            399.15,
+            2
+          ],
+          "treble": [
+            417.16,
+            421.15,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            402.07,
+            396.54,
+            2
+          ],
+          "treble": [
+            406.03,
+            419.95,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -667.27071539,
+            1.44093099,
+            649.91251742
+          ],
+          [
+            -389.78856963,
+            6.67082587,
+            443.36507537
+          ],
+          [
+            -0.84017077,
+            0.00182803,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 0.662,
+        "index_shift": 0
+      },
+      "flags": [
+        "few_wires",
+        "numbering_low_conf"
+      ],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/hAuPpjcpZSU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "last_fret",
+          "confidence": 0.3,
+          "nut_visible": false,
+          "reasoning": "No nut or clear inlay is visible in the zoomed strip, so the anchor is the last fret. The strip shows seven real fret wires, the last at x\u2248775, and the fingerboard ends at x\u2248850. With 24 frets, these wires would be frets 18\u201324. The labelled ticks do not line up well with the real wires. W1 (x\u2248332) falls nearest the real wire at x\u2248365, which is fret 20. A rough scale estimate from the full frame suggests about fret 19, so this is uncertain."
+        },
+        "n_candidates": 706,
+        "grid_score": 16.43,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 17,
+          "reason": "A black electric guitar with a pearloid pickguard and a maple fingerboard is shown close up, with the neck clearly in focus and most fret wires visible; the fretting hand covers only a few of them."
+        }
+      }
+    }
+  ]
+}

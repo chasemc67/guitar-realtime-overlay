@@ -1,0 +1,319 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "s7DVJX4PK3U_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/s7DVJX4PK3U_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            1001.67,
+            436.72,
+            2
+          ],
+          "treble": [
+            1010.77,
+            485.38,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            959.35,
+            441.81,
+            2
+          ],
+          "treble": [
+            957.93,
+            492.7,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            868.78,
+            453.16,
+            2
+          ],
+          "treble": [
+            869.12,
+            504.69,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            823.84,
+            458.8,
+            2
+          ],
+          "treble": [
+            839.02,
+            508.76,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            792.27,
+            462.76,
+            2
+          ],
+          "treble": [
+            800.89,
+            513.91,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            759.4,
+            466.88,
+            2
+          ],
+          "treble": [
+            768.32,
+            518.31,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            730.14,
+            470.55,
+            2
+          ],
+          "treble": [
+            738.93,
+            522.28,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            702.66,
+            473.99,
+            2
+          ],
+          "treble": [
+            711.32,
+            526.0,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            677.25,
+            477.18,
+            2
+          ],
+          "treble": [
+            685.79,
+            529.45,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            653.65,
+            480.14,
+            2
+          ],
+          "treble": [
+            662.51,
+            532.6,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            633.12,
+            482.71,
+            2
+          ],
+          "treble": [
+            639.79,
+            535.66,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            612.85,
+            485.25,
+            2
+          ],
+          "treble": [
+            619.44,
+            538.41,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            593.37,
+            487.69,
+            2
+          ],
+          "treble": [
+            601.11,
+            540.89,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            575.91,
+            489.88,
+            2
+          ],
+          "treble": [
+            583.16,
+            543.31,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            560.19,
+            491.85,
+            2
+          ],
+          "treble": [
+            566.56,
+            545.55,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            544.42,
+            493.83,
+            2
+          ],
+          "treble": [
+            551.53,
+            547.58,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            529.69,
+            495.68,
+            2
+          ],
+          "treble": [
+            537.52,
+            549.47,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            515.95,
+            497.4,
+            2
+          ],
+          "treble": [
+            524.11,
+            551.29,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            504.66,
+            498.82,
+            2
+          ],
+          "treble": [
+            511.98,
+            552.92,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            492.11,
+            500.39,
+            2
+          ],
+          "treble": [
+            499.76,
+            554.57,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -592.60879758,
+            8.79506267,
+            1006.33421815
+          ],
+          [
+            258.12577512,
+            50.42068967,
+            461.07969468
+          ],
+          [
+            0.30567464,
+            0.00289485,
+            1.0
+          ]
+        ],
+        "tau": 0.49999999999999994,
+        "rmse_px": 1.684,
+        "index_shift": 0
+      },
+      "flags": [
+        "ai_unusable",
+        "fit_rmse_high"
+      ],
+      "notes": "AI usability: The instrument is a Yamaha acoustic guitar shown at medium distance, so it fails the electric-guitar and close-up requirements even though the fretboard is fairly visible.",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/s7DVJX4PK3U_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.85,
+          "nut_visible": true,
+          "reasoning": "The light nut bar where the fingerboard meets the Yamaha headstock is clearly visible, and the W1 ticks sit directly on it, so W1 is the nut itself (fret 0). No fret wrap is present. W2 is the first fret wire after the nut (fret 1), and the following wires continue in order from there."
+        },
+        "n_candidates": 701,
+        "grid_score": 16.49,
+        "usability": {
+          "usable": false,
+          "guitar": "acoustic",
+          "close_up": false,
+          "neck_clear": true,
+          "visible_frets_estimate": 10,
+          "reason": "The instrument is a Yamaha acoustic guitar shown at medium distance, so it fails the electric-guitar and close-up requirements even though the fretboard is fairly visible."
+        }
+      }
+    }
+  ]
+}

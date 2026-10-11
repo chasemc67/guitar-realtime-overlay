@@ -1,0 +1,244 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "SekrUcb03Eg_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/SekrUcb03Eg_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f2": {
+          "bass": [
+            928.89,
+            136.86,
+            2
+          ],
+          "treble": [
+            941.3,
+            189.29,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            675.02,
+            184.1,
+            2
+          ],
+          "treble": [
+            684.12,
+            241.18,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            643.63,
+            189.94,
+            2
+          ],
+          "treble": [
+            652.1,
+            247.64,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            614.17,
+            195.43,
+            2
+          ],
+          "treble": [
+            622.31,
+            253.65,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            586.76,
+            200.53,
+            2
+          ],
+          "treble": [
+            593.57,
+            259.45,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            560.62,
+            205.39,
+            2
+          ],
+          "treble": [
+            567.16,
+            264.78,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            537.15,
+            209.76,
+            2
+          ],
+          "treble": [
+            542.3,
+            269.8,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            512.56,
+            214.34,
+            2
+          ],
+          "treble": [
+            518.82,
+            274.53,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            491.75,
+            218.21,
+            2
+          ],
+          "treble": [
+            496.36,
+            279.07,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            470.77,
+            222.11,
+            2
+          ],
+          "treble": [
+            475.55,
+            283.26,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            452.17,
+            225.57,
+            2
+          ],
+          "treble": [
+            456.15,
+            287.18,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            434.68,
+            228.83,
+            2
+          ],
+          "treble": [
+            437.31,
+            290.98,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            417.23,
+            232.08,
+            2
+          ],
+          "treble": [
+            420.47,
+            294.38,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            401.65,
+            234.98,
+            2
+          ],
+          "treble": [
+            402.96,
+            297.91,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -929.7699028,
+            -5.81185664,
+            1027.2790298
+          ],
+          [
+            147.26203447,
+            47.58318946,
+            144.92154384
+          ],
+          [
+            -0.09580195,
+            -0.02000174,
+            1.0
+          ]
+        ],
+        "tau": 0.15,
+        "rmse_px": 1.264,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/SekrUcb03Eg_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.6,
+          "nut_visible": false,
+          "reasoning": "The anchor is the double-dot 12th-fret inlay, which sits between W10 and W11, so W11 is fret 12. Single dots between W3/W4, W5/W6 and W7/W8 give frets 5, 7 and 9, and dots between W13/W14, W15/W16, W17/W18 and W19/W20 give 15, 17, 19 and 21, which is consistent. Counting back from W11 = 12 by label index gives W2 = 3 and W1 = 2. However, W1 sits very close to W2 (about 33 px apart, versus about 108 px for the next gap), so the fret-2 wire may really be under the fingers and W1's position may be off. W22 lines up with the neck pickup edge, not a fret."
+        },
+        "n_candidates": 1145,
+        "grid_score": 12.43,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 14,
+          "reason": "A burgundy Stratocaster-style electric guitar fills the frame, and its rosewood fingerboard runs across the image with many fret wires visible and in focus, though the fretting hand covers a few of them."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "hqBFkJAI3dA_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/hqBFkJAI3dA_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            1153.45,
+            411.21,
+            2
+          ],
+          "treble": [
+            1169.44,
+            461.05,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            1116.11,
+            425.65,
+            2
+          ],
+          "treble": [
+            1130.46,
+            478.46,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1082.72,
+            438.77,
+            2
+          ],
+          "treble": [
+            1096.51,
+            493.43,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1051.12,
+            451.17,
+            2
+          ],
+          "treble": [
+            1064.32,
+            507.62,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            1019.49,
+            463.6,
+            2
+          ],
+          "treble": [
+            1034.02,
+            520.98,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            989.98,
+            475.18,
+            2
+          ],
+          "treble": [
+            1004.38,
+            534.05,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            961.24,
+            486.47,
+            2
+          ],
+          "treble": [
+            975.98,
+            546.57,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            933.69,
+            497.29,
+            2
+          ],
+          "treble": [
+            948.75,
+            558.57,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            907.28,
+            507.66,
+            2
+          ],
+          "treble": [
+            923.14,
+            569.86,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            882.03,
+            517.58,
+            2
+          ],
+          "treble": [
+            897.71,
+            581.08,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            857.84,
+            527.07,
+            2
+          ],
+          "treble": [
+            874.3,
+            591.4,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            834.74,
+            536.15,
+            2
+          ],
+          "treble": [
+            851.47,
+            601.46,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            812.7,
+            544.8,
+            2
+          ],
+          "treble": [
+            829.21,
+            611.27,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            792.15,
+            552.87,
+            2
+          ],
+          "treble": [
+            808.42,
+            620.44,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            772.05,
+            560.76,
+            2
+          ],
+          "treble": [
+            788.56,
+            629.19,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            752.98,
+            568.25,
+            2
+          ],
+          "treble": [
+            768.74,
+            637.93,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            734.68,
+            575.44,
+            2
+          ],
+          "treble": [
+            751.15,
+            645.69,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            716.7,
+            582.5,
+            2
+          ],
+          "treble": [
+            734.38,
+            653.08,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            700.66,
+            588.8,
+            2
+          ],
+          "treble": [
+            718.04,
+            660.29,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            684.36,
+            595.2,
+            2
+          ],
+          "treble": [
+            702.43,
+            667.17,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            669.36,
+            601.09,
+            2
+          ],
+          "treble": [
+            687.61,
+            673.7,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            655.16,
+            606.67,
+            2
+          ],
+          "treble": [
+            673.1,
+            680.1,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            640.99,
+            612.23,
+            2
+          ],
+          "treble": [
+            660.09,
+            685.83,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -825.24186283,
+            12.40176102,
+            1157.89933334
+          ],
+          [
+            173.90260614,
+            51.16255288,
+            437.64106743
+          ],
+          [
+            -0.18469758,
+            -0.00037428,
+            1.0
+          ]
+        ],
+        "tau": 0.35,
+        "rmse_px": 0.33,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/hqBFkJAI3dA_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.85,
+          "nut_visible": true,
+          "reasoning": "The nut bar is clearly visible where the fingerboard meets the headstock, at about x\u2248435 in image 1. W3 is the first fret wire after the nut, so W3 = fret 1. The inlays agree: birds sit in the cells W4\u2013W5 (fret 3), W6\u2013W7 (5), W8\u2013W9 (7), W10\u2013W11 (9), W13\u2013W14 (12) and W16\u2013W17 (15). W1 lies on the headstock among the tuner posts, so it is not a real fret wire; counting back from W3 = 1 gives W1 = -1."
+        },
+        "n_candidates": 683,
+        "grid_score": 23.48,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 18,
+          "reason": "A PRS-style electric guitar with bird inlays is shown close up, and the whole fingerboard is visible with many fret wires in reasonable focus, with the fretting hand held off the neck."
+        }
+      }
+    }
+  ]
+}

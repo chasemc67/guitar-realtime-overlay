@@ -1,0 +1,224 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "NN224KF8WxU_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/NN224KF8WxU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f7": {
+          "bass": [
+            665.39,
+            261.23,
+            2
+          ],
+          "treble": [
+            664.54,
+            287.44,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            650.75,
+            271.94,
+            1
+          ],
+          "treble": [
+            648.99,
+            300.03,
+            1
+          ]
+        },
+        "f10": {
+          "bass": [
+            621.06,
+            293.67,
+            1
+          ],
+          "treble": [
+            618.78,
+            324.48,
+            1
+          ]
+        },
+        "f13": {
+          "bass": [
+            577.23,
+            325.75,
+            1
+          ],
+          "treble": [
+            574.09,
+            360.65,
+            1
+          ]
+        },
+        "f14": {
+          "bass": [
+            563.2,
+            336.01,
+            2
+          ],
+          "treble": [
+            560.24,
+            371.86,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            534.79,
+            356.81,
+            1
+          ],
+          "treble": [
+            530.68,
+            395.78,
+            1
+          ]
+        },
+        "f18": {
+          "bass": [
+            507.65,
+            376.67,
+            2
+          ],
+          "treble": [
+            503.01,
+            418.18,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            494.26,
+            386.47,
+            1
+          ],
+          "treble": [
+            489.12,
+            429.41,
+            1
+          ]
+        },
+        "f20": {
+          "bass": [
+            481.1,
+            396.1,
+            2
+          ],
+          "treble": [
+            475.36,
+            440.55,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            468.49,
+            405.33,
+            2
+          ],
+          "treble": [
+            462.86,
+            450.67,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            443.94,
+            423.3,
+            1
+          ],
+          "treble": [
+            437.37,
+            471.3,
+            1
+          ]
+        },
+        "f24": {
+          "bass": [
+            432.1,
+            431.96,
+            1
+          ],
+          "treble": [
+            425.18,
+            481.17,
+            1
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -713.5130755,
+            -7.26513861,
+            767.44404401
+          ],
+          [
+            70.14264888,
+            15.45199836,
+            195.29919654
+          ],
+          [
+            -0.60967795,
+            -0.01009286,
+            1.0
+          ]
+        ],
+        "tau": 0.44999999999999996,
+        "rmse_px": 0.234,
+        "index_shift": 0
+      },
+      "flags": [
+        "ai_unusable",
+        "few_wires",
+        "numbering_low_conf"
+      ],
+      "notes": "AI usability: This is a close-up of an electric guitar with a maple fingerboard, but the extreme angle, foreshortening, motion blur and the hand covering much of the neck make the fret wires hard to resolve reliably.",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/NN224KF8WxU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.45,
+          "nut_visible": false,
+          "reasoning": "On this maple board I take the two dots at different heights near x\u22481100-1140 to be the 12th-fret double dot, sitting between the 5th and 6th clearly visible real wires. Counting back, the single dot near x\u2248710 falls in the fret-9 cell and the large dot at the far left falls in the fret-7 cell. That makes the first real wire, which W1 most likely marks, fret 7. The labels do not line up cleanly with the visible wires, and many of the 37 detected labels must be false because the guitar has only 24 frets. I could not single out which labels are false, so that list is left empty and confidence is moderate."
+        },
+        "n_candidates": 386,
+        "grid_score": 10.87,
+        "usability": {
+          "usable": false,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": false,
+          "visible_frets_estimate": 10,
+          "reason": "This is a close-up of an electric guitar with a maple fingerboard, but the extreme angle, foreshortening, motion blur and the hand covering much of the neck make the fret wires hard to resolve reliably."
+        }
+      }
+    }
+  ]
+}

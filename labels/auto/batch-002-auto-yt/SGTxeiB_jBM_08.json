@@ -1,0 +1,294 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "SGTxeiB_jBM_08",
+  "video": {
+    "path": "",
+    "source_image": "/workspace/guitar-overlay/data/scraped/frames/SGTxeiB_jBM_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_3_5_7",
+      "kpts": {
+        "f3": {
+          "bass": [
+            917.69,
+            137.17,
+            2
+          ],
+          "treble": [
+            928.13,
+            160.34,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            851.15,
+            162.75,
+            2
+          ],
+          "treble": [
+            862.83,
+            187.42,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            787.55,
+            187.2,
+            2
+          ],
+          "treble": [
+            800.16,
+            213.4,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            726.82,
+            210.55,
+            2
+          ],
+          "treble": [
+            739.99,
+            238.34,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            668.86,
+            232.83,
+            2
+          ],
+          "treble": [
+            682.19,
+            262.31,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            613.1,
+            254.27,
+            2
+          ],
+          "treble": [
+            627.27,
+            285.08,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            559.93,
+            274.71,
+            2
+          ],
+          "treble": [
+            575.65,
+            306.47,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            509.26,
+            294.19,
+            2
+          ],
+          "treble": [
+            525.41,
+            327.3,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            368.04,
+            348.48,
+            2
+          ],
+          "treble": [
+            387.69,
+            384.4,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            327.86,
+            363.93,
+            2
+          ],
+          "treble": [
+            345.75,
+            401.79,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            287.86,
+            379.31,
+            2
+          ],
+          "treble": [
+            305.99,
+            418.27,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            247.95,
+            394.65,
+            2
+          ],
+          "treble": [
+            269.69,
+            433.32,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            213.38,
+            407.94,
+            2
+          ],
+          "treble": [
+            233.08,
+            448.5,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            179.07,
+            421.13,
+            2
+          ],
+          "treble": [
+            198.21,
+            462.96,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            146.18,
+            433.77,
+            2
+          ],
+          "treble": [
+            167.21,
+            475.8,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            114.83,
+            445.82,
+            2
+          ],
+          "treble": [
+            135.59,
+            488.91,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            85.84,
+            456.97,
+            2
+          ],
+          "treble": [
+            105.82,
+            501.26,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            56.4,
+            468.29,
+            1
+          ],
+          "treble": [
+            78.55,
+            512.56,
+            1
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1497.7539936,
+            12.51452226,
+            1137.0718446
+          ],
+          [
+            513.78848493,
+            25.42251651,
+            63.22268531
+          ],
+          [
+            -0.16322258,
+            0.00094305,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 1.697,
+        "index_shift": 0
+      },
+      "flags": [
+        "fit_rmse_high"
+      ],
+      "notes": "",
+      "frame_file": "/workspace/guitar-overlay/data/scraped/frames/SGTxeiB_jBM_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_3_5_7",
+          "confidence": 0.6,
+          "nut_visible": false,
+          "reasoning": "Dot inlays sit in the cells ending at W4, W6, W8 and W10, and again at W16, W18, W20 and W22. That regular odd-fret pattern (3, 5, 7, 9 and 15, 17, 19, 21) means W(n) = fret n-1, consistent at both ends; the 12th-fret double dot is hidden under the hand. Counting back gives W1 = fret 0, so W1 is the nut line beside the white fret-wrap band rather than a true fret wire. This conflicts slightly with the wire spacing, which leaves room for a wire left of W1, so confidence is moderate."
+        },
+        "n_candidates": 1095,
+        "grid_score": 19.97,
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 18,
+          "reason": "Close-up of an electric guitar with a maple fingerboard running diagonally across the frame, with most fret wires and dot inlays clearly visible and in focus, and the fretting hand covering only a few frets."
+        }
+      }
+    }
+  ]
+}

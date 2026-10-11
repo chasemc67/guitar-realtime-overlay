@@ -141,6 +141,8 @@ low-E and not binding (`review/d13-gt-strings/`). Caveat: the re-derived GT uses
 auto pipeline, applied to the GT wire lines. Along-wire GT/auto agreement is therefore partly self-consistency, and
 only Chase's review of the crops makes it independent. The perpendicular-to-wire error stays independent.
 
+**D13 confirmed and narrowed (Chase, 2026-10-11).** The outer strings (low E, high E) define the fretboard's height extent instead of the wood edges. The PRIMARY goal is accurate fret wire/marker anchoring and numbering. No individual string detection is required: assume 6 evenly spaced strings between the outer extents (the current joint six-string fit is only used to locate the two outer extents). Outer-extent precision matters less than fret-wire precision, so the eval headline metric is the along-neck / fret-wire error (anchor distance from the GT wire line, "across-wire" in eval_auto output), reported separately from the along-wire (outer-extent) error. Q16 is answered.
+
 ## 0. Goal & constraints
 
 Draw a scale overlay onto a guitar fretboard from a live close-up camera, so that it matches `docs/reference-overlay.jpg`:

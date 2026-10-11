@@ -30,6 +30,7 @@ import cv2
 
 from gro import anchors as A
 from gro.auto.ai import AIClient
+from gro.auto.manifest import excluded_ids, video_id
 from gro.auto.pipeline import AutoConfig, annotate_frame
 from gro.auto.temporal import TrackConfig, annotate_clip
 
@@ -81,6 +82,7 @@ def main() -> None:
     pf.add_argument("--images", default="", help="glob of still images (e.g. <videoid>_<t>.jpg)")
     pf.add_argument("--limit", type=int, default=0)
     pf.add_argument("--frames-out", type=Path, default=None)
+    pf.add_argument("--include-excluded", action="store_true", help="don't skip manifest-excluded videos (acoustic)")
     pc = sub.choices["clip"]
     pc.add_argument("--t0", type=float, required=True)
     pc.add_argument("--t1", type=float, required=True)
@@ -99,7 +101,11 @@ def main() -> None:
         if a.video:
             for t in [float(x) for x in a.times.split(",") if x.strip()]:
                 jobs.append(("video", a.video, t))
+        excl = {} if a.include_excluded else excluded_ids()
         for p in sorted(glob.glob(a.images)) if a.images else []:
+            if video_id(Path(p).stem) in excl:
+                print(f"skip {Path(p).name}: excluded in the manifest ({excl[video_id(Path(p).stem)]})")
+                continue
             jobs.append(("image", Path(p), None))
         if a.limit:
             jobs = jobs[: a.limit]

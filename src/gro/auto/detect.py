@@ -27,8 +27,8 @@ import cv2
 import numpy as np
 
 from gro import anchors as A
-from gro.auto.strings import detect_strings, inset_lines
-from gro.geometry import FitError, FretboardModel, fit_fretboard, fret_u
+from gro.auto.strings import RHO_NOM, allowed_shifts, detect_strings, inset_lines, lines_rho, prior_lines, prior_ok
+from gro.geometry import FitError, FretboardModel, apply_h, fit_fretboard, fret_u
 from gro.snap import fit_line, intersect, robust_line, wire_extent
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -838,7 +838,7 @@ class DetectParams:
     min_wire_score: float = 4.0
     extend_support: float = 0.6  # beyond the grid range, a wire must be this clear to be added
     n_hyps: int = 6
-    n_full: int = 2  # hypotheses (best grid score first) that get the full wire stage
+    n_full: int = 3  # hypotheses (best grid score first) that get the full wire stage
     seed: int = 0
 
 
@@ -874,8 +874,13 @@ def detect_frame(img: np.ndarray, params: DetectParams | None = None, roi: np.nd
 
 
 def _quality(d: Detection) -> float:
+    """Visible wires + grid score - fit error, plus a neck-coherence bonus: real fret wires lie under six strings
+    (a comb within the width prior), overlay text / burned-in logos (vertical letter strokes) don't."""
     n_vis = sum(w.vis == 2 for w in d.wires.values())
-    return n_vis + 0.5 * d.grid.score - 2.0 * (d.model.rmse_px if d.model else 10)
+    neck = 8.0 * min(getattr(d.debug.get("strings"), "score", 0.0) or 0.0, 1.0)
+    if d.debug.get("strings_source") == "comb":
+        neck += 6.0
+    return n_vis + 0.5 * d.grid.score - 2.0 * (d.model.rmse_px if d.model else 10) + neck
 
 
 def _grid_stage(gray, segs: Segments, hyp: NeckHypothesis, P: DetectParams) -> Detection:
@@ -927,7 +932,7 @@ def _wire_stage(gray, det: Detection, P: DetectParams) -> None:
         model, wires, info = model2, wires2, info2
     det.model, det.wires, det.edges = model, wires, info.get("edges")
     det.debug["board_edges"], det.debug["strings"] = info.get("board_edges"), info.get("strings")
-    det.debug["strings_source"] = info.get("strings_source")
+    det.debug["strings_source"], det.debug["strings_rho"] = info.get("strings_source"), info.get("strings_rho")
     det.anchors = info["anchors"]
     det.ok = True
 
@@ -947,7 +952,63 @@ def _predict_wires(model: FretboardModel, shape, wires: dict[int, WireObs]) -> d
     return out
 
 
-def _wires_to_model(gray, rough: dict[int, np.ndarray], core: set[int], nrm_down, P: DetectParams):
+def _grow_short_wires(gray, wires: dict[int, WireObs], nrm_down, P: DetectParams, min_ratio: float = 1.2) -> None:
+    """Width prior on the wires themselves: a fret wire spans the strings, at least ~0.7x the fret spacing at fret 1
+    and more further up. A visible wire shorter than `min_ratio` x the local spacing (the neck hypothesis only covered
+    a bright binding / one string) is grown to the end of its ridge and re-snapped."""
+    vis = sorted(n for n, w in wires.items() if w.vis == 2)
+    mids = {n: 0.5 * (wires[n].seg[0] + wires[n].seg[1]) for n in vis}
+    for i, n in enumerate(vis):
+        sp = [np.linalg.norm(mids[m] - mids[n]) / abs(m - n) for m in vis[max(i - 1, 0) : i + 2] if m != n]
+        if not sp:
+            continue
+        seg = wires[n].seg
+        L = float(np.linalg.norm(seg[1] - seg[0]))
+        if L >= min_ratio * float(np.mean(sp)):
+            continue
+        best = None
+        for ext in (1.0, 2.5, 6.0, 12.0):
+            e = wire_extent(gray, seg[0], seg[1], ext=ext)
+            if e is not None:
+                best = np.array(e)
+                break
+        if best is None or np.linalg.norm(best[1] - best[0]) <= L:
+            continue
+        sn, _ = snap_wire_fast(gray, best[0], best[1], search=2.0, step=0.5)
+        med, sup = wire_support(gray, sn[0], sn[1])
+        if sup >= P.vis_support and med >= P.min_wire_score:
+            w = wires[n]
+            w.seg, w.score, w.support = _bass_first(sn, nrm_down), med, sup
+
+
+def _outer_strings(gray, model, keep2: dict, board, index_shift: int | None, n_frets: int = 24):
+    """Outer-string lines (low E, high E) consistent with the width prior, first that fits: the string comb, the board
+    edges inset by EDGE_INSET, the prior span centred on the board. Returns (lines, source, StringFit | None, rho)."""
+    frets = sorted(keep2)
+    sf = detect_strings(gray, model, frets, shift=index_shift, n_frets=n_frets)
+    if sf is not None and sf.ok:
+        return sf.lines, "comb", sf, sf.rho
+    segs = {n: keep2[n][0] for n in frets}
+    shifts = allowed_shifts(frets, index_shift, n_frets)
+    inset = inset_lines(*board, [segs[n] for n in frets])
+    rho = lines_rho(model, inset, segs, shifts)
+    ok = prior_ok(rho)
+    if ok.any():
+        k = int(np.argmin(np.abs(rho - RHO_NOM).sum(-1) + 10.0 * ~ok))
+        return inset, "edge_inset", sf, (float(rho[k, 0]), float(rho[k, 1]))
+    # Neither is plausible: the prior span at the shift whose board-edge width is closest to nominal, centred on the
+    # board (flagged downstream; the wires/numbering are still right, only the cross-neck extent is a guess).
+    # Centre: the median plane position of the wire midpoints (the wires span the strings; the board edges may not).
+    rb = lines_rho(model, board, segs, shifts)
+    s = int(shifts[int(np.argmin(np.abs(rb / 1.2 - RHO_NOM).sum(-1)))]) if index_shift is None else int(index_shift)
+    mids = np.array([0.5 * (segs[n][0] + segs[n][1]) for n in frets])
+    v_c = float(np.median(apply_h(np.linalg.inv(model.H), mids)[:, 1]))
+    return prior_lines(model, frets, s, v_c=v_c), "prior", sf, (RHO_NOM, RHO_NOM)
+
+
+def _wires_to_model(
+    gray, rough: dict[int, np.ndarray], core: set[int], nrm_down, P: DetectParams, index_shift: int | None = None
+):
     """Snap the rough wires, decide visibility, measure the board edges, fit the fretboard model."""
     wires: dict[int, WireObs] = {}
     for n, seg in sorted(rough.items()):
@@ -964,6 +1025,8 @@ def _wires_to_model(gray, rough: dict[int, np.ndarray], core: set[int], nrm_down
     vis2 = {n: (w.seg, 2) for n, w in wires.items() if w.vis == 2}
     if len(vis2) < 4:
         return None, wires, {"reason": "fewer than 4 visible wires"}
+    _grow_short_wires(gray, wires, nrm_down, P)
+    vis2 = {n: (w.seg, 2) for n, w in wires.items() if w.vis == 2}
     try:
         anchors, info = anchors_from_segments(gray, vis2, nrm_down)
     except (FitError, np.linalg.LinAlgError) as e:
@@ -975,17 +1038,13 @@ def _wires_to_model(gray, rough: dict[int, np.ndarray], core: set[int], nrm_down
     # D13: anchors on the outer strings. The board edges above give a first model; find the string comb on it.
     keep2 = {n: v for n, v in vis2.items() if n not in info["rejected"]}
     board = info["lines"]
-    sf = detect_strings(gray, model, sorted(keep2))
-    if sf is not None and sf.ok:
-        lines, src = sf.lines, "comb"
-    else:
-        lines, src = inset_lines(*board, [keep2[n][0] for n in sorted(keep2)]), "edge_inset"
+    lines, src, sf, rho = _outer_strings(gray, model, keep2, board, index_shift)
     try:
         anchors, info2 = anchors_from_segments(gray, keep2, nrm_down, edge_lines=lines)
         model = fit_fretboard(anchors, tau=None)
     except (FitError, np.linalg.LinAlgError) as e:
         return None, wires, {"reason": f"string refit: {e}"}
-    info.update(lines=info2["lines"], board_edges=board, strings=sf, strings_source=src)
+    info.update(lines=info2["lines"], board_edges=board, strings=sf, strings_source=src, strings_rho=rho)
     for n in info["rejected"]:
         wires.pop(n, None)
     bad = {a.fret for a in model.outliers}
@@ -1011,13 +1070,20 @@ def angle_deg(v) -> float:
     return math.degrees(math.atan2(v[1], v[0]))
 
 
-def refit_subset(gray: np.ndarray, det: Detection, keep: set[int], params: DetectParams | None = None) -> Detection:
+def refit_subset(
+    gray: np.ndarray,
+    det: Detection,
+    keep: set[int],
+    params: DetectParams | None = None,
+    index_shift: int | None = None,
+) -> Detection:
     """Re-measure a detection using only the wires in `keep` (e.g. after numbering drops wires past the last fret or
-    ones the AI flagged as the fingerboard end). Returns a new Detection (or the input if the refit fails)."""
+    ones the AI flagged as the fingerboard end; with the numbering's `index_shift` the width prior is exact).
+    Returns a new Detection (or the input if the refit fails)."""
     P = params or DetectParams()
     rough = {n: w.seg for n, w in det.wires.items() if n in keep}
     core = {n for n, w in det.wires.items() if n in keep}
-    model, wires, info = _wires_to_model(gray, rough, core, det.strip.down, P)
+    model, wires, info = _wires_to_model(gray, rough, core, det.strip.down, P, index_shift)
     if model is None:
         return det
     out = Detection(
@@ -1035,6 +1101,7 @@ def refit_subset(gray: np.ndarray, det: Detection, keep: set[int], params: Detec
             "board_edges": info.get("board_edges"),
             "strings": info.get("strings"),
             "strings_source": info.get("strings_source"),
+            "strings_rho": info.get("strings_rho"),
         },
     )
     return out

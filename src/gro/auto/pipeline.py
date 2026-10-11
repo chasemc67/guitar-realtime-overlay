@@ -35,6 +35,7 @@ class AutoConfig:
     usability_model: str = FAST_MODEL
     rmse_flag_px: float = 1.5
     nut: bool = True  # add nut anchors when the AI says the nut is visible
+    ai_span_check: bool = True  # AI verifier "does the grid cover all 6 strings?" (flag only, cached)
     params: DetectParams = field(default_factory=DetectParams)
 
 
@@ -58,6 +59,45 @@ RESCUE_PROMPT = """The image shows a guitar. Give the approximate fingerboard (t
 wires) as a quadrilateral, in normalized image coordinates (x from the left, y from the top, both 0..1): the four \
 corners in order: nut-side top, body-side top, body-side bottom, nut-side bottom. If no fingerboard is visible, \
 return null corners. Reply with JSON only: {"corners": [[x, y], [x, y], [x, y], [x, y]] or null, "reason": "<short>"}"""
+
+
+SPAN_PROMPT = """This is a crop of a guitar fingerboard with an overlay. The RED line is meant to lie on the low E \
+string (one outermost string) and the BLUE line on the high E string (the other outermost string); thin yellow \
+lines mark fret wires. Does the band between the red and blue lines cover all 6 strings along the marked frets (red \
+and blue each on an outer string, within about half a string spacing)? Reply with JSON only: {"covers_all_6": \
+<bool>, "problem": "none"|"misses_red_side"|"misses_blue_side"|"misses_both"|"too_wide"|"not_on_neck"|"unclear", \
+"reason": "<one sentence>"}"""
+
+
+def span_crop(img: np.ndarray, anchors: list[A.Anchor], pad: float = 0.25) -> np.ndarray | None:
+    """Crop around the anchors with the outer-string lines (red = low E, blue = high E) and wires drawn in."""
+    by: dict[int, dict] = {}
+    for a in anchors:
+        by.setdefault(a.fret, {})[a.side] = np.array([a.x, a.y])
+    wires = [(f, d["bass"], d["treble"]) for f, d in sorted(by.items()) if len(d) == 2]
+    if len(wires) < 2:
+        return None
+    out = img.copy()
+    for _, b, t in wires:
+        cv2.line(out, tuple(map(int, b)), tuple(map(int, t)), (0, 230, 255), 1, cv2.LINE_AA)
+    for i, col in ((1, (0, 0, 255)), (2, (255, 80, 0))):
+        cv2.line(out, tuple(map(int, wires[0][i])), tuple(map(int, wires[-1][i])), col, 2, cv2.LINE_AA)
+    pts = np.array([p for w in wires for p in w[1:]])
+    lo, hi = pts.min(0), pts.max(0)
+    m = pad * (hi - lo).max()
+    h, w = img.shape[:2]
+    x0, y0 = np.maximum(lo - m, 0).astype(int)
+    x1, y1 = np.minimum(hi + m, [w, h]).astype(int)
+    crop = out[y0:y1, x0:x1]
+    sc = min(1.0, 1024 / max(crop.shape[:2]))
+    return cv2.resize(crop, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA) if sc < 1 else crop
+
+
+def check_span(ai: AIClient, img: np.ndarray, anchors: list[A.Anchor], model: str = FAST_MODEL) -> dict | None:
+    if ai is None or not ai.available:
+        return None
+    crop = span_crop(img, [a for a in anchors if a.fret > 0])
+    return None if crop is None else ai.chat_json("span", SPAN_PROMPT, [crop], model=model, max_tokens=1500)
 
 
 def check_usability(ai: AIClient, img: np.ndarray, model: str = FAST_MODEL) -> dict | None:
@@ -189,8 +229,12 @@ def annotate_frame(
         while len(keep) > cfg.frets:
             lo, hi = min(keep), max(keep)
             keep.discard(hi if det.wires[hi].score <= det.wires[lo].score else lo)
-    if keep != set(det.wires):
-        det = refit_subset(gray, det, keep, cfg.params)
+    if keep != set(det.wires) or numbering.resolved:
+        # With the absolute numbering known the width prior is exact (cross-neck span vs the local fret spacing).
+        det = refit_subset(gray, det, keep, cfg.params, numbering.shift if numbering.resolved else None)
+    src = det.debug.get("strings_source")
+    if src in ("edge_inset", "prior"):
+        flags.append(f"strings_{src}")
     s = numbering.shift
     anchors = [A.Anchor(a.fret + s, a.side, a.x, a.y, a.vis) for a in det.anchors if a.fret in keep]
     try:
@@ -218,6 +262,12 @@ def annotate_frame(
         flags.append("few_wires")
     if numbering.resolved and numbering.confidence < 0.6:
         flags.append("numbering_low_conf")
+    span = None
+    if use_ai and cfg.ai_span_check and anchors:
+        span = check_span(ai, img, anchors, cfg.usability_model)
+        if span is not None and span.get("covers_all_6") is False:
+            flags.append("ai_span_bad")
+            notes.append(f"AI span check: {span.get('problem')}: {span.get('reason', '')}")
     anchorable, cue = anchorability(anchors, numbering)
     fit = None
     if model is not None:
@@ -238,7 +288,10 @@ def annotate_frame(
         },
         "n_candidates": det.n_candidates,
         "grid_score": round(det.grid.score, 2) if det.grid else None,
+        "strings_source": src,
+        "strings_rho": [round(x, 3) for x in det.debug["strings_rho"]] if det.debug.get("strings_rho") else None,
         "usability": usab,
+        "span_check": span,
     }
     lab = A.FrameLabel(
         t=t,

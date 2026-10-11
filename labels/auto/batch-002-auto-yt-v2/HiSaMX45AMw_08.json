@@ -1,0 +1,362 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "HiSaMX45AMw_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/HiSaMX45AMw_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            1242.08,
+            365.7,
+            2
+          ],
+          "treble": [
+            1261.07,
+            434.71,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            1171.89,
+            377.3,
+            2
+          ],
+          "treble": [
+            1190.29,
+            447.85,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1104.47,
+            388.47,
+            2
+          ],
+          "treble": [
+            1126.4,
+            459.7,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1045.74,
+            398.2,
+            2
+          ],
+          "treble": [
+            1062.92,
+            471.47,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            986.81,
+            407.96,
+            2
+          ],
+          "treble": [
+            1005.57,
+            482.1,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            933.29,
+            416.83,
+            2
+          ],
+          "treble": [
+            950.77,
+            492.26,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            882.45,
+            425.25,
+            2
+          ],
+          "treble": [
+            899.4,
+            501.78,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            835.49,
+            433.03,
+            2
+          ],
+          "treble": [
+            852.67,
+            510.45,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            789.04,
+            440.72,
+            2
+          ],
+          "treble": [
+            804.97,
+            519.29,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            750.89,
+            447.04,
+            2
+          ],
+          "treble": [
+            763.99,
+            526.89,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            706.43,
+            454.41,
+            2
+          ],
+          "treble": [
+            726.9,
+            533.77,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            672.73,
+            459.99,
+            2
+          ],
+          "treble": [
+            688.03,
+            540.97,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            639.44,
+            465.5,
+            2
+          ],
+          "treble": [
+            651.91,
+            547.67,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            606.07,
+            471.03,
+            2
+          ],
+          "treble": [
+            619.73,
+            553.63,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            573.99,
+            476.35,
+            2
+          ],
+          "treble": [
+            588.07,
+            559.5,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            545.96,
+            480.99,
+            2
+          ],
+          "treble": [
+            558.83,
+            564.92,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            517.03,
+            485.78,
+            2
+          ],
+          "treble": [
+            531.21,
+            570.05,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            492.74,
+            489.81,
+            2
+          ],
+          "treble": [
+            504.9,
+            574.92,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            466.89,
+            494.09,
+            2
+          ],
+          "treble": [
+            480.42,
+            579.46,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            444.67,
+            497.77,
+            2
+          ],
+          "treble": [
+            457.04,
+            583.8,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            423.79,
+            501.23,
+            2
+          ],
+          "treble": [
+            435.01,
+            587.88,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            401.89,
+            504.85,
+            2
+          ],
+          "treble": [
+            414.55,
+            591.67,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            384.83,
+            507.68,
+            2
+          ],
+          "treble": [
+            394.62,
+            595.37,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1173.54464146,
+            4.09513694,
+            1250.42076636
+          ],
+          [
+            242.01875744,
+            63.57053003,
+            400.16320482
+          ],
+          [
+            0.05833676,
+            -0.01302096,
+            1.0
+          ]
+        ],
+        "tau": 0.39999999999999997,
+        "rmse_px": 1.039,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "data/scraped/frames/HiSaMX45AMw_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.95,
+          "nut_visible": true,
+          "reasoning": "The nut bar is clearly visible at the far left of the strip, and there are no fret wires between it and W1, so W1 is fret 1. The inlays agree with this. Trapezoid inlays sit in the cells W2-W3 (3), W4-W5 (5), W6-W7 (7), W8-W9 (9), W11-W12 (12), W14-W15 (15), W16-W17 (17), W18-W19 (19) and W20-W21 (21)."
+        },
+        "n_candidates": 1157,
+        "grid_score": 22.94,
+        "strings_source": "comb",
+        "strings_rho": [
+          1.027,
+          0.956
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 15,
+          "reason": "A Les Paul-style electric guitar is shown close up with the neck stretching across the frame, and many fret wires and inlays are clearly visible, with only the fretting fingers covering a small part."
+        },
+        "span_check": {
+          "covers_all_6": true,
+          "problem": "none",
+          "reason": "The red line follows the top edge of the fingerboard (low E side) and the blue line follows the bottom edge (high E side) along the marked frets, so the band spans all six strings."
+        }
+      }
+    }
+  ]
+}

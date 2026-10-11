@@ -1,0 +1,223 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "8-grcbKnbps_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/8-grcbKnbps_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f14": {
+          "bass": [
+            1011.49,
+            355.95,
+            1
+          ],
+          "treble": [
+            1022.67,
+            247.82,
+            1
+          ]
+        },
+        "f15": {
+          "bass": [
+            964.1,
+            359.28,
+            2
+          ],
+          "treble": [
+            976.46,
+            246.01,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            922.39,
+            362.2,
+            2
+          ],
+          "treble": [
+            936.28,
+            244.43,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            874.93,
+            365.53,
+            2
+          ],
+          "treble": [
+            889.98,
+            242.61,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            831.38,
+            368.59,
+            2
+          ],
+          "treble": [
+            847.59,
+            240.95,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            793.4,
+            371.25,
+            2
+          ],
+          "treble": [
+            807.29,
+            239.37,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            753.19,
+            374.07,
+            2
+          ],
+          "treble": [
+            773.76,
+            238.05,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            722.76,
+            376.2,
+            2
+          ],
+          "treble": [
+            738.86,
+            236.68,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            689.73,
+            378.52,
+            2
+          ],
+          "treble": [
+            709.23,
+            235.52,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            651.79,
+            381.18,
+            2
+          ],
+          "treble": [
+            672.45,
+            234.08,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            621.86,
+            383.28,
+            1
+          ],
+          "treble": [
+            643.01,
+            232.92,
+            1
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1674.20180178,
+            -44.02256025,
+            1573.31670106
+          ],
+          [
+            -176.33464212,
+            -72.79004306,
+            295.36677641
+          ],
+          [
+            -0.64126251,
+            -0.06174658,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 1.834,
+        "index_shift": 0
+      },
+      "flags": [
+        "strings_prior",
+        "fit_outliers",
+        "fit_rmse_high",
+        "ai_span_bad"
+      ],
+      "notes": "AI span check: misses_red_side: The blue line sits on the high E string, but the red line runs well inside the lower edge of the fingerboard (near the middle of the neck on the right), so the low E string and possibly another string fall outside the band.",
+      "frame_file": "data/scraped/frames/8-grcbKnbps_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "last_fret",
+          "confidence": 0.88,
+          "nut_visible": false,
+          "reasoning": "The double dot between W10 and W11 is the 24th-fret marker, so W11 = 24 is the last fret. Counting back, the single dots fall in the W7-W8, W5-W6, W3-W4 and W1-W2 cells, which matches frets 21, 19, 17 and 15, so W2 = 15 and W1 = 14. This agrees with a dot at the far left edge sitting two cells before W1, which is the fret 12 cell. W13 and W15 lie over the black pickup area past the end of the fingerboard."
+        },
+        "n_candidates": 636,
+        "grid_score": 10.39,
+        "strings_source": "prior",
+        "strings_rho": [
+          0.95,
+          0.95
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 12,
+          "reason": "A yellow electric guitar with a floating tremolo bridge and humbuckers is shown close up, and its maple fingerboard has about 12 fret wires and dot inlays clearly visible and in focus, with no fingers blocking them."
+        },
+        "span_check": {
+          "covers_all_6": false,
+          "problem": "misses_red_side",
+          "reason": "The blue line sits on the high E string, but the red line runs well inside the lower edge of the fingerboard (near the middle of the neck on the right), so the low E string and possibly another string fall outside the band."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,869 @@
+{
+ "cmd": "frames",
+ "n": 31,
+ "note": "4 shards (24 frames) merged; the first 7 frames ran in a single process whose run log was lost when it was stopped to shard; s7DVJX4PK3U skipped (manifest: acoustic)",
+ "ai_shards": {
+  "cost_usd": 0.8215000000000001,
+  "calls": 45
+ },
+ "items": [
+  {
+   "clip_id": "I4Vt5Q4aUrw_08",
+   "anchors": 42,
+   "frets": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "rmse": 0.672,
+   "numbering": "ai/inlay_9_12_15/0.93",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 105.0
+  },
+  {
+   "clip_id": "QYoiaH5lId8_08",
+   "anchors": 36,
+   "frets": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "rmse": 4.279,
+   "numbering": "ai/inlay_9_12_15/0.85",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [
+    "strings_prior",
+    "fit_outliers",
+    "fit_rmse_high",
+    "ai_span_bad"
+   ],
+   "usable": true,
+   "seconds": 202.4
+  },
+  {
+   "clip_id": "XyBfN5WNo9g_08",
+   "anchors": 34,
+   "frets": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.59,
+   "numbering": "ai/last_fret/0.75",
+   "anchorable": [
+    false,
+    null
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 79.8
+  },
+  {
+   "clip_id": "bVmq2C5kLoM_08",
+   "anchors": 48,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.33,
+   "numbering": "ai/inlay_9_12_15/0.80",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 30.0
+  },
+  {
+   "clip_id": "mP2wtBlcCSc_08",
+   "anchors": 28,
+   "frets": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 1.468,
+   "numbering": "ai/inlay_9_12_15/0.90",
+   "anchorable": [
+    false,
+    null
+   ],
+   "flags": [
+    "strings_prior",
+    "ai_span_bad"
+   ],
+   "usable": true,
+   "seconds": 71.7
+  },
+  {
+   "clip_id": "tWLgUEf0h40_08",
+   "anchors": 30,
+   "frets": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "rmse": 1.563,
+   "numbering": "ai/inlay_9_12_15/0.75",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [
+    "fit_rmse_high"
+   ],
+   "usable": true,
+   "seconds": 66.4
+  },
+  {
+   "clip_id": "IZJdHyfkrsg_08",
+   "anchors": 30,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "rmse": 1.782,
+   "numbering": "ai/nut/0.93",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [
+    "strings_prior",
+    "fit_rmse_high"
+   ],
+   "usable": true,
+   "seconds": 299.0
+  },
+  {
+   "clip_id": "RztmWh5kYuw_08",
+   "anchors": 38,
+   "frets": [
+    0,
+    1,
+    2,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+   ],
+   "rmse": 1.72,
+   "numbering": "ai/nut/0.85",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [
+    "fit_rmse_high"
+   ],
+   "usable": true,
+   "seconds": 116.7
+  },
+  {
+   "clip_id": "Z21qSJ3HynA_08",
+   "anchors": 48,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "rmse": 0.327,
+   "numbering": "ai/nut/0.85",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 24.6
+  },
+  {
+   "clip_id": "gQZDu0mIhwc_08",
+   "anchors": 44,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    22
+   ],
+   "rmse": 1.298,
+   "numbering": "ai/nut/0.97",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [
+    "ai_unusable"
+   ],
+   "usable": false,
+   "seconds": 56.8
+  },
+  {
+   "clip_id": "nbkiBItGzoU_08",
+   "anchors": 28,
+   "frets": [
+    1,
+    4,
+    7,
+    8,
+    9,
+    11,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    25
+   ],
+   "rmse": 0.588,
+   "numbering": "relative/None/0.00",
+   "anchorable": [
+    false,
+    null
+   ],
+   "flags": [
+    "index_unresolved",
+    "strings_prior",
+    "few_wires",
+    "ai_span_bad"
+   ],
+   "usable": true,
+   "seconds": 33.2
+  },
+  {
+   "clip_id": "wi9ZivDT1l0_08",
+   "anchors": 38,
+   "frets": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "rmse": 1.408,
+   "numbering": "ai/inlay_3_5_7/0.90",
+   "anchorable": [
+    true,
+    "inlay_3_5_7"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 46.7
+  },
+  {
+   "clip_id": "NA9J_pQkEaE_08",
+   "anchors": 38,
+   "frets": [
+    0,
+    1,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+   ],
+   "rmse": 0.27,
+   "numbering": "ai/nut/0.95",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 32.7
+  },
+  {
+   "clip_id": "SGTxeiB_jBM_08",
+   "anchors": 38,
+   "frets": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+   ],
+   "rmse": 1.896,
+   "numbering": "ai/inlay_3_5_7/0.80",
+   "anchorable": [
+    true,
+    "inlay_3_5_7"
+   ],
+   "flags": [
+    "strings_edge_inset",
+    "fit_rmse_high"
+   ],
+   "usable": true,
+   "seconds": 93.9
+  },
+  {
+   "clip_id": "aZH5YWOY2Fc_08",
+   "anchors": 48,
+   "frets": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.806,
+   "numbering": "ai/inlay_9_12_15/0.93",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [
+    "ai_unusable"
+   ],
+   "usable": false,
+   "seconds": 38.2
+  },
+  {
+   "clip_id": "hAuPpjcpZSU_08",
+   "anchors": 18,
+   "frets": [
+    15,
+    16,
+    17,
+    18,
+    19,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.576,
+   "numbering": "ai/inlay_9_12_15/0.30",
+   "anchorable": [
+    false,
+    null
+   ],
+   "flags": [
+    "strings_prior",
+    "numbering_low_conf",
+    "ai_span_bad"
+   ],
+   "usable": true,
+   "seconds": 55.6
+  },
+  {
+   "clip_id": "r7bBo-b2Xh0_08",
+   "anchors": 48,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "rmse": 0.561,
+   "numbering": "ai/nut/0.93",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 95.9
+  },
+  {
+   "clip_id": "xI3ZBCyl6Ec_08",
+   "anchors": 48,
+   "frets": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.378,
+   "numbering": "ai/nut/0.85",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 97.0
+  },
+  {
+   "clip_id": "NN224KF8WxU_08",
+   "anchors": 30,
+   "frets": [
+    8,
+    9,
+    11,
+    12,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+   ],
+   "rmse": 0.359,
+   "numbering": "ai/inlay_3_5_7/0.35",
+   "anchorable": [
+    false,
+    null
+   ],
+   "flags": [
+    "ai_unusable",
+    "strings_prior",
+    "few_wires",
+    "numbering_low_conf",
+    "ai_span_bad"
+   ],
+   "usable": false,
+   "seconds": 63.6
+  },
+  {
+   "clip_id": "SekrUcb03Eg_08",
+   "anchors": 34,
+   "frets": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+   ],
+   "rmse": 0.349,
+   "numbering": "ai/inlay_9_12_15/0.93",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 75.3
+  },
+  {
+   "clip_id": "bOmRY782-GE_08",
+   "anchors": 46,
+   "frets": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "rmse": 0.339,
+   "numbering": "ai/inlay_9_12_15/0.85",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 47.8
+  },
+  {
+   "clip_id": "hqBFkJAI3dA_08",
+   "anchors": 46,
+   "frets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "rmse": 0.284,
+   "numbering": "ai/nut/0.80",
+   "anchorable": [
+    true,
+    "nut"
+   ],
+   "flags": [
+    "strings_edge_inset"
+   ],
+   "usable": true,
+   "seconds": 38.6
+  },
+  {
+   "clip_id": "rtVaz9HSyZw_08",
+   "anchors": 38,
+   "frets": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "rmse": 0.451,
+   "numbering": "ai/inlay_9_12_15/0.90",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 67.9
+  },
+  {
+   "clip_id": "xQg_N9mBoYc_08",
+   "anchors": 42,
+   "frets": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "rmse": 0.787,
+   "numbering": "ai/inlay_9_12_15/0.85",
+   "anchorable": [
+    true,
+    "inlay_9_12_15"
+   ],
+   "flags": [],
+   "usable": true,
+   "seconds": 42.8
+  }
+ ]
+}

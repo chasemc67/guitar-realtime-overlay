@@ -1,0 +1,374 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "Z21qSJ3HynA_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/Z21qSJ3HynA_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "nut",
+      "kpts": {
+        "nut": {
+          "bass": [
+            1094.55,
+            262.22,
+            2
+          ],
+          "treble": [
+            1099.07,
+            310.7,
+            2
+          ]
+        },
+        "f1": {
+          "bass": [
+            1044.54,
+            265.87,
+            2
+          ],
+          "treble": [
+            1049.7,
+            315.42,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            997.47,
+            269.33,
+            2
+          ],
+          "treble": [
+            1002.61,
+            319.9,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            953.31,
+            272.57,
+            2
+          ],
+          "treble": [
+            958.88,
+            324.06,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            912.3,
+            275.58,
+            2
+          ],
+          "treble": [
+            916.91,
+            328.06,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            873.33,
+            278.45,
+            2
+          ],
+          "treble": [
+            877.92,
+            331.77,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            836.72,
+            281.14,
+            2
+          ],
+          "treble": [
+            841.27,
+            335.25,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            802.31,
+            283.67,
+            2
+          ],
+          "treble": [
+            806.83,
+            338.53,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            769.97,
+            286.04,
+            2
+          ],
+          "treble": [
+            774.45,
+            341.61,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            740.02,
+            288.24,
+            2
+          ],
+          "treble": [
+            743.56,
+            344.55,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            710.95,
+            290.38,
+            2
+          ],
+          "treble": [
+            715.37,
+            347.23,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            683.57,
+            292.39,
+            2
+          ],
+          "treble": [
+            688.4,
+            349.8,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            658.74,
+            294.21,
+            2
+          ],
+          "treble": [
+            663.08,
+            352.21,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            634.46,
+            296.0,
+            2
+          ],
+          "treble": [
+            639.67,
+            354.44,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            612.97,
+            297.58,
+            2
+          ],
+          "treble": [
+            616.8,
+            356.61,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            591.39,
+            299.16,
+            2
+          ],
+          "treble": [
+            595.64,
+            358.63,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            571.52,
+            300.62,
+            2
+          ],
+          "treble": [
+            575.74,
+            360.52,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            552.35,
+            302.03,
+            2
+          ],
+          "treble": [
+            557.44,
+            362.26,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            535.21,
+            303.29,
+            2
+          ],
+          "treble": [
+            539.82,
+            363.94,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            518.59,
+            304.51,
+            2
+          ],
+          "treble": [
+            522.73,
+            365.56,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            503.46,
+            305.62,
+            2
+          ],
+          "treble": [
+            507.56,
+            367.01,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            488.23,
+            306.74,
+            2
+          ],
+          "treble": [
+            492.31,
+            368.46,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            474.38,
+            307.76,
+            2
+          ],
+          "treble": [
+            478.88,
+            369.74,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            460.28,
+            308.79,
+            2
+          ],
+          "treble": [
+            464.32,
+            371.12,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -838.81264749,
+            1.95787585,
+            1097.18684461
+          ],
+          [
+            89.98891647,
+            47.65460526,
+            286.39137842
+          ],
+          [
+            0.05091636,
+            -0.00273483,
+            1.0
+          ]
+        ],
+        "tau": 0.44999999999999996,
+        "rmse_px": 0.327,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "data/scraped/frames/Z21qSJ3HynA_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "nut",
+          "confidence": 0.85,
+          "nut_visible": true,
+          "reasoning": "The cream nut bar is visible where the fingerboard meets the SG headstock, and the W1 tick sits right on it, so W1 is the nut (fret 0). Inlays confirm this: with W1=0, the trapezoid inlays fall in the cells ending at W4 (fret 3), W6 (5), W8 (7), W10 (9), W13 (12), W16 (15), W18 (17), W20 (19) and W22 (21). This fits the standard inlay pattern exactly, which makes W24 fret 23."
+        },
+        "n_candidates": 728,
+        "grid_score": 23.98,
+        "strings_source": "comb",
+        "strings_rho": [
+          0.985,
+          0.938
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 16,
+          "reason": "A red SG-style electric guitar fills the frame with the whole fretboard, including inlays and fret wires, clearly visible and in focus, with only a few frets partly covered by the fretting hand."
+        },
+        "span_check": {
+          "covers_all_6": true,
+          "problem": "none",
+          "reason": "The red and blue lines run along the two outer edges of the fingerboard on the outermost strings, and the band between them spans the full neck width across the marked frets."
+        }
+      }
+    }
+  ]
+}

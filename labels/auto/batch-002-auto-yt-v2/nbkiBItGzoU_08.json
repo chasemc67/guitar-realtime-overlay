@@ -1,0 +1,223 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "nbkiBItGzoU_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/nbkiBItGzoU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f4": {
+          "bass": [
+            993.97,
+            302.82,
+            1
+          ],
+          "treble": [
+            976.18,
+            303.53,
+            1
+          ]
+        },
+        "f7": {
+          "bass": [
+            1000.61,
+            307.08,
+            1
+          ],
+          "treble": [
+            976.59,
+            308.07,
+            1
+          ]
+        },
+        "f8": {
+          "bass": [
+            1003.31,
+            308.81,
+            1
+          ],
+          "treble": [
+            976.76,
+            309.93,
+            1
+          ]
+        },
+        "f9": {
+          "bass": [
+            1006.33,
+            310.75,
+            1
+          ],
+          "treble": [
+            976.94,
+            312.01,
+            1
+          ]
+        },
+        "f11": {
+          "bass": [
+            1013.5,
+            315.35,
+            1
+          ],
+          "treble": [
+            977.39,
+            316.98,
+            1
+          ]
+        },
+        "f17": {
+          "bass": [
+            1051.36,
+            339.62,
+            1
+          ],
+          "treble": [
+            979.77,
+            343.66,
+            1
+          ]
+        },
+        "f18": {
+          "bass": [
+            1062.08,
+            346.5,
+            1
+          ],
+          "treble": [
+            980.46,
+            351.37,
+            1
+          ]
+        },
+        "f19": {
+          "bass": [
+            1074.12,
+            354.22,
+            2
+          ],
+          "treble": [
+            981.34,
+            361.21,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            1091.31,
+            365.24,
+            1
+          ],
+          "treble": [
+            982.37,
+            372.72,
+            1
+          ]
+        },
+        "f21": {
+          "bass": [
+            1114.04,
+            379.83,
+            2
+          ],
+          "treble": [
+            983.82,
+            388.92,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            1137.92,
+            395.14,
+            2
+          ],
+          "treble": [
+            985.56,
+            408.5,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1201.02081839,
+            -14.76386422,
+            980.59185147
+          ],
+          [
+            -351.99608275,
+            -0.1807666,
+            297.30165431
+          ],
+          [
+            -1.23771028,
+            -0.00286948,
+            1.0
+          ]
+        ],
+        "tau": 0.6,
+        "rmse_px": 1.223,
+        "index_shift": 0
+      },
+      "flags": [
+        "index_unresolved",
+        "strings_prior",
+        "few_wires",
+        "ai_span_bad"
+      ],
+      "notes": "AI numbering failed (no answer); relative numbering; AI span check: not_on_neck: The overlay sits on a dark speaker-grille-like surface with 'star' lettering, not on a guitar fingerboard, so no strings are visible and the lines cannot be on the outer strings.",
+      "frame_file": "data/scraped/frames/nbkiBItGzoU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "relative",
+          "resolved": false,
+          "cue": null,
+          "confidence": 0.0,
+          "nut_visible": false,
+          "reasoning": ""
+        },
+        "n_candidates": 1019,
+        "grid_score": 11.88,
+        "strings_source": "prior",
+        "strings_rho": [
+          0.95,
+          0.95
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 15,
+          "reason": "A sunburst electric guitar with a maple fingerboard fills the frame, and well over 6 fret wires are clearly visible and in focus, with only some fingers covering part of the neck."
+        },
+        "span_check": {
+          "covers_all_6": false,
+          "problem": "not_on_neck",
+          "reason": "The overlay sits on a dark speaker-grille-like surface with 'star' lettering, not on a guitar fingerboard, so no strings are visible and the lines cannot be on the outer strings."
+        }
+      }
+    }
+  ]
+}

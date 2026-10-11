@@ -1,0 +1,362 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "bOmRY782-GE_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/bOmRY782-GE_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f1": {
+          "bass": [
+            1217.04,
+            153.05,
+            2
+          ],
+          "treble": [
+            1236.42,
+            223.22,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            1150.79,
+            167.33,
+            2
+          ],
+          "treble": [
+            1169.94,
+            238.93,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1088.69,
+            180.72,
+            2
+          ],
+          "treble": [
+            1107.62,
+            253.65,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            1030.46,
+            193.28,
+            2
+          ],
+          "treble": [
+            1049.15,
+            267.46,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            975.83,
+            205.06,
+            2
+          ],
+          "treble": [
+            994.29,
+            280.42,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            924.56,
+            216.11,
+            2
+          ],
+          "treble": [
+            942.8,
+            292.58,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            876.43,
+            226.49,
+            2
+          ],
+          "treble": [
+            894.45,
+            304.0,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            831.24,
+            236.23,
+            2
+          ],
+          "treble": [
+            849.03,
+            314.73,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            788.78,
+            245.38,
+            2
+          ],
+          "treble": [
+            806.36,
+            324.81,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            749.56,
+            253.84,
+            2
+          ],
+          "treble": [
+            765.86,
+            334.38,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            711.4,
+            262.07,
+            2
+          ],
+          "treble": [
+            728.56,
+            343.19,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            676.16,
+            269.66,
+            2
+          ],
+          "treble": [
+            693.11,
+            351.56,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            643.02,
+            276.81,
+            2
+          ],
+          "treble": [
+            659.78,
+            359.44,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            611.26,
+            283.66,
+            2
+          ],
+          "treble": [
+            628.36,
+            366.86,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            581.94,
+            289.98,
+            2
+          ],
+          "treble": [
+            598.85,
+            373.83,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            554.94,
+            295.8,
+            2
+          ],
+          "treble": [
+            571.16,
+            380.37,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            528.29,
+            301.55,
+            2
+          ],
+          "treble": [
+            545.37,
+            386.46,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            504.54,
+            306.67,
+            2
+          ],
+          "treble": [
+            520.43,
+            392.35,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            480.94,
+            311.75,
+            2
+          ],
+          "treble": [
+            497.2,
+            397.84,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            459.88,
+            316.29,
+            2
+          ],
+          "treble": [
+            475.47,
+            402.97,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            438.89,
+            320.82,
+            2
+          ],
+          "treble": [
+            454.86,
+            407.84,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            419.57,
+            324.98,
+            2
+          ],
+          "treble": [
+            435.92,
+            412.32,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            400.72,
+            329.05,
+            2
+          ],
+          "treble": [
+            415.92,
+            417.04,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1182.22874357,
+            9.3412629,
+            1297.1979471
+          ],
+          [
+            296.22996553,
+            67.90652816,
+            172.07186434
+          ],
+          [
+            0.06284327,
+            -0.0078252,
+            1.0
+          ]
+        ],
+        "tau": 0.39999999999999997,
+        "rmse_px": 0.339,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "data/scraped/frames/bOmRY782-GE_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.85,
+          "nut_visible": false,
+          "reasoning": "Trapezoid inlays sit in the cells W2-W3, W4-W5, W6-W7, W8-W9, W11-W12, W14-W15, W16-W17, W18-W19 and W20-W21. This matches the marker sequence 3, 5, 7, 9, 12, 15, 17, 19, 21, so W3 is fret 3, W9 is fret 9 and W12 is fret 12. Counting back from W3 makes W1 fret 1. The nut is cut off to the left, and W25 lies beyond the fingerboard end, near the pickup, so it is not a real fret wire."
+        },
+        "n_candidates": 942,
+        "grid_score": 23.48,
+        "strings_source": "comb",
+        "strings_rho": [
+          0.998,
+          0.947
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 16,
+          "reason": "A red SG-style electric guitar is shown close up with the rosewood fingerboard, trapezoid inlays and many fret wires clearly visible, with the fretting hand covering only a small part."
+        },
+        "span_check": {
+          "covers_all_6": true,
+          "problem": "none",
+          "reason": "The red and blue lines run along the outer edges of the fingerboard, close to the low E and high E strings (within about half a string spacing), so the band between them spans all six strings across the marked frets."
+        }
+      }
+    }
+  ]
+}

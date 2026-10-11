@@ -1,0 +1,290 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "XyBfN5WNo9g_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/XyBfN5WNo9g_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f5": {
+          "bass": [
+            877.87,
+            38.06,
+            2
+          ],
+          "treble": [
+            918.84,
+            95.36,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            836.52,
+            74.33,
+            2
+          ],
+          "treble": [
+            879.62,
+            132.18,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            797.87,
+            108.24,
+            2
+          ],
+          "treble": [
+            840.82,
+            168.59,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            760.07,
+            141.39,
+            2
+          ],
+          "treble": [
+            804.78,
+            202.42,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            725.1,
+            172.06,
+            2
+          ],
+          "treble": [
+            769.46,
+            235.56,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            691.07,
+            201.91,
+            2
+          ],
+          "treble": [
+            736.76,
+            266.26,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            569.54,
+            308.52,
+            2
+          ],
+          "treble": [
+            619.5,
+            376.3,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            543.76,
+            331.12,
+            2
+          ],
+          "treble": [
+            594.1,
+            400.14,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            517.72,
+            353.97,
+            2
+          ],
+          "treble": [
+            568.83,
+            423.86,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            494.66,
+            374.19,
+            2
+          ],
+          "treble": [
+            545.63,
+            445.63,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            470.0,
+            395.83,
+            2
+          ],
+          "treble": [
+            524.17,
+            465.77,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            449.68,
+            413.65,
+            2
+          ],
+          "treble": [
+            502.39,
+            486.22,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            428.59,
+            432.15,
+            2
+          ],
+          "treble": [
+            482.34,
+            505.03,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            408.6,
+            449.67,
+            2
+          ],
+          "treble": [
+            464.25,
+            522.01,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            391.6,
+            464.59,
+            2
+          ],
+          "treble": [
+            445.58,
+            539.54,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            372.98,
+            480.92,
+            2
+          ],
+          "treble": [
+            429.29,
+            554.83,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            356.3,
+            495.55,
+            2
+          ],
+          "treble": [
+            413.12,
+            570.01,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1046.61432613,
+            36.60238069,
+            1130.74224673
+          ],
+          [
+            830.98067264,
+            48.88701703,
+            -144.10777377
+          ],
+          [
+            -0.13467993,
+            0.00215073,
+            1.0
+          ]
+        ],
+        "tau": 0.5499999999999999,
+        "rmse_px": 0.59,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "data/scraped/frames/XyBfN5WNo9g_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "last_fret",
+          "confidence": 0.75,
+          "nut_visible": false,
+          "reasoning": "Using the inlays from the body end: the double dot in the W19-W20 cell is the 24th-fret marker, so W20 = 24. The single dots in cells W16-W17, W14-W15, W12-W13 and W10-W11 then fall at frets 21, 19, 17 and 15, which makes W10 = 14. Counting back through the three unlabelled wires under the fingers (11, 12, 13) gives W6 = 10, so W1 = 5. This fits the dots in W4-W5 (9), W2-W3 (7) and the cell just left of W1 (5); the 12th-fret double dot is hidden under the fingers."
+        },
+        "n_candidates": 867,
+        "grid_score": 15.49,
+        "strings_source": "comb",
+        "strings_rho": [
+          0.859,
+          0.779
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 14,
+          "reason": "A teal electric guitar neck is shown close up with a dark fingerboard, dot inlays and many fret wires clearly visible and in focus, with the fretting hand covering only a small part."
+        },
+        "span_check": {
+          "covers_all_6": true,
+          "problem": "none",
+          "reason": "The red and blue lines run along the two outer edges of the fingerboard, and the inlay dots sit near the middle of the band, so all six strings fall between the lines."
+        }
+      }
+    }
+  ]
+}

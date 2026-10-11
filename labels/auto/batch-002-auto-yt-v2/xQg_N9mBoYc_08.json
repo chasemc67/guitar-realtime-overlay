@@ -1,0 +1,338 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "xQg_N9mBoYc_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/xQg_N9mBoYc_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f3": {
+          "bass": [
+            998.04,
+            360.81,
+            2
+          ],
+          "treble": [
+            1017.47,
+            440.05,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            930.85,
+            370.9,
+            2
+          ],
+          "treble": [
+            950.12,
+            450.74,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            870.07,
+            380.03,
+            2
+          ],
+          "treble": [
+            887.06,
+            460.76,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            813.95,
+            388.45,
+            2
+          ],
+          "treble": [
+            829.83,
+            469.85,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            761.84,
+            396.28,
+            2
+          ],
+          "treble": [
+            776.13,
+            478.38,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            713.76,
+            403.5,
+            2
+          ],
+          "treble": [
+            727.07,
+            486.17,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            668.41,
+            410.31,
+            2
+          ],
+          "treble": [
+            681.33,
+            493.43,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            627.18,
+            416.5,
+            2
+          ],
+          "treble": [
+            639.23,
+            500.12,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            586.93,
+            422.54,
+            2
+          ],
+          "treble": [
+            600.28,
+            506.3,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            553.18,
+            427.61,
+            2
+          ],
+          "treble": [
+            562.05,
+            512.38,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            519.08,
+            432.73,
+            2
+          ],
+          "treble": [
+            528.28,
+            517.74,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            488.55,
+            437.31,
+            2
+          ],
+          "treble": [
+            496.02,
+            522.86,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            457.03,
+            442.05,
+            2
+          ],
+          "treble": [
+            465.97,
+            527.63,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            431.07,
+            445.94,
+            2
+          ],
+          "treble": [
+            437.82,
+            532.11,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            405.1,
+            449.84,
+            2
+          ],
+          "treble": [
+            411.28,
+            536.32,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            381.37,
+            453.41,
+            2
+          ],
+          "treble": [
+            386.49,
+            540.26,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            358.69,
+            456.81,
+            2
+          ],
+          "treble": [
+            362.77,
+            544.02,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            336.28,
+            460.18,
+            2
+          ],
+          "treble": [
+            342.53,
+            547.24,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            315.85,
+            463.24,
+            2
+          ],
+          "treble": [
+            321.12,
+            550.64,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            296.22,
+            466.19,
+            2
+          ],
+          "treble": [
+            302.64,
+            553.57,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            280.39,
+            468.57,
+            2
+          ],
+          "treble": [
+            284.84,
+            556.4,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -1236.92552392,
+            -2.43293638,
+            1240.91866146
+          ],
+          [
+            321.09595804,
+            68.65051501,
+            363.97107494
+          ],
+          [
+            0.23411803,
+            -0.02141801,
+            1.0
+          ]
+        ],
+        "tau": 0.39999999999999997,
+        "rmse_px": 0.787,
+        "index_shift": 0
+      },
+      "flags": [],
+      "notes": "",
+      "frame_file": "data/scraped/frames/xQg_N9mBoYc_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.85,
+          "nut_visible": false,
+          "reasoning": "I used the trapezoid inlays as the anchor. They sit in the cells ending at W1, W3, W5, W7, W10, W13, W15, W17 and W19. The gaps between these cells are 2,2,2,3,3,2,2,2 wires, which matches the standard marker pattern 3,5,7,9,12,15,17,19,21; the three-wire gaps on either side of W10 mark the 12th fret. So W10 is fret 12, W7 is fret 9, and the inlay cell ending at W1 is fret 3, making W1 fret 3."
+        },
+        "n_candidates": 397,
+        "grid_score": 20.94,
+        "strings_source": "comb",
+        "strings_rho": [
+          0.945,
+          0.983
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 15,
+          "reason": "A red electric guitar (SG-style) with a dark rosewood fingerboard and block inlays is shown close up, with most of the neck's fret wires visible and reasonably in focus despite dim lighting and some fingers covering the upper frets."
+        },
+        "span_check": {
+          "covers_all_6": true,
+          "problem": "none",
+          "reason": "The red line runs along the top (low E) edge of the fingerboard and the blue line along the bottom (high E) edge, so the band spans all six strings across the marked frets."
+        }
+      }
+    }
+  ]
+}

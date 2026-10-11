@@ -1,0 +1,198 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "hAuPpjcpZSU_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/hAuPpjcpZSU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f15": {
+          "bass": [
+            510.54,
+            369.97,
+            2
+          ],
+          "treble": [
+            515.66,
+            404.1,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            501.52,
+            371.29,
+            1
+          ],
+          "treble": [
+            507.73,
+            407.28,
+            1
+          ]
+        },
+        "f17": {
+          "bass": [
+            492.6,
+            372.61,
+            2
+          ],
+          "treble": [
+            499.61,
+            410.53,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            483.16,
+            373.99,
+            2
+          ],
+          "treble": [
+            489.76,
+            414.47,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            472.26,
+            375.6,
+            2
+          ],
+          "treble": [
+            479.56,
+            418.56,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            452.1,
+            378.56,
+            1
+          ],
+          "treble": [
+            459.46,
+            426.6,
+            1
+          ]
+        },
+        "f22": {
+          "bass": [
+            441.09,
+            380.18,
+            1
+          ],
+          "treble": [
+            448.65,
+            430.93,
+            1
+          ]
+        },
+        "f23": {
+          "bass": [
+            430.83,
+            381.69,
+            2
+          ],
+          "treble": [
+            437.35,
+            435.46,
+            2
+          ]
+        },
+        "f24": {
+          "bass": [
+            417.09,
+            383.71,
+            2
+          ],
+          "treble": [
+            425.88,
+            440.05,
+            2
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -641.02626709,
+            0.08771356,
+            604.27073567
+          ],
+          [
+            -322.29071645,
+            10.45094388,
+            362.24366672
+          ],
+          [
+            -0.94289754,
+            -0.00382174,
+            1.0
+          ]
+        ],
+        "tau": 0.49999999999999994,
+        "rmse_px": 0.576,
+        "index_shift": 0
+      },
+      "flags": [
+        "strings_prior",
+        "numbering_low_conf",
+        "ai_span_bad"
+      ],
+      "notes": "AI span check: misses_red_side: The inlay dots mark the neck's center line, and they sit close to the red line, so the red line lies well inside the board instead of on the outer low E string, leaving the strings above it outside the band, while the blue line is near the opposite edge.",
+      "frame_file": "data/scraped/frames/hAuPpjcpZSU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_9_12_15",
+          "confidence": 0.3,
+          "nut_visible": false,
+          "reasoning": "The anchor is the inlay pattern, because the nut is out of view. In the strip, four single center dots sit in alternating cells: around x\u2248265, 640, 880 and 1045. Only about three more wires follow before the fingerboard meets the pickguard, so these dots must be the 15/17/19/21 markers rather than 3/5/7/9. Counting the visible wires from the 15th-fret dot cell, the wire just right of that dot is fret 15, and the W1 tick falls closest to it at the bottom edge. The ticks are spaced more evenly than the real wires, so the label-to-wire alignment, and therefore this answer, is uncertain; a rough scale-length estimate from the full frame suggests fret 18 instead."
+        },
+        "n_candidates": 706,
+        "grid_score": 22.94,
+        "strings_source": "prior",
+        "strings_rho": [
+          0.95,
+          0.95
+        ],
+        "usability": {
+          "usable": true,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": true,
+          "visible_frets_estimate": 17,
+          "reason": "A black electric guitar with a pearloid pickguard and a maple fingerboard is shown close up, with the neck clearly in focus and most fret wires visible; the fretting hand covers only a few of them."
+        },
+        "span_check": {
+          "covers_all_6": false,
+          "problem": "misses_red_side",
+          "reason": "The inlay dots mark the neck's center line, and they sit close to the red line, so the red line lies well inside the board instead of on the outer low E string, leaving the strings above it outside the band, while the blue line is near the opposite edge."
+        }
+      }
+    }
+  ]
+}

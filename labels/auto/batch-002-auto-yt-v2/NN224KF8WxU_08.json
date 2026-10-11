@@ -1,0 +1,272 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "NN224KF8WxU_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/NN224KF8WxU_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "pseudo",
+      "annotator": "auto:gro-cv-v1",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": false,
+      "anchor_cue": null,
+      "kpts": {
+        "f8": {
+          "bass": [
+            631.33,
+            279.81,
+            1
+          ],
+          "treble": [
+            620.55,
+            328.45,
+            1
+          ]
+        },
+        "f9": {
+          "bass": [
+            610.83,
+            288.23,
+            2
+          ],
+          "treble": [
+            600.34,
+            337.36,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            576.95,
+            302.14,
+            1
+          ],
+          "treble": [
+            564.56,
+            353.13,
+            1
+          ]
+        },
+        "f12": {
+          "bass": [
+            560.42,
+            308.93,
+            1
+          ],
+          "treble": [
+            547.53,
+            360.64,
+            1
+          ]
+        },
+        "f14": {
+          "bass": [
+            529.61,
+            321.58,
+            1
+          ],
+          "treble": [
+            515.76,
+            374.65,
+            1
+          ]
+        },
+        "f15": {
+          "bass": [
+            515.27,
+            327.46,
+            1
+          ],
+          "treble": [
+            500.97,
+            381.17,
+            1
+          ]
+        },
+        "f16": {
+          "bass": [
+            501.61,
+            333.07,
+            1
+          ],
+          "treble": [
+            486.87,
+            387.39,
+            1
+          ]
+        },
+        "f17": {
+          "bass": [
+            488.61,
+            338.41,
+            1
+          ],
+          "treble": [
+            473.44,
+            393.31,
+            1
+          ]
+        },
+        "f18": {
+          "bass": [
+            476.23,
+            343.49,
+            1
+          ],
+          "treble": [
+            460.65,
+            398.95,
+            1
+          ]
+        },
+        "f19": {
+          "bass": [
+            464.45,
+            348.33,
+            1
+          ],
+          "treble": [
+            448.48,
+            404.31,
+            1
+          ]
+        },
+        "f20": {
+          "bass": [
+            453.25,
+            352.93,
+            1
+          ],
+          "treble": [
+            436.91,
+            409.42,
+            1
+          ]
+        },
+        "f21": {
+          "bass": [
+            443.33,
+            357.0,
+            2
+          ],
+          "treble": [
+            425.04,
+            414.65,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            432.7,
+            361.37,
+            2
+          ],
+          "treble": [
+            415.57,
+            418.82,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            422.88,
+            365.4,
+            1
+          ],
+          "treble": [
+            405.49,
+            423.27,
+            1
+          ]
+        },
+        "f24": {
+          "bass": [
+            413.76,
+            369.15,
+            1
+          ],
+          "treble": [
+            396.04,
+            427.43,
+            1
+          ]
+        }
+      },
+      "fit": {
+        "H": [
+          [
+            -598.16960796,
+            -24.28995662,
+            821.55670879
+          ],
+          [
+            192.78246909,
+            33.97597013,
+            220.55227341
+          ],
+          [
+            -0.10835265,
+            -0.02526507,
+            1.0
+          ]
+        ],
+        "tau": 0.3,
+        "rmse_px": 0.359,
+        "index_shift": 0
+      },
+      "flags": [
+        "ai_unusable",
+        "strings_prior",
+        "few_wires",
+        "numbering_low_conf",
+        "ai_span_bad"
+      ],
+      "notes": "AI usability: This is a close-up of an electric guitar with a maple fingerboard, but the extreme angle, foreshortening, motion blur and the hand covering much of the neck make the fret wires hard to resolve reliably.; AI span check: misses_blue_side: The fret wires continue well below the blue line toward the bottom of the image, so the band covers only part of the fingerboard width and the blue line is not on the outer high E string.",
+      "frame_file": "data/scraped/frames/NN224KF8WxU_08.jpg",
+      "auto": {
+        "numbering": {
+          "source": "ai",
+          "resolved": true,
+          "cue": "inlay_3_5_7",
+          "confidence": 0.35,
+          "nut_visible": false,
+          "reasoning": "The nut is off-frame under the fretting hand, so the inlay dots in the full frame are the anchor. The single dots near x\u2248700 and x\u2248580 fit frets 7 and 9 by their spacing, and the lower dot near x\u2248447 fits one of the 12th-fret pair. W1 sits just toward the body from the fret-7 dot cell and just toward the nut from the fret-9 dot, which makes it fret 8. W1 is about 8\u20139 wires from the 12th-fret area, but 34 wires are detected where only about 17 real frets should remain toward the body. That means many detections are likely false (strings or blur), though I cannot reliably say which labels."
+        },
+        "n_candidates": 386,
+        "grid_score": 11.39,
+        "strings_source": "prior",
+        "strings_rho": [
+          0.95,
+          0.95
+        ],
+        "usability": {
+          "usable": false,
+          "guitar": "electric",
+          "close_up": true,
+          "neck_clear": false,
+          "visible_frets_estimate": 10,
+          "reason": "This is a close-up of an electric guitar with a maple fingerboard, but the extreme angle, foreshortening, motion blur and the hand covering much of the neck make the fret wires hard to resolve reliably."
+        },
+        "span_check": {
+          "covers_all_6": false,
+          "problem": "misses_blue_side",
+          "reason": "The fret wires continue well below the blue line toward the bottom of the image, so the band covers only part of the fingerboard width and the blue line is not on the outer high E string."
+        }
+      }
+    }
+  ]
+}

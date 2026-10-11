@@ -9,6 +9,10 @@ Metrics (per frame and pooled):
   and the error perpendicular to the GT wire (independent of where the board edge is put along the wire).
   Predicted and GT wires are matched geometrically first (best index offset d), so a numbering error does not turn
   into a pixel error; recall = GT anchors whose wire was found.
+- cross-neck (does the grid span low E -> high E): per matched wire, the span width error |pred span - GT span|
+  and the outer-string error (distance of each predicted anchor from the GT low-E / high-E line, a line fitted
+  through the GT anchors of that side), in px and in % of the GT span at that wire. The fret-wire (perpendicular)
+  error stays the headline (D13); this is reported next to it.
 - numbering: exact fret-index match (d == 0), reported for every frame and for GT-anchorable frames (D12).
 - anchorable flag and anchor_cue accuracy vs the GT labels.
 """
@@ -27,6 +31,7 @@ import numpy as np
 from gro import anchors as A
 from gro.auto.ai import AIClient
 from gro.auto.pipeline import AutoConfig, annotate_frame
+from gro.snap import fit_line
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -68,6 +73,35 @@ def compare(gt: list[A.Anchor], pred: list[A.Anchor]) -> dict:
         perp = float(abs((np.array([p.x, p.y]) - b) @ n))
         rows.append((a, e, perp))
     return {"offset": d, "rows": rows}
+
+
+def crossneck(gt: list[A.Anchor], pred: list[A.Anchor], offset: int) -> dict:
+    """Span width error and outer-string error per matched wire (px and % of the GT span)."""
+    gt = [a for a in gt if a.vis > 0]
+    gl, pl = _wire_lines(gt), _wire_lines(pred)
+    side_lines = {}
+    for i, side in enumerate(("bass", "treble")):
+        pts = np.array([gl[f][i] for f in sorted(gl)])
+        if len(pts) >= 2:
+            side_lines[side] = fit_line(pts)
+    out = {"span_px": [], "span_pct": [], "outer_px": [], "outer_pct": [], "span_signed_pct": []}
+    for f, (b, t) in gl.items():
+        if f + offset not in pl:
+            continue
+        pb, pt = pl[f + offset]
+        span_gt = float(np.linalg.norm(t - b))
+        e = float(np.linalg.norm(pt - pb)) - span_gt
+        out["span_px"].append(abs(e))
+        out["span_pct"].append(100 * abs(e) / span_gt)
+        out["span_signed_pct"].append(100 * e / span_gt)
+        for side, p in (("bass", pb), ("treble", pt)):
+            if side not in side_lines:
+                continue
+            c, u = side_lines[side]
+            d = float(abs((p - c) @ np.array([-u[1], u[0]])))
+            out["outer_px"].append(d)
+            out["outer_pct"].append(100 * d / span_gt)
+    return out
 
 
 def worst_crops(canon, rows, offset, pred, k: int = 6, half: int = 18, zoom: int = 6):
@@ -144,8 +178,9 @@ def main() -> None:
     ai = None if a.no_ai else AIClient(**({"model": a.model} if a.model else {}), offline=a.offline)
     if ai is not None and not ai.available:
         print("note: no AI_GATEWAY_API_KEY -> running without AI", file=sys.stderr)
-    cfg = AutoConfig(use_ai=not a.no_ai, ai_usability=False)
-    results, pooled = [], {k: [] for k in ("all", "vis2", "bass", "treble", "perp")}
+    cfg = AutoConfig(use_ai=not a.no_ai, ai_usability=False, ai_span_check=False)
+    cn_keys = ("span_px", "span_pct", "outer_px", "outer_pct")
+    results, pooled = [], {k: [] for k in ("all", "vis2", "bass", "treble", "perp", *cn_keys)}
     for path, lf, i, fr in load_gt(dirs):
         img = frame_image(lf, fr, path)
         if img is None:
@@ -165,6 +200,9 @@ def main() -> None:
         e_p = [p for _, _, p in rows]
         for k, v in zip(("all", "vis2", "bass", "treble", "perp"), (e_all, e_v2, e_b, e_t, e_p), strict=True):
             pooled[k] += [x for x in v if x is not None]
+        cn = crossneck(fr.anchors, pred, cmp_["offset"])
+        for k in cn_keys:
+            pooled[k] += cn[k]
         gt_anch, gt_cue = fr.anchorability()
         pr_anch, pr_cue = res.label.anchorability()
         num = res.numbering
@@ -178,6 +216,9 @@ def main() -> None:
             "err_bass": stats(e_b),
             "err_treble": stats(e_t),
             "err_perp": stats(e_p),
+            **{f"cn_{k}": stats(cn[k]) for k in cn_keys},
+            "cn_span_signed_pct_mean": float(np.mean(cn["span_signed_pct"])) if cn["span_signed_pct"] else None,
+            "strings_source": res.label.extra.get("auto", {}).get("strings_source"),
             "index_offset": cmp_["offset"],
             # A relative (unresolved) numbering never counts as correct, even when the guess happens to match.
             "numbering_ok": cmp_["offset"] == 0 and bool(num and num.resolved),
@@ -211,15 +252,17 @@ def main() -> None:
 
     print(
         "\n| frame | GT anchors | recall | mean px | median | max | vis2 mean | bass mean | treble mean | "
-        "perp mean | index ok | numbering | anchorable GT/pred | cue GT/pred |"
+        "perp mean | span err px | span err % | outer px | outer % | index ok | numbering | anchorable GT/pred | "
+        "cue GT/pred |"
     )
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for r in results:
         print(
             f"| {r['item']} | {r['n_gt']} | {r['recall']:.0%} | {f(r['err']['mean'])} | {f(r['err']['median'])} | "
             f"{f(r['err']['max'])} | {f(r['err_vis2']['mean'])} | {f(r['err_bass']['mean'])} | "
             f"{f(r['err_treble']['mean'])} | {f(r['err_perp']['mean'])} | "
-            f"{num_cell(r)} | "
+            f"{f(r['cn_span_px']['mean'])} | {f(r['cn_span_pct']['mean'])} | {f(r['cn_outer_px']['mean'])} | "
+            f"{f(r['cn_outer_pct']['mean'])} | {num_cell(r)} | "
             f"{r['numbering_source']}/{r['numbering_cue']} | {r['gt_anchorable']}/{r['pred_anchorable']} | "
             f"{r['gt_cue']}/{r['pred_cue']} |"
         )
@@ -238,6 +281,10 @@ def main() -> None:
         f"\npooled: mean {f(P['all']['mean'])} px, median {f(P['all']['median'])}, max {f(P['all']['max'])} "
         f"(n={P['all']['n']}); vis2 mean {f(P['vis2']['mean'])}; bass {f(P['bass']['mean'])} / treble "
         f"{f(P['treble']['mean'])}; perpendicular-to-wire {f(P['perp']['mean'])}"
+    )
+    print(
+        f"cross-neck: span width err {f(P['span_px']['mean'])} px ({f(P['span_pct']['mean'])}% of span), "
+        f"outer-string err {f(P['outer_px']['mean'])} px ({f(P['outer_pct']['mean'])}%)"
     )
     print(
         f"numbering exact: {summary['numbering_acc']:.0%} (anchorable frames: "

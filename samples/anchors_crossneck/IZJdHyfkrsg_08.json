@@ -1,0 +1,204 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "IZJdHyfkrsg_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/IZJdHyfkrsg_08.jpg",
+    "w": 1280,
+    "h": 960,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "manual",
+      "annotator": "agent:claude-gt-crossneck",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_3_5_7",
+      "kpts": {
+        "f1": {
+          "bass": [
+            956.33,
+            228.98,
+            2
+          ],
+          "treble": [
+            977.6,
+            294.63,
+            2
+          ]
+        },
+        "f2": {
+          "bass": [
+            854.75,
+            244.99,
+            2
+          ],
+          "treble": [
+            881.37,
+            313.21,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            761.01,
+            259.76,
+            2
+          ],
+          "treble": [
+            787.62,
+            331.33,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            672.59,
+            273.67,
+            2
+          ],
+          "treble": [
+            699.43,
+            348.39,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            589.26,
+            286.78,
+            2
+          ],
+          "treble": [
+            616.47,
+            364.44,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            510.84,
+            299.1,
+            2
+          ],
+          "treble": [
+            537.77,
+            379.68,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            435.99,
+            310.86,
+            2
+          ],
+          "treble": [
+            463.54,
+            394.06,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            366.26,
+            321.81,
+            2
+          ],
+          "treble": [
+            393.5,
+            407.63,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            298.45,
+            332.46,
+            2
+          ],
+          "treble": [
+            327.67,
+            420.39,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            234.29,
+            342.52,
+            2
+          ],
+          "treble": [
+            265.38,
+            432.47,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            173.92,
+            352.0,
+            2
+          ],
+          "treble": [
+            204.38,
+            444.29,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            117.06,
+            360.92,
+            2
+          ],
+          "treble": [
+            148.7,
+            455.09,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            62.86,
+            369.42,
+            2
+          ],
+          "treble": [
+            94.18,
+            465.67,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            11.19,
+            377.52,
+            2
+          ],
+          "treble": [
+            43.28,
+            475.54,
+            2
+          ]
+        }
+      },
+      "fit": null,
+      "flags": [],
+      "notes": "maple, nut visible, hand covering; old grid missed B + high E. Edges = maple/background boundary; outer strings = board edges inset by the physical margin (see gt_crossneck.py)",
+      "frame_file": "data/scraped/frames/IZJdHyfkrsg_08.jpg",
+      "gt_set": "crossneck"
+    }
+  ]
+}

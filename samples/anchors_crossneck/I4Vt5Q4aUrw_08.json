@@ -1,0 +1,300 @@
+{
+  "schema": "fretboard-kpts/v1",
+  "clip_id": "I4Vt5Q4aUrw_08",
+  "video": {
+    "path": "",
+    "source_image": "data/scraped/frames/I4Vt5Q4aUrw_08.jpg",
+    "w": 1280,
+    "h": 720,
+    "fps": null,
+    "mirrored": false
+  },
+  "guitar": {
+    "type": "electric",
+    "frets": 24,
+    "strings": 6
+  },
+  "frames": [
+    {
+      "t": 8.0,
+      "source": "manual",
+      "annotator": "agent:claude-gt-crossneck",
+      "status": "draft",
+      "qa_reviewer": null,
+      "neck_present": true,
+      "anchorable": true,
+      "anchor_cue": "inlay_9_12_15",
+      "kpts": {
+        "f2": {
+          "bass": [
+            1237.49,
+            104.13,
+            2
+          ],
+          "treble": [
+            1260.61,
+            179.25,
+            2
+          ]
+        },
+        "f3": {
+          "bass": [
+            1173.17,
+            119.84,
+            2
+          ],
+          "treble": [
+            1191.59,
+            197.56,
+            2
+          ]
+        },
+        "f4": {
+          "bass": [
+            1103.89,
+            136.76,
+            2
+          ],
+          "treble": [
+            1134.07,
+            212.82,
+            2
+          ]
+        },
+        "f5": {
+          "bass": [
+            1043.6,
+            151.49,
+            2
+          ],
+          "treble": [
+            1073.85,
+            228.8,
+            2
+          ]
+        },
+        "f6": {
+          "bass": [
+            989.32,
+            164.75,
+            2
+          ],
+          "treble": [
+            1014.87,
+            244.44,
+            2
+          ]
+        },
+        "f7": {
+          "bass": [
+            934.95,
+            178.03,
+            2
+          ],
+          "treble": [
+            960.91,
+            258.76,
+            2
+          ]
+        },
+        "f8": {
+          "bass": [
+            883.59,
+            190.57,
+            2
+          ],
+          "treble": [
+            908.96,
+            272.54,
+            2
+          ]
+        },
+        "f9": {
+          "bass": [
+            835.35,
+            202.35,
+            2
+          ],
+          "treble": [
+            860.5,
+            285.4,
+            2
+          ]
+        },
+        "f10": {
+          "bass": [
+            788.46,
+            213.81,
+            2
+          ],
+          "treble": [
+            814.33,
+            297.64,
+            2
+          ]
+        },
+        "f11": {
+          "bass": [
+            744.62,
+            224.51,
+            2
+          ],
+          "treble": [
+            770.62,
+            309.24,
+            2
+          ]
+        },
+        "f12": {
+          "bass": [
+            703.15,
+            234.64,
+            2
+          ],
+          "treble": [
+            729.97,
+            320.02,
+            2
+          ]
+        },
+        "f13": {
+          "bass": [
+            662.87,
+            244.48,
+            2
+          ],
+          "treble": [
+            690.49,
+            330.5,
+            2
+          ]
+        },
+        "f14": {
+          "bass": [
+            625.83,
+            253.53,
+            2
+          ],
+          "treble": [
+            653.35,
+            340.35,
+            2
+          ]
+        },
+        "f15": {
+          "bass": [
+            592.39,
+            261.69,
+            2
+          ],
+          "treble": [
+            616.87,
+            350.03,
+            2
+          ]
+        },
+        "f16": {
+          "bass": [
+            560.12,
+            269.57,
+            2
+          ],
+          "treble": [
+            581.97,
+            359.29,
+            2
+          ]
+        },
+        "f17": {
+          "bass": [
+            525.94,
+            277.92,
+            2
+          ],
+          "treble": [
+            552.37,
+            367.14,
+            2
+          ]
+        },
+        "f18": {
+          "bass": [
+            495.48,
+            285.36,
+            2
+          ],
+          "treble": [
+            523.03,
+            374.92,
+            2
+          ]
+        },
+        "f19": {
+          "bass": [
+            470.79,
+            291.39,
+            2
+          ],
+          "treble": [
+            489.93,
+            383.7,
+            2
+          ]
+        },
+        "f20": {
+          "bass": [
+            440.09,
+            298.89,
+            2
+          ],
+          "treble": [
+            467.24,
+            389.72,
+            2
+          ]
+        },
+        "f21": {
+          "bass": [
+            413.97,
+            305.27,
+            2
+          ],
+          "treble": [
+            443.39,
+            396.05,
+            2
+          ]
+        },
+        "f22": {
+          "bass": [
+            390.36,
+            311.04,
+            2
+          ],
+          "treble": [
+            418.2,
+            402.73,
+            2
+          ]
+        },
+        "f23": {
+          "bass": [
+            375.74,
+            314.61,
+            2
+          ],
+          "treble": [
+            396.81,
+            408.41,
+            2
+          ]
+        }
+      },
+      "fit": null,
+      "flags": [],
+      "notes": "dark board, hand at the body end; old grid missed the treble side. Outer strings read directly: body end past the last fret (six strings visible, 20 px apart), nut end 8% inside the wire ends; outer strings = board edges inset by the physical margin (see gt_crossneck.py)",
+      "frame_file": "data/scraped/frames/I4Vt5Q4aUrw_08.jpg",
+      "gt_set": "crossneck"
+    }
+  ]
+}

@@ -72,8 +72,15 @@ def _synthetic_board(seed=0):
     sh = 4
     for n in range(1, 23):
         a, b = m.fret_line(n)
-        cv2.line(img, tuple(np.int32(np.round(a * 2**sh))), tuple(np.int32(np.round(b * 2**sh))), (225, 225, 225), 2,
-                 cv2.LINE_AA, sh)
+        cv2.line(
+            img,
+            tuple(np.int32(np.round(a * 2**sh))),
+            tuple(np.int32(np.round(b * 2**sh))),
+            (225, 225, 225),
+            2,
+            cv2.LINE_AA,
+            sh,
+        )
     return cv2.GaussianBlur(img, (3, 3), 0.8), m
 
 

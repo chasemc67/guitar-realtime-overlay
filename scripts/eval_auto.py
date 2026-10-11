@@ -79,8 +79,9 @@ def worst_crops(canon, rows, offset, pred, k: int = 6, half: int = 18, zoom: int
         p = pa[(g.fret + offset, g.side)]
         cx, cy = int(round(0.5 * (g.x + p.x))), int(round(0.5 * (g.y + p.y)))
         x0, y0 = cx - half, cy - half
-        crop = cv2.copyMakeBorder(canon, half, half, half, half, cv2.BORDER_CONSTANT)[y0 + half : y0 + 3 * half,
-                                                                                      x0 + half : x0 + 3 * half]
+        crop = cv2.copyMakeBorder(canon, half, half, half, half, cv2.BORDER_CONSTANT)[
+            y0 + half : y0 + 3 * half, x0 + half : x0 + 3 * half
+        ]
         t = cv2.resize(crop, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
 
         def P(q, x0=x0, y0=y0):
@@ -192,8 +193,11 @@ def main() -> None:
         results.append(r)
         if a.crops:
             a.crops.mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(str(a.crops / f"{lf.clip_id}_f{i:03d}.jpg"), worst_crops(canon, rows, cmp_["offset"], pred),
-                        [cv2.IMWRITE_JPEG_QUALITY, 88])
+            cv2.imwrite(
+                str(a.crops / f"{lf.clip_id}_f{i:03d}.jpg"),
+                worst_crops(canon, rows, cmp_["offset"], pred),
+                [cv2.IMWRITE_JPEG_QUALITY, 88],
+            )
     if not results:
         sys.exit("no GT frames")
 

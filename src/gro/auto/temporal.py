@@ -157,7 +157,7 @@ def annotate_clip(
                 prop = transform_model(model, G)
         if is_key:
 
-            def hint(det, prop=prop):
+            def hint(det, prop=prop, lock=lock):
                 if lock is None or not lock.resolved:
                     return None
                 if prop is None:
@@ -192,8 +192,9 @@ def annotate_clip(
                 flags.append("klt_lost")
             if m2 is None:
                 flags.append("resnap_failed")
-                lab = A.FrameLabel(t=t, anchors=[], source="interp", annotator=ANNOTATOR, status="rejected",
-                                   flags=flags, extra=extra)
+                lab = A.FrameLabel(
+                    t=t, anchors=[], source="interp", annotator=ANNOTATOR, status="rejected", flags=flags, extra=extra
+                )
                 lab.anchorable, lab.anchor_cue = False, None
                 bad_run += 1
                 if prop is not None:
@@ -207,16 +208,30 @@ def annotate_clip(
                 bad_run = bad_run + 1 if flags else 0
                 model = m2
                 rms_hist.append(m2.rmse_px)
-                fit = {"H": np.round(m2.H, 8).tolist(), "tau": m2.tau, "rmse_px": round(m2.rmse_px, 3),
-                       "index_shift": 0}
-                lab = A.FrameLabel(t=t, anchors=anchors, source="interp", annotator=ANNOTATOR, status="draft",
-                                   fit=fit, flags=flags, extra=extra)
+                fit = {
+                    "H": np.round(m2.H, 8).tolist(),
+                    "tau": m2.tau,
+                    "rmse_px": round(m2.rmse_px, 3),
+                    "index_shift": 0,
+                }
+                lab = A.FrameLabel(
+                    t=t,
+                    anchors=anchors,
+                    source="interp",
+                    annotator=ANNOTATOR,
+                    status="draft",
+                    fit=fit,
+                    flags=flags,
+                    extra=extra,
+                )
                 if lock is None or not lock.resolved:
                     lab.anchorable, lab.anchor_cue = False, None
                     lab.flags.append("index_unresolved")
         labels.append(lab)
-        log(f"  t={t:7.2f}s {'KEY ' if is_key else 'prop'} anchors={len(lab.anchors):3d} "
-            f"rmse={(lab.fit or {}).get('rmse_px', float('nan')):.2f} flags={','.join(lab.flags) or '-'}")
+        log(
+            f"  t={t:7.2f}s {'KEY ' if is_key else 'prop'} anchors={len(lab.anchors):3d} "
+            f"rmse={(lab.fit or {}).get('rmse_px', float('nan')):.2f} flags={','.join(lab.flags) or '-'}"
+        )
         prev = gray
         k += 1
         idx += 1

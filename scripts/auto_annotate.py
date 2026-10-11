@@ -123,8 +123,14 @@ def main() -> None:
                 clip_id = src.stem
                 parts = clip_id.rsplit("_", 1)
                 t = float(parts[1]) if len(parts) == 2 and parts[1].replace(".", "").isdigit() else None
-                video = {"path": "", "source_image": rel(src), "w": img.shape[1], "h": img.shape[0], "fps": None,
-                         "mirrored": a.mirrored}
+                video = {
+                    "path": "",
+                    "source_image": rel(src),
+                    "w": img.shape[1],
+                    "h": img.shape[0],
+                    "fps": None,
+                    "mirrored": a.mirrored,
+                }
                 extra = {"frame_file": rel(src)}
             canon = cv2.flip(img, 1) if a.mirrored else img
             t0 = time.time()
@@ -155,14 +161,22 @@ def main() -> None:
         fps = cap.get(cv2.CAP_PROP_FPS) or 60.0
         size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         cap.release()
-        frames = annotate_clip(str(a.video), a.mirrored, a.t0, a.t1, ai, cfg,
-                               TrackConfig(out_fps=a.fps, keyframe_s=a.keyframe_s))
+        frames = annotate_clip(
+            str(a.video), a.mirrored, a.t0, a.t1, ai, cfg, TrackConfig(out_fps=a.fps, keyframe_s=a.keyframe_s)
+        )
         clip_id = f"{a.video.stem}_{a.t0:g}-{a.t1:g}s"
         lf = A.LabelFile(clip_id, video_info(a.video, a.mirrored, fps, size), guitar_info(a.frets), frames)
         A.save(lf, a.out / f"{clip_id}.json")
         for fr in frames:
-            report.append({"t": fr.t, "source": fr.source, "anchors": len(fr.anchors),
-                           "rmse": (fr.fit or {}).get("rmse_px"), "flags": fr.flags})
+            report.append(
+                {
+                    "t": fr.t,
+                    "source": fr.source,
+                    "anchors": len(fr.anchors),
+                    "rmse": (fr.fit or {}).get("rmse_px"),
+                    "flags": fr.flags,
+                }
+            )
     summary = {
         "cmd": a.cmd,
         "n": len(report),

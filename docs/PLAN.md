@@ -1,6 +1,6 @@
 # Guitar Real-Time Overlay — Technical Plan
 
-Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D10). Owner: Chase. This is an opinionated plan; open
+Status: draft v4 (2026-10-11), which adds the owner decisions below (D1–D11). Owner: Chase. This is an opinionated plan; open
 questions are collected at the end (§10).
 
 ## Decisions (2026-10-11)
@@ -119,6 +119,10 @@ These decisions come from Chase (owner) and override anything below that conflic
   PC's disk / Drive `Training data` (D9). Only the working set is synced to the box.
 - M1 learnings that shape annotation are in D4 and §1.2: fret spacing can't pin down the fret index. When the nut is
   hidden (fret wrap on Chase's guitars), the index has to come from inlays, the body joint, or the last fret.
+
+**D11. Absolute fret numbering without the nut: use the inlay pattern (Chase, 2026-10-11).**
+When the nut/headstock isn't visible, anchor absolute fret numbering on the inlay sequence 3-5-7-9-12: the double-width gap between the 9 and 12 markers stands out, and the 12th is often a double dot. The model should predict per-fret inlay presence (single/double/none) and the fitter matches that sequence against the fitted fret grid. Fret counts vary by guitar (21/22/24), so neck-body-joint and last-fret cues are secondary and less reliable. Accept that numbering may be impossible without inlays or a visible nut (e.g. blank boards, heavy occlusion); degrade gracefully by showing relative positions (pattern shape without absolute notes) or asking the user which fret a marker is on, and keep that answer per session.
+Annotation review of batch-000-hand: Chase says it looks great (2026-10-11). Collection runs on the Mac Mini (home IP) until the PC is back.
 
 ## 0. Goal & constraints
 

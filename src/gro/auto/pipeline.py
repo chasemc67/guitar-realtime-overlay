@@ -225,8 +225,9 @@ def annotate_frame(
     if numbering.resolved:
         keep = {n for n in keep if 1 <= n + numbering.shift <= (cfg.frets or 24)}
     elif cfg.frets:
-        # Relative: at most `frets` wires; trim the weaker end (false wires sit at the body end).
-        while len(keep) > cfg.frets:
+        # Relative: at most `frets` wires spanning at most `frets` indices (the relative numbering starts at fret 1);
+        # trim the weaker end (false wires sit at the body end).
+        while keep and max(keep) - min(keep) + 1 > cfg.frets:
             lo, hi = min(keep), max(keep)
             keep.discard(hi if det.wires[hi].score <= det.wires[lo].score else lo)
     if keep != set(det.wires) or numbering.resolved:

@@ -230,16 +230,57 @@ class SimCCNet(nn.Module):
         return torch.stack([self.locate1d(sx.float()), self.locate1d(sy.float())], -1), conf.float()
 
 
-class ExportHead(nn.Module):
-    """FretNet -> v1 raw head layout (1, 155, 1): box from keypoint extent, score = max keypoint confidence."""
+R = 2 ** (-1 / 12)  # ratio of consecutive fret gaps (equal temperament)
 
-    def __init__(self, net: FretNet):
+
+def order_gate(xy: torch.Tensor, conf: torch.Tensor, thr: float = 0.5, tol1: float = 0.25, tol2: float = 0.2):
+    """Fret-order consistency: zero the confidence of a keypoint that sits where its index neighbours say it cannot.
+
+    Per side, keypoints above `thr` are projected on the neck axis (t). Test 1: keypoint f's fraction of the span from
+    f-1 to f+1 should be 1 / (1 + R) (about 0.51); test 2: its fraction of the span f-2 .. f+2 should be about 0.51 too.
+    A keypoint that slipped onto the next wire fails both (fraction ~1 and ~0.75); its correct neighbours pass the test
+    that skips it. Keypoints fail when every available test fails (and at least one is available). Perspective changes
+    consecutive gap ratios only mildly, so the fractions stay well within the tolerances."""
+    out = []
+    for side in (0, 1):
+        p, c = xy[:, side::2], conf[:, side::2]  # (B, 25, 2), (B, 25)
+        v = (c > thr).to(xy.dtype)
+        d = (p[:, 1:] - p[:, :-1]) * (v[:, 1:] * v[:, :-1])[..., None]
+        u = d.sum(1, keepdim=True)
+        u = u / (u.norm(dim=-1, keepdim=True) + 1e-6)
+        t = (p * u).sum(-1)  # (B, 25)
+
+        def frac(k: int, expect: float, tol: float):
+            n = t.shape[1]
+            z = torch.zeros_like(t[:, :k])
+            lo_t, hi_t = torch.cat([z, t[:, : n - k]], 1), torch.cat([t[:, k:], z], 1)
+            lo_v, hi_v = torch.cat([z, v[:, : n - k]], 1), torch.cat([v[:, k:], z], 1)
+            have = lo_v * hi_v * v
+            span = hi_t - lo_t
+            f = (t - lo_t) / torch.where(span.abs() < 1e-3, torch.ones_like(span), span)
+            bad = (((f - expect).abs() > tol) | (span <= 1e-3)).to(t.dtype)
+            return have, have * bad
+
+        h1, b1 = frac(1, 1 / (1 + R), tol1)
+        h2, b2 = frac(2, (1 + R) / (1 + R + R**2 + R**3), tol2)
+        fail = (b1 + (1 - h1)) * (b2 + (1 - h2)) * torch.clamp(h1 + h2, max=1)  # every available test failed
+        out.append(c * (1 - fail))
+    return torch.stack(out, -1).flatten(1)  # back to k = 2 * fret + side
+
+
+class ExportHead(nn.Module):
+    """FretNet -> v1 raw head layout (1, 155, 1): box from keypoint extent, score = max keypoint confidence.
+    gate=True applies `order_gate` to the confidences (the tracker and every decoder see gated keypoints)."""
+
+    def __init__(self, net: nn.Module, gate: bool = False):
         super().__init__()
-        self.net = net
+        self.net, self.gate = net, gate
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         xy, conf_logit = self.net.predict(x)  # (B, K, 2), (B, K)
         conf = torch.sigmoid(conf_logit)  # (B, K)
+        if self.gate:
+            conf = order_gate(xy, conf)
         lo, hi = xy.amin(1), xy.amax(1)  # (B, 2)
         box = torch.cat([(lo + hi) / 2, hi - lo], 1)  # cx, cy, w, h
         score = conf.amax(1, keepdim=True)
@@ -247,8 +288,9 @@ class ExportHead(nn.Module):
         return torch.cat([box, score, kpts], 1).unsqueeze(-1)  # (B, 155, 1)
 
 
-def export_head(net: nn.Module) -> ExportHead:
-    return ExportHead(net).eval()
+def export_head(net: nn.Module, gate: bool | None = None) -> ExportHead:
+    """gate=None: the checkpoint's own setting (`net.gate`, saved by `save(..., gate=True)`)."""
+    return ExportHead(net, getattr(net, "gate", False) if gate is None else gate).eval()
 
 
 def build(arch: str, head: str = "heatmap", pretrained: bool = True, imgsz: int = 640, **kw) -> nn.Module:
@@ -260,7 +302,7 @@ def build(arch: str, head: str = "heatmap", pretrained: bool = True, imgsz: int 
 def save(net: nn.Module, path, **meta) -> None:
     """Checkpoint of plain tensors and strings only, so torch.load(weights_only=True) can read it."""
     torch.save({"arch": net.arch, "window": net.window, "head": net.head, "imgsz": net.imgsz,
-                "state_dict": net.state_dict(), "meta": meta}, path)  # fmt: skip
+                "gate": bool(getattr(net, "gate", False)), "state_dict": net.state_dict(), "meta": meta}, path)  # fmt: skip
 
 
 def load(path, device: str = "cpu") -> nn.Module:
@@ -268,6 +310,7 @@ def load(path, device: str = "cpu") -> nn.Module:
     net = build(ck["arch"], ck.get("head", "heatmap"), pretrained=False, imgsz=ck.get("imgsz", 640),
                 window=ck.get("window", 2))  # fmt: skip
     net.load_state_dict(ck["state_dict"])
+    net.gate = bool(ck.get("gate", False))
     return net.to(device).eval()
 
 

@@ -149,6 +149,14 @@ Goal: beat v1's eval v2 numbering of 0.601 without regressing wire error (v1 D13
   - `SimCCNet`: per-keypoint tokens built from the whole stride-16 map, then 1D x/y classification.
 - **Training data:** 1447 of 5798 train frames are labelled to fret 23 or higher. Round 2 oversamples them ×2.
 
+- **The fret-order gate catches isolated slips but not runs.** `order_gate` is in the export head, so CoreML and the
+  tracker see it. It drops a keypoint whose position along the neck breaks the equal-temperament spacing of its index
+  neighbours (f±1, f±2). On v3b it lowers D13 (6.08 → 5.56) and raises numbering only slightly (0.367 → 0.389). Most
+  remaining failures are runs: a stretch of high frets (e.g. 14–21 on the Gretsch, 21–22 on the SG's bass side) all
+  shifted +1, or the SG's bass frets 4–6 placed on wires 11–14. Locally those runs are self-consistent; the model
+  lost count where wires are dense. Counting needs global reasoning (the query / SimCC heads) or more pixels per
+  fret.
+
 ### Candidates
 
 All are permissive: torchvision code and ImageNet weights (BSD-3-Clause), own head code. "last" = final-epoch
@@ -159,3 +167,4 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v1 (reference, AGPL) | — | AGPL-3.0 | 8.44 / 5.80 | 0.601 | 0.805 / 0.835 | 0.82 | 1.000 | 0.949 |
 | v3b_r50 (shipped v3) | — | BSD-3 + own | 6.08 / 2.89 | 0.367 | 0.907 / 1.000 | 1.11 | 0.867 | 0.990 |
 | v3c_r50nb last (ep 50) | b | BSD-3 + own | 7.53 / 2.62 | 0.406 | 0.914 / 1.000 | 1.78 | 0.800 | 0.986 |
+| v3b + order gate (`order_gate`, no retraining) | b | BSD-3 + own | 5.56 / 2.86 | 0.389 | 0.885 / 1.000 | 1.11 | 0.867 | 0.990 |

@@ -47,3 +47,28 @@ def test_checkpoint_roundtrip_and_backend(net, tmp_path):
     assert isinstance(backend, FretNetBackend)
     raw = backend(np.full((640, 640, 3), 114, np.uint8))
     assert raw.shape == (155, 1) and raw.dtype == np.float32
+
+
+def test_order_gate_drops_slips_and_keeps_a_clean_neck():
+    from gro.fretnet.model import R, order_gate
+
+    xs = [20 + 600 * (1 - R**f) for f in range(25)]
+    xy = torch.zeros(1, 50, 2)
+    for f in range(23):
+        for s in (0, 1):
+            xy[0, 2 * f + s] = torch.tensor([xs[f], 100.0 + 50 * s])
+    conf = torch.zeros(1, 50)
+    conf[0, :46] = 0.9
+    assert torch.equal(order_gate(xy, conf), conf)
+    xy[0, 2 * 17] = xy[0, 2 * 18].clone()  # fret 17 (low-E side) slipped onto wire 18
+    xy[0, 2 * 5 + 1] = xy[0, 2 * 12 + 1].clone()  # fret 5 (high-E side) jumped to wire 12
+    dropped = (order_gate(xy, conf)[0, :46] < 0.5).nonzero().flatten().tolist()
+    assert dropped == [11, 34]
+
+
+def test_gate_flag_roundtrips(net, tmp_path):
+    p = tmp_path / "g.pt"
+    net.gate = True
+    save(net, p)
+    net.gate = False
+    assert load(p).gate and export_head(load(p)).gate

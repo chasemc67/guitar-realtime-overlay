@@ -68,7 +68,14 @@ def fret_spacing(gt: list[A.Anchor]) -> float | None:
 
 
 def frame_row(model, image, gt, a, item, clip):
-    if isinstance(model, Backend):
+    if a.stage1 is not None:
+        k = model.predict_frame(image)
+        detected = k is not None and np.isfinite(k).all()
+        pred = [] if not detected else [
+            A.Anchor(i // 2, ("bass", "treble")[i % 2], float(x), float(y), conf=float(c))
+            for i, (x, y, c) in enumerate(k) if c > 0.5
+        ]
+    elif isinstance(model, Backend):
         pred, detected = predict_backend(model, image)
     else:
         pred, detected = predict(model, image, a.imgsz, a.device)
@@ -137,8 +144,14 @@ def main() -> None:
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--device", default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
+    ap.add_argument("--stage1", type=Path, help="FretNet neck-box checkpoint for RTMPose --weights (no GT boxes)")
     a = ap.parse_args()
-    if a.weights.suffix == ".pt" and not is_checkpoint(a.weights):  # ultralytics weights: ultralytics' predict
+    if a.stage1 is not None:
+        from gro.fretnet.rtmpose import TopDown
+
+        model = TopDown(a.stage1, a.weights, device=a.device or "cuda")
+        a.imgsz = model.imgsz
+    elif a.weights.suffix == ".pt" and not is_checkpoint(a.weights):  # ultralytics weights: ultralytics' predict
         from ultralytics import YOLO
 
         model = YOLO(str(a.weights), task="pose")
@@ -175,6 +188,7 @@ def main() -> None:
     hand_rows = [r for r in rows if r["source"] == "hand"]
     report = {
         "weights": str(a.weights),
+        "stage1": str(a.stage1) if a.stage1 else None,
         "imgsz": a.imgsz,
         "config": cfg["name"],
         "macro": macro(per_clip),
@@ -192,6 +206,7 @@ def main() -> None:
         f"# Eval v2: {a.name}",
         "",
         f"Weights `{a.weights}`, imgsz {a.imgsz}. Frozen set `{a.config.relative_to(ROOT)}`. Macro = mean over clips.",
+        *([f"RTMPose neck boxes predicted by `{a.stage1}`; no ground-truth boxes used."] if a.stage1 else []),
         "",
         *HEADER,
         row_md("**eval v2 macro**", report["macro"]),

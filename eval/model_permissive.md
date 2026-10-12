@@ -178,3 +178,4 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v4q_r50 last + order gate | b | BSD-3 + own | 5.44 / 2.62 | 0.441 | 0.916 / 1.000 | 1.12 | 0.933 | 0.973 |
 | v4q_r50 last + order + cross-side wire gate (`gate="wires"`) | b | BSD-3 + own | 5.32 / 2.52 | 0.444 | 0.901 / 1.000 | 1.12 | 0.933 | 0.973 |
 | v3b + order + wire gate | b | BSD-3 + own | 5.21 / 2.81 | 0.389 | 0.870 / 1.000 | 1.11 | 0.867 | 0.990 |
+| v5s_cnxt (best = last, ep 45): ConvNeXt-T + RTMPose-style SimCC head (own code), frets 23+ ×2 | a | BSD-3 + own | 18.14 / 16.41 | 0.207 | 0.946 / 1.000 | 3.80 | 0.533 | 0.987 |

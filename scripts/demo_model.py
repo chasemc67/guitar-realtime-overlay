@@ -3,7 +3,8 @@
 Requires ultralytics and imageio-ffmpeg (not needed with --preds from scripts/cache_preds.py). The D1 mirrored flag
 and a known fret count come from data_manifests/ (gro.auto.manifest.clip_info); --[no-]mirrored / --frets override.
 Board end: the last fret is detected per frame (gro.board_end: keypoint confidence + fret-wire ridges in the rectified
-strip) and voted per clip; the grid and notes stop there. Smoothing: One-Euro on the homography (gro.smooth), or the
+strip) and voted per clip; the grid and notes stop there. Until the vote settles, only frets up to the highest
+confidently seen fret (keypoint conf > 0.5) are drawn. Smoothing: One-Euro on the homography (gro.smooth), or the
 v1 anchor EMA with --smooth ema. An unusable detection holds the last fit for at most 10 frames.
 Output is H.264 (libx264, --crf, scaled to --width); --log writes a per-frame CSV (anchors, fit rmse, held/missed).
 """
@@ -121,6 +122,7 @@ def main() -> None:
     ap.add_argument("--crf", type=int, default=26)
     ap.add_argument("--every", type=int, default=1, help="write every n-th frame (tracking still sees all)")
     ap.add_argument("--log", type=Path, default=None)
+    ap.add_argument("--no-startup-cap", action="store_true", help="draw the default 24 frets until the vote settles")
     a = ap.parse_args()
     if a.out.resolve() == a.video.resolve() or a.out.suffix.lower() != ".mp4":
         ap.error("--out must be an MP4 distinct from the source")
@@ -194,12 +196,15 @@ def main() -> None:
                 k, _ = raw_predict(model, canon, a.imgsz, a.device)
             anchors = anchors_from(k)
             estimate = None
+            conf = np.nanmin(k[:, 2].reshape(25, 2), 1) if np.isfinite(k[:, 2]).any() else None
             if not override:
                 probe = safe_fit([p for p in anchors if p.fret <= END_FIT_MAX_FRET])
                 if probe is not None:
-                    conf = np.nanmin(k[:, 2].reshape(25, 2), 1)
                     estimate = frame_last_fret(ridge_scores(canon, probe), conf)
-            n_frets = vote.update(estimate)
+            vote.update(estimate)
+            if conf is not None and not a.no_startup_cap:
+                vote.observe_conf(conf)
+            n_frets = vote.shown  # until the vote settles: at most the highest confidently seen fret
             fit = tracker.update(anchors) if a.smooth == "ema" else tracker.update(anchors, canon.shape, n_frets)
             out = render_on_original(frame, fit, mirrored, notes=notes) if fit is not None else frame
             if count % a.every == 0:

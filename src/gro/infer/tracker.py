@@ -7,8 +7,9 @@
 
 Per frame: mirror into canonical (right-handed) orientation if `mirrored` (D1) -> letterbox -> backend -> best box
 -> keypoints -> anchors (conf > kpt_thr) -> board-end probe fit + ridge test -> FretCountVote -> RANSAC fit up to
-the voted last fret -> One-Euro smoothing (gro.smooth) -> hold the last fit for `hold` missed frames. Everything in
-the returned TrackState is in *original* frame pixels (the mirror is composed into H and applied to keypoints).
+the voted last fret (until the vote settles: at most the highest confidently seen fret) -> One-Euro smoothing
+(gro.smooth) -> hold the last fit for `hold` missed frames. Everything in the returned TrackState is in *original*
+frame pixels (the mirror is composed into H and applied to keypoints).
 """
 
 from __future__ import annotations
@@ -36,7 +37,7 @@ class TrackState:
     t: float
     valid: bool  # a (possibly held) fit is available
     model: FretboardModel | None = None  # smoothed fit; model.H maps canonical plane points to image px
-    n_frets: int = 24  # voted / overridden last fret
+    n_frets: int = 24  # last fret drawn: voted / overridden, capped at the highest confident fret until settled
     kpts: np.ndarray = field(default_factory=lambda: np.full((N_KPTS, 3), np.nan, np.float32))  # raw x, y, conf
     board_score: float = 0.0
     anchors: list[Anchor] = field(default_factory=list)  # keypoints with conf > kpt_thr (canonical fret/side)
@@ -158,12 +159,15 @@ class FretboardTracker:
         estimate = None
         settled = sum(self.vote.votes.values()) >= self.settled_votes
         self.frame_index += 1
+        conf = np.nanmin(k[:, 2].reshape(25, 2), 1) if np.isfinite(k[:, 2]).any() else None
         if not self.frets and (not settled or self.frame_index % self.end_every == 0):
             probe = safe_fit([p for p in anchors if p.fret <= END_FIT_MAX_FRET])
             if probe is not None:
-                conf = np.nanmin(k[:, 2].reshape(25, 2), 1)
                 estimate = frame_last_fret(ridge_scores(canon_bgr, probe), conf)
-        n_frets = self.vote.update(estimate)
+        self.vote.update(estimate)
+        if conf is not None:
+            self.vote.observe_conf(conf)
+        n_frets = self.vote.shown  # capped at the highest confident fret until the vote settles
 
         fit = safe_fit([p for p in anchors if p.fret <= n_frets], n_frets)
         held = fit is None

@@ -89,13 +89,28 @@ class FretCountVote:
     """Per-clip fret count: running vote over per-frame estimates with hysteresis.
 
     Until `min_votes` frames have voted, `value` is the default (24, the model's slot count). After that it follows the
-    mode, switching only when the new mode leads the current value by `margin` votes."""
+    mode, switching only when the new mode leads the current value by `margin` votes.
 
-    def __init__(self, default: int = 24, min_votes: int = 15, margin: int = 10, override: int | None = None):
+    `shown` is the count to draw. Until the vote has settled (min_votes votes and `value` is their mode) it is capped
+    at the highest fret whose keypoints are confidently seen (`observe_conf`), so a 22-fret guitar does not get 24
+    frets drawn for the first ~0.5 s. The cap is the highest per-frame confident fret seen in >= `cap_frames` frames
+    (monotone, so the drawn board end only grows while the vote settles)."""
+
+    def __init__(
+        self,
+        default: int = 24,
+        min_votes: int = 15,
+        margin: int = 10,
+        override: int | None = None,
+        cap_thr: float = 0.5,
+        cap_frames: int = 3,
+    ):
         self.votes: Counter[int] = Counter()
         self.value = override or default
         self.override = override
         self.min_votes, self.margin = min_votes, margin
+        self.cap_thr, self.cap_frames = cap_thr, cap_frames
+        self.caps: Counter[int] = Counter()
 
     def update(self, estimate: int | None) -> int:
         if self.override or estimate is None:
@@ -106,3 +121,37 @@ class FretCountVote:
             if mode != self.value and count >= self.votes[self.value] + self.margin:
                 self.value = mode
         return self.value
+
+    @property
+    def settled(self) -> bool:
+        if self.override:
+            return True
+        n = sum(self.votes.values())
+        return n >= self.min_votes and self.votes[self.value] == max(self.votes.values())
+
+    def observe_conf(self, conf: np.ndarray) -> None:
+        """Record one frame's (25,) min-over-sides keypoint confidence (only used until the vote settles)."""
+        if self.settled:
+            return
+        c = np.nan_to_num(np.asarray(conf, float), nan=0.0)
+        seen = np.flatnonzero(c > self.cap_thr)
+        if len(seen) and seen[-1] >= 12:  # a usable view reaches at least the 12th fret
+            self.caps[int(seen[-1])] += 1
+
+    @property
+    def cap(self) -> int | None:
+        """Highest confidently seen fret (seen in >= cap_frames frames, or in every frame so far); None = no data."""
+        if not self.caps:
+            return None
+        need = min(self.cap_frames, sum(self.caps.values()))
+        total = 0
+        for f in sorted(self.caps, reverse=True):
+            total += self.caps[f]
+            if total >= need:
+                return f
+        return None
+
+    @property
+    def shown(self) -> int:
+        cap = None if self.settled else self.cap
+        return self.value if cap is None else min(self.value, cap)

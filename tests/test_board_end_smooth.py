@@ -58,3 +58,22 @@ def test_one_euro_static_input_is_identity_and_noise_is_damped():
         in_dev.append(np.abs(noisy.project(u, y) - m.project(u, y)).mean())
         out_dev.append(np.abs(s.project(u, y) - m.project(u, y)).mean())
     assert np.mean(out_dev[20:]) < 0.5 * np.mean(in_dev[20:])
+
+
+def test_startup_cap_until_vote_settles():
+    v = FretCountVote(min_votes=5, margin=3)
+    conf = np.full(25, 0.95)
+    conf[23:] = 0.2  # 22-fret guitar: slots 23/24 unconfident
+    assert v.shown == 24  # no data yet
+    v.observe_conf(conf)
+    assert v.cap == 22 and v.shown == 22
+    spurious = conf.copy()
+    spurious[24] = 0.9
+    v.observe_conf(spurious)  # a single spurious high slot must not raise the cap
+    for _ in range(3):
+        v.observe_conf(conf)
+    assert v.shown == 22
+    for _ in range(5):
+        v.update(24)  # 24-fret guitar votes: settled, the vote wins over the cap
+    assert v.settled and v.shown == 24
+    assert FretCountVote(override=21).shown == 21

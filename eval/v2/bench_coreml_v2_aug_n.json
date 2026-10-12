@@ -1,0 +1,35 @@
+{
+ "model": {
+  "v1_fp16|ALL": {
+   "median_ms": 4.33,
+   "p95_ms": 5.39,
+   "load_s": 2.29
+  },
+  "v1_fp16|CPU_AND_NE": {
+   "median_ms": 4.28,
+   "p95_ms": 4.59,
+   "load_s": 0.81
+  },
+  "v1_fp16|CPU_AND_GPU": {
+   "median_ms": 12.1,
+   "p95_ms": 12.4,
+   "load_s": 0.18
+  },
+  "v2_aug_n_fp16|ALL": {
+   "median_ms": 2.48,
+   "p95_ms": 2.65,
+   "load_s": 0.72
+  },
+  "v2_aug_n_fp16|CPU_AND_NE": {
+   "median_ms": 2.48,
+   "p95_ms": 2.64,
+   "load_s": 0.71
+  },
+  "v2_aug_n_fp16|CPU_AND_GPU": {
+   "median_ms": 6.49,
+   "p95_ms": 6.94,
+   "load_s": 0.13
+  }
+ },
+ "e2e": {}
+}

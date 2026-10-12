@@ -4,6 +4,7 @@ Requires ultralytics (and TensorRT for --trt). First run scripts/export_yolo.py
 if data/datasets/scale-v1/data.yaml is absent; training never creates the dataset.
 Example: python scripts/train_yolo.py --name scale-v1 [--trt]
          python scripts/train_yolo.py --name v2b --data data/datasets/scale-v2/data.yaml --degrees 15 --scale 0.5
+Fine-tune: --model runs/pose/v2_aug/weights/best.pt --optimizer SGD --lr0 0.001 --warmup-epochs 0 --epochs 15
 Augmentation defaults are v1's; fliplr stays 0 (the model is right-handed only, D1).
 """
 
@@ -33,6 +34,9 @@ def main() -> None:
     ap.add_argument("--hsv-v", type=float, default=0.2)
     ap.add_argument("--erasing", type=float, default=0.4)
     ap.add_argument("--close-mosaic", type=int, default=10)
+    ap.add_argument("--optimizer", default="auto", help="'auto' ignores --lr0; use SGD/AdamW for a fine-tune")
+    ap.add_argument("--lr0", type=float, default=0.01)
+    ap.add_argument("--warmup-epochs", type=float, default=3.0)
     a = ap.parse_args()
     if Path(a.name).name != a.name or a.name in (".", ".."):
         ap.error("--name must be a single directory name")
@@ -66,6 +70,9 @@ def main() -> None:
         perspective=a.perspective,
         erasing=a.erasing,
         close_mosaic=a.close_mosaic,
+        optimizer=a.optimizer,
+        lr0=a.lr0,
+        warmup_epochs=a.warmup_epochs,
     )
     best = YOLO(str(model.trainer.best), task="pose")
     print(best.export(format="onnx", imgsz=a.imgsz, batch=1, dynamic=False))

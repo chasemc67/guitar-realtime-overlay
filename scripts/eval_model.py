@@ -98,7 +98,11 @@ def metrics(gt, pred, detected):
         d = {f: float(abs((q - b) @ n)) for f, (b, n) in wires.items()}
         f = min(d, key=d.get)
         i = order.index(f)
-        gaps = [abs(float((wires[g][0] - wires[f][0]) @ wires[f][1])) / abs(g - f) for g in order[max(i - 1, 0) : i + 2] if g != f]
+        gaps = [
+            abs(float((wires[g][0] - wires[f][0]) @ wires[f][1])) / abs(g - f)
+            for g in order[max(i - 1, 0) : i + 2]
+            if g != f
+        ]
         if gaps and d[f] < 0.5 * min(gaps):
             shifts.append(p.fret - f)
     numbering = (all(s == 0 for s in shifts) if shifts else None) if detected else False
@@ -118,6 +122,83 @@ def metrics(gt, pred, detected):
         "index_set_exact": gt_set == pred_set if gt_set else None,
         "index_jaccard": len(gt_set & pred_set) / len(gt_set | pred_set) if gt_set else None,
     }
+
+
+def index_shift(shifts):
+    """Per-frame index shift = the most common (pred index - GT index of the wire it lies on), with its support."""
+    if not shifts:
+        return None, 0.0
+    vals, counts = np.unique(shifts, return_counts=True)
+    k = int(np.argmax(counts))
+    return int(vals[k]), float(counts[k] / len(shifts))
+
+
+def nearest_wire_px(gt, pred):
+    """Index-agnostic alignment: perpendicular px from each predicted keypoint to the nearest GT wire line (only
+    predictions within the GT fret range +-1 spacing). Separates "the grid lines up" from "the numbers are right"."""
+    by = defaultdict(dict)
+    for g in gt:
+        if g.vis > 0:
+            by[g.fret][g.side] = np.array([g.x, g.y])
+    wires = []
+    for _f, d in sorted(by.items()):
+        if len(d) == 2:
+            b, t = d["bass"], d["treble"]
+            n = np.array([-(t - b)[1], (t - b)[0]]) / max(np.linalg.norm(t - b), 1e-9)
+            wires.append((b, n, (b + t) / 2))
+    if len(wires) < 2:
+        return []
+    mids = np.array([w[2] for w in wires])
+    out = []
+    for p in pred:
+        q = np.array([p.x, p.y])
+        d = [abs(float((q - b) @ n)) for b, n, _ in wires]
+        i = int(np.argmin(d))
+        gap = float(np.linalg.norm(mids[min(i + 1, len(mids) - 1)] - mids[max(i - 1, 0)])) / (
+            2 if 0 < i < len(mids) - 1 else 1
+        )
+        if d[i] < gap:
+            out.append(d[i])
+    return out
+
+
+def render_alignment(image, gt, pred, title, path):
+    """GT wires (green, index above the low-E string) vs predicted keypoints/wires (magenta, index below the high-E
+    string; conf > 0.5 only) on the canonical frame, cropped to the board and upscaled 2x."""
+    pts = np.array([[a.x, a.y] for a in [*(g for g in gt if g.vis > 0), *pred]])
+    h, w = image.shape[:2]
+    x0, y0 = np.clip(pts.min(0) - 60, 0, [w, h]).astype(int)
+    x1, y1 = np.clip(pts.max(0) + 60, 0, [w, h]).astype(int)
+    z = 2
+    out = cv2.resize(image[y0:y1, x0:x1], None, fx=z, fy=z, interpolation=cv2.INTER_CUBIC)
+    P = lambda a: (int(round((a.x - x0) * z)), int(round((a.y - y0) * z)))  # noqa: E731
+
+    def draw(anchors, col, below):
+        by = defaultdict(dict)
+        for a in anchors:
+            by[a.fret][a.side] = a
+        for side in ("bass", "treble"):
+            line = [P(d[side]) for f, d in sorted(by.items()) if side in d]
+            for p, q in zip(line, line[1:], strict=False):
+                cv2.line(out, p, q, col, 1, cv2.LINE_AA)
+        for f, d in sorted(by.items()):
+            if len(d) == 2:
+                cv2.line(out, P(d["bass"]), P(d["treble"]), col, 1, cv2.LINE_AA)
+            for a in d.values():
+                cv2.circle(out, P(a), 3, col, -1, cv2.LINE_AA)
+            a = d.get("treble" if below else "bass")
+            if a is not None:
+                q = P(a)
+                cv2.putText(
+                    out, str(f), (q[0] - 6, q[1] + (18 if below else -8)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, col, 1
+                )
+
+    draw([g for g in gt if g.vis > 0], (0, 255, 0), False)
+    draw(pred, (255, 0, 255), True)
+    cv2.rectangle(out, (0, 0), (out.shape[1], 22), (0, 0, 0), -1)
+    cv2.putText(out, title, (6, 16), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(path), out, [cv2.IMWRITE_JPEG_QUALITY, 88])
 
 
 def test_frames(dataset):
@@ -319,13 +400,16 @@ def table(summary, label="Set"):
         cells = [
             str(s["frames"]),
             "n/a" if d13["mean"] is None else f"{d13['mean']:.2f} / {d13['median']:.2f}",
-            *(
-                "n/a" if v is None else f"{v:.2f}"
-                for v in (s["outer_string_px"]["mean"], s["keypoint_px"]["mean"])
-            ),
+            *("n/a" if v is None else f"{v:.2f}" for v in (s["outer_string_px"]["mean"], s["keypoint_px"]["mean"])),
             *(
                 "n/a" if v is None else f"{v:.3f}"
-                for v in (s["coverage"], s["detection_rate"], s["numbering_accuracy"], s["index_set_exact"], s["index_jaccard"])
+                for v in (
+                    s["coverage"],
+                    s["detection_rate"],
+                    s["numbering_accuracy"],
+                    s["index_set_exact"],
+                    s["index_jaccard"],
+                )
             ),
         ]
         lines.append(f"| {key} | " + " | ".join(cells) + " |")
@@ -346,8 +430,12 @@ def main() -> None:
     ap.add_argument("--onnx", type=Path)
     ap.add_argument("--engine", type=Path)
     ap.add_argument("--no-timing", action="store_true")
+    ap.add_argument(
+        "--align", type=Path, help="visual-alignment mode: render pred vs GT for every held-out hand frame here"
+    )
+    ap.add_argument("--hand-only", action="store_true", help="skip the pseudo-GT sets (hand GT only)")
     a = ap.parse_args()
-    if not a.dataset.is_file():
+    if not a.hand_only and not a.dataset.is_file():
         ap.error("dataset YAML absent; run scripts/export_yolo.py first")
     name = a.name or a.weights.stem
     if Path(name).name != name or name in (".", ".."):
@@ -355,13 +443,18 @@ def main() -> None:
     from ultralytics import YOLO
 
     model = YOLO(str(a.weights), task="pose")
-    groups = {"pseudo_gt_test": [], f"pseudo_gt_{a.heldout[:10]}": [], "hand_gt_heldout": [], "hand_gt_in_train_videos": []}
-    for item, clip, image, gt, (sx, sy) in test_frames(a.dataset):
+    groups = {
+        "pseudo_gt_test": [],
+        f"pseudo_gt_{a.heldout[:10]}": [],
+        "hand_gt_heldout": [],
+        "hand_gt_in_train_videos": [],
+    }
+    for item, clip, image, gt, (sx, sy) in [] if a.hand_only else test_frames(a.dataset):
         pred, detected = predict(model, image, a.imgsz, a.device)
         pred = [Anchor(p.fret, p.side, p.x * sx, p.y * sy, conf=p.conf) for p in pred]
         groups["pseudo_gt_test"].append({"item": item, "clip": clip, **metrics(gt, pred, detected)})
     frame = None
-    if (a.labels / "frames.csv").is_file():
+    if (a.labels / "frames.csv").is_file() and not a.hand_only:
         for item, image, gt in heldout_frames(a.labels, a.labels / "frames.csv", a.heldout, a.stride_0906):
             frame = image if frame is None else frame
             pred, detected = predict(model, image, a.imgsz, a.device)
@@ -373,12 +466,31 @@ def main() -> None:
         if image is None:
             skipped.append(f"{path}#{i}: image unavailable")
             continue
-        pred, detected = predict(model, cv2.flip(image, 1) if lf.mirrored else image, a.imgsz, a.device)
+        canon = cv2.flip(image, 1) if lf.mirrored else image  # D1: GT and model both live in the canonical frame
+        pred, detected = predict(model, canon, a.imgsz, a.device)
         key = "hand_gt_heldout" if a.heldout in lf.video.get("path", "") else "hand_gt_in_train_videos"
-        groups[key].append({"item": f"{path.parent.name}/{path.name}#{i}", "clip": path.stem, **metrics(fr.anchors, pred, detected)})
+        row = {"item": f"{path.parent.name}/{path.name}#{i}", "clip": path.stem, **metrics(fr.anchors, pred, detected)}
+        row["index_shift"], row["index_shift_support"] = index_shift(row["index_shifts"])
+        row["nearest_wire_px"] = nearest_wire_px(fr.anchors, pred)
+        groups[key].append(row)
+        if a.align and key == "hand_gt_heldout":
+            d13, nw = np.median(row["wire_perp_px"]) if row["wire_perp_px"] else np.nan, row["nearest_wire_px"]
+            title = (
+                f"{path.stem}  GT green / pred magenta  D13(slot) med {d13:.1f}px  nearest-wire med "
+                f"{np.median(nw) if nw else np.nan:.1f}px  index shift {row['index_shift']}"
+            )
+            render_alignment(canon, fr.anchors, pred, title, a.align / f"{path.stem}.jpg")
     groups = {k: v for k, v in groups.items() if v}
-    timing = {} if a.no_timing else benchmark(
-        a.weights, a.onnx or a.weights.with_suffix(".onnx"), a.imgsz, a.engine or a.weights.with_suffix(".engine"), frame
+    timing = (
+        {}
+        if a.no_timing
+        else benchmark(
+            a.weights,
+            a.onnx or a.weights.with_suffix(".onnx"),
+            a.imgsz,
+            a.engine or a.weights.with_suffix(".engine"),
+            frame,
+        )
     )
     report = clean_json(
         {
@@ -418,6 +530,27 @@ def main() -> None:
         "",
         f"Skipped hand frames: {len(skipped)}.",
     ]
+    if a.align and groups.get("hand_gt_heldout"):
+        lines += [
+            "",
+            "## Visual alignment, held-out hand GT (per frame)",
+            "",
+            f"Renders: `{a.align.relative_to(ROOT) if a.align.is_absolute() else a.align}/`.",
+            "D13(slot): perpendicular px from each predicted slot to the GT wire with the same index.",
+            "Nearest-wire: perpendicular px to the closest GT wire whatever its index (does the grid line up?).",
+            "Index shift: most common pred index - GT index (support).",
+            "",
+            "| Frame | Detected | Pred frets | D13 slot median px | Nearest-wire median px | Index shift (support) |",
+            "|---|---|---|---:|---:|---:|",
+        ]
+        for r in groups["hand_gt_heldout"]:
+            f = r["pred_frets"]
+            med = lambda v: "n/a" if not v else f"{np.median(v):.1f}"  # noqa: E731
+            sh = "n/a" if r["index_shift"] is None else f"{r['index_shift']:+d} ({r['index_shift_support']:.0%})"
+            lines.append(
+                f"| {r['clip']} | {r['detected']} | {f'{f[0]}-{f[-1]} ({len(f)})' if f else '-'} | "
+                f"{med(r['wire_perp_px'])} | {med(r['nearest_wire_px'])} | {sh} |"
+            )
     Path(f"{destination}.md").write_text("\n".join(lines) + "\n")
     print(Path(f"{destination}.md"))
 

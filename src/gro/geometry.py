@@ -48,7 +48,7 @@ def apply_h(H: np.ndarray, pts: np.ndarray) -> np.ndarray:
     pts = np.asarray(pts, dtype=float)
     shp = pts.shape
     p = pts.reshape(-1, 2)
-    q = np.c_[p, np.ones(len(p))] @ H.T
+    q = p @ H[:, :2].T + H[:, 2]
     return (q[:, :2] / q[:, 2:3]).reshape(shp)
 
 
@@ -77,14 +77,47 @@ def dlt(src: np.ndarray, dst: np.ndarray, w: np.ndarray | None = None) -> np.nda
         w = np.ones(len(src))
     Ts, s = _normalize(src)
     Td, d = _normalize(dst)
-    rows = []
-    for (x, y), (u, v), wi in zip(s, d, np.sqrt(w), strict=True):
-        rows.append(wi * np.array([-x, -y, -1, 0, 0, 0, u * x, u * y, u]))
-        rows.append(wi * np.array([0, 0, 0, -x, -y, -1, v * x, v * y, v]))
-    _, _, vt = np.linalg.svd(np.asarray(rows))
+    x, y, u, v = s[:, 0], s[:, 1], d[:, 0], d[:, 1]
+    o, z = np.ones_like(x), np.zeros_like(x)
+    rows = np.empty((2 * len(x), 9))
+    rows[0::2] = np.stack([-x, -y, -o, z, z, z, u * x, u * y, u], 1)
+    rows[1::2] = np.stack([z, z, z, -x, -y, -o, v * x, v * y, v], 1)
+    rows *= np.repeat(np.sqrt(np.asarray(w, float)), 2)[:, None]
+    _, _, vt = np.linalg.svd(rows)
     Hn = vt[-1].reshape(3, 3)
     H = np.linalg.inv(Td) @ Hn @ Ts
     return H / H[2, 2]
+
+
+def _apply_h_batch(Hs: np.ndarray, pts: np.ndarray) -> np.ndarray:
+    """K homographies applied to the same N points -> (K, N, 2)."""
+    q = np.einsum("kij,nj->kni", Hs[:, :, :2], pts) + Hs[:, None, :, 2]
+    return q[..., :2] / q[..., 2:3]
+
+
+def _dlt_batch(src: np.ndarray, dst: np.ndarray) -> np.ndarray:
+    """Unweighted Hartley-normalized DLT for K samples of 4 points: (K, 4, 2) x 2 -> (K, 3, 3)."""
+
+    def norm(p):
+        c = p.mean(axis=1, keepdims=True)
+        s = np.sqrt(2.0) / np.maximum(np.sqrt(((p - c) ** 2).sum(-1)).mean(-1), 1e-12)
+        T = np.zeros((len(p), 3, 3))
+        T[:, 0, 0] = T[:, 1, 1] = s
+        T[:, 0, 2], T[:, 1, 2] = -s * c[:, 0, 0], -s * c[:, 0, 1]
+        T[:, 2, 2] = 1.0
+        return T, (p - c) * s[:, None, None]
+
+    Ts, s = norm(src)
+    Td, d = norm(dst)
+    x, y, u, v = s[..., 0], s[..., 1], d[..., 0], d[..., 1]
+    o, z = np.ones_like(x), np.zeros_like(x)
+    rows = np.empty((len(src), 2 * src.shape[1], 9))
+    rows[:, 0::2] = np.stack([-x, -y, -o, z, z, z, u * x, u * y, u], -1)
+    rows[:, 1::2] = np.stack([z, z, z, -x, -y, -o, v * x, v * y, v], -1)
+    _, _, vt = np.linalg.svd(rows)
+    Hn = vt[:, -1].reshape(-1, 3, 3)
+    H = np.linalg.inv(Td) @ Hn @ Ts
+    return H / H[:, 2:3, 2:3]
 
 
 def _refine(H: np.ndarray, src: np.ndarray, dst: np.ndarray, w: np.ndarray, huber_px: float, iters: int = 15):
@@ -269,24 +302,27 @@ def fit_fretboard(
     if n == 4:
         best_inl = np.ones(n, bool)
     else:
+        # Draw every sample first (same RNG sequence as one-at-a-time), then solve and score them as a batch.
         idx = np.arange(n)
+        picks = [rng.choice(idx, 4, replace=False) for _ in range(ransac_iters)]
+        picks = np.array([p for p in picks if _sample_ok([anchors[i] for i in p])], int).reshape(-1, 4)
         with np.errstate(all="ignore"):
-            for _ in range(ransac_iters):
-                pick = rng.choice(idx, 4, replace=False)
-                if not _sample_ok([anchors[i] for i in pick]):
-                    continue
-                try:
-                    H = dlt(src[pick], dst[pick])
-                except np.linalg.LinAlgError:
-                    continue
-                if not np.all(np.isfinite(H)):
-                    continue
-                sc = score(H)
-                if sc is None:
-                    continue
-                inl, cost = sc
-                if inl.sum() >= 4 and cost < best_cost:
-                    best_inl, best_cost = inl, cost
+            Hs = _dlt_batch(src[picks], dst[picks]) if len(picks) else np.zeros((0, 3, 3))
+            ok = np.isfinite(Hs).all(axis=(1, 2))
+            Hs = Hs[ok]
+            if len(Hs):
+                p1 = plane_point(fret_u(a_fret + 1), a_y, tau)
+                p0 = plane_point(fret_u(a_fret), a_y, tau)
+                r = np.linalg.norm(_apply_h_batch(Hs, src) - dst, axis=-1)
+                fw = np.linalg.norm(_apply_h_batch(Hs, p1) - _apply_h_batch(Hs, p0), axis=-1)
+                fin = np.isfinite(r).all(1) & np.isfinite(fw).all(1)
+                thr = np.maximum(inlier_frac * fw, min_inlier_px)
+                inl = r < thr
+                cost = np.sum(np.minimum(r / thr, 1.0) ** 2, axis=1)
+                cost[~fin | (inl.sum(1) < 4)] = np.inf
+                k = int(np.argmin(cost))
+                if np.isfinite(cost[k]):
+                    best_inl, best_cost = inl[k], cost[k]
         if best_inl is None or _degenerate([anchors[i] for i in np.flatnonzero(best_inl)]):
             best_inl = np.ones(n, bool)
 

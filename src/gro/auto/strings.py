@@ -221,6 +221,8 @@ def detect_strings(
     # Sampling step ~0.2 px at the board centre (coarser for very wide searches).
     mid_u = float(np.median(u_all))
     w_px = float(np.linalg.norm(np.subtract(*_plane_to_img(model, [mid_u, mid_u], [-v_ext / 2, v_ext / 2]))))
+    if not np.isfinite(w_px):  # degenerate first model (e.g. a near-singular H)
+        return None
     nv = int(np.clip(2 * w_px / 0.2, 300, 4000))
     v = np.linspace(-v_ext, v_ext, nv)
     cells = _cell_profiles(gray, model, frets, v, flank_px)
@@ -246,7 +248,6 @@ def detect_strings(
     W = _wire_presence(gray, model, frets, v, cs_, ds_, u_ref, flank_px=2.5)
     S = S - len(cells) * (1.0 - W)
     # Comb: tooth i at (c0 + i cs, d0 + i dd); even spacing across the neck at every u.
-    c0 = np.arange(len(cs_))
     # Tooth spacing (index units) covering the prior spans at the reference u (the taper is checked below).
     sp = np.arange(max(int(0.8 * span_lo / 5 / dv), 2), int(1.2 * span_hi / 5 / dv) + 2)
     dstep = ds_[1] - ds_[0]
@@ -263,17 +264,18 @@ def detect_strings(
         sp_ok = prior_ok(rho).any(axis=1)
         if not sp_ok.any():
             continue
-        C0, SP, J0 = np.meshgrid(c0, sp[sp_ok], j0, indexing="ij")
-        tot = np.zeros(C0.shape)
-        valid = np.ones(C0.shape, bool)
-        for i in range(N_STRINGS):
-            ci = C0 + i * SP
-            valid &= ci < len(cs_)
-            tot += S[np.minimum(ci, len(cs_) - 1), J0 + i * ddj]
-        tot[~valid] = -np.inf
-        m = np.unravel_index(int(np.argmax(tot)), tot.shape)
-        if tot[m] > best[0]:
-            best = (float(tot[m]), (C0[m], SP[m], J0[m], ddj))
+        # tot(c, j) = sum over teeth of S[c + i sp, j + i ddj], as shifted slices (no gather), per spacing.
+        jlo, jhi = int(j0[0]), int(j0[-1]) + 1
+        for spv in sp[sp_ok]:
+            n_c = len(cs_) - 5 * int(spv)
+            if n_c <= 0:
+                continue
+            tot = S[:n_c, jlo:jhi].copy()
+            for i in range(1, N_STRINGS):
+                tot += S[i * spv : i * spv + n_c, jlo + i * ddj : jhi + i * ddj]
+            ci, jj = np.unravel_index(int(np.argmax(tot)), tot.shape)
+            if tot[ci, jj] > best[0]:
+                best = (float(tot[ci, jj]), (int(ci), int(spv), jlo + int(jj), ddj))
     if best[1] is None:
         return None
     ci0, spi, j0, ddj = best[1]

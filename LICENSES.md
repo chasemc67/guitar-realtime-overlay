@@ -76,3 +76,9 @@ The ImageNet weights retain the dataset-terms caveat recorded above; a BSD code 
 establish unrestricted rights to the pretraining images.
 Sources checked: [torchvision licence](https://github.com/pytorch/vision/blob/main/LICENSE),
 [ResNet-18 weight documentation](https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.resnet18.html).
+
+The smaller v7 variants use torchvision `mobilenet_v3_small` and
+`MobileNet_V3_Small_Weights.IMAGENET1K_V1` (BSD-3-Clause code; same pretraining-data caveat).
+The optional per-wire sequence head uses two original `torch.nn.TransformerEncoder` layers
+and predicts absolute wire indices; it adds no external model code or weights.
+[MobileNetV3 Small weight documentation](https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.mobilenet_v3_small.html).

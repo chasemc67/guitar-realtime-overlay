@@ -116,3 +116,38 @@ def test_reject_ambiguous_only_drops_between_wire_points():
     out = reassign_wires(k, model, reject_ambiguous=True)
     assert out[10, 2] == 0
     np.testing.assert_array_equal(out[12], k[12])
+
+
+@pytest.mark.parametrize("mode", ["offset", "sequence"])
+def test_mobile_checkpoint_roundtrip(mode, tmp_path):
+    from gro.fretnet.numbering import NumberingNet, load_numbering
+
+    net = NumberingNet(width=128, mode=mode, arch="mobilenet_v3_small").eval()
+    checkpoint = tmp_path / "numbering.pt"
+    torch.save({"kind": "gro_numbering", "width": 128, "mode": mode,
+                "arch": "mobilenet_v3_small", "state_dict": net.state_dict()}, checkpoint)
+    loaded = load_numbering(checkpoint)
+    x = torch.zeros(1, 3, 128, 128)
+    with torch.inference_mode():
+        expected = net(x)
+        assert expected.shape == ((1, 7) if mode == "offset" else (1, 25, 25))
+        torch.testing.assert_close(loaded(x), expected)
+
+
+def test_sequence_dataset_exposes_only_labelled_wires(tmp_path):
+    import runpy
+    from pathlib import Path
+
+    import cv2
+
+    dataset = runpy.run_path(str(Path(__file__).resolve().parents[1] / "scripts/train_numbering.py"))["Strips"]
+    image = tmp_path / "train_frame.jpg"
+    cv2.imwrite(str(image), np.zeros((160, 1729, 3), np.uint8))
+    label = np.zeros((50, 3))
+    label[6:8, 2] = 2
+    label[14, 2] = 1
+    (tmp_path / "train_frame.txt").write_text("0 .5 .5 1 1 " + " ".join(map(str, label.ravel())))
+    data = dataset([image], 128, False, tmp_path)
+    x, shift, present = data[3]
+    assert x.shape == (3, 128, 128) and shift == 3
+    assert np.flatnonzero(present).tolist() == [3, 7]

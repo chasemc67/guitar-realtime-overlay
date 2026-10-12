@@ -18,6 +18,7 @@ Output: eval/v2/<name>.json and .md.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import defaultdict
@@ -91,7 +92,7 @@ def frame_row(model, image, gt, a, item, clip):
     m["nearest_wire_px"] = nearest_wire_px(gt, pred)
     row = {"item": item, "clip": clip, **{k: v for k, v in m.items() if k != "per_keypoint_px"}}
     if getattr(a, "numbering", None):
-        from gro.fretnet.numbering import rectify
+        from gro.fretnet.numbering import HI, LO, SHIFT, rectify
         from gro.geometry import FitError, fit_fretboard
 
         row["stage2"] = dict(model.refiner.last)
@@ -115,9 +116,18 @@ def frame_row(model, image, gt, a, item, clip):
         try:
             fit = fit_fretboard(gt, ransac_iters=100)
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            offset, confidence = model.refiner.classify(rectify(rgb, fit, model.refiner.net.width))
-            row["stage2"]["gt_offset"] = offset
-            row["stage2"]["gt_confidence"] = confidence
+            predictions = []
+            for shift in range(-SHIFT, SHIFT + 1):
+                strip = rectify(rgb, fit, model.refiner.net.width, lo=LO + shift, hi=HI + shift)
+                offset, confidence = model.refiner.classify(strip)
+                predictions.append(offset)
+                if shift == 0:
+                    row["stage2"]["gt_offset"] = offset
+                    row["stage2"]["gt_confidence"] = confidence
+            row["stage2"]["gt_shift_predictions"] = predictions
+            row["stage2"]["gt_balanced_accuracy"] = float(
+                np.mean([p == shift for p, shift in zip(predictions, range(-SHIFT, SHIFT + 1), strict=True)])
+            )
         except (FitError, ValueError, np.linalg.LinAlgError):
             row["stage2"]["gt_offset"] = None
     return row
@@ -168,6 +178,7 @@ def numbering_diagnostics(rows):
         "gt_fit_frames": len(gt),
         "stage1_fit_scored_frames": len(pred),
         "gt_strip_offset_accuracy": mean([d["gt_offset"] == 0 for d in gt]),
+        "gt_strip_balanced_offset_accuracy": mean([d["gt_balanced_accuracy"] for d in gt]),
         "stage1_strip_offset_accuracy": mean([d["offset_correct"] for d in pred]),
         "zero_offset_baseline_accuracy": mean([d["target_offset"] == 0 for d in pred]),
         "uniform_offset_possible_fraction": mean([d["uniform_offset_possible"] for d in pred]),
@@ -266,9 +277,12 @@ def main() -> None:
     hand_rows = [r for r in rows if r["source"] == "hand"]
     report = {
         "weights": str(a.weights),
+        "weights_sha256": hashlib.sha256(a.weights.read_bytes()).hexdigest() if a.weights.is_file() else None,
         "wire_reassign": a.wire_reassign,
         "wire_reject_ambiguous": a.wire_reject_ambiguous,
         "numbering_weights": str(a.numbering) if a.numbering else None,
+        "numbering_sha256": hashlib.sha256(a.numbering.read_bytes()).hexdigest() if a.numbering else None,
+        "numbering_model": model.refiner.net.metadata if a.numbering else None,
         "numbering_confidence": a.numbering_confidence if a.numbering else None,
         "stage1": str(a.stage1) if a.stage1 else None,
         "imgsz": a.imgsz,

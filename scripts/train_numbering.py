@@ -1,6 +1,6 @@
 """Train rectified whole-neck offset classifier on scale-v1aug; held-out IDs fail closed.
 
-Cache GT strips on CPU first, then train a ResNet-18 using random integer offsets,
+Cache GT strips on CPU first, then train a torchvision backbone using random integer offsets,
 sub-fret/projective jitter, colour/blur/occlusion augmentation. Select checkpoints by val only.
 """
 
@@ -53,8 +53,9 @@ def guarded_images(data, split, cfg):
 
 
 class Strips(Dataset):
-    def __init__(self, paths, width, train):
+    def __init__(self, paths, width, train, labels):
         self.paths, self.width, self.train = paths, width, train
+        self.present = [(read_label(labels / (p.stem + ".txt"), 1, 1)[:, 2].reshape(25, 2) > 0).any(1) for p in paths]
 
     def __len__(self):
         return len(self.paths) if self.train else len(self.paths) * 7
@@ -62,7 +63,8 @@ class Strips(Dataset):
     def __getitem__(self, i):
         rng = np.random.default_rng() if self.train else np.random.default_rng(i)
         shift = int(rng.integers(-SHIFT, SHIFT + 1)) if self.train else i % 7 - SHIFT
-        p = self.paths[i if self.train else i // 7]
+        index = i if self.train else i // 7
+        p = self.paths[index]
         img = cv2.cvtColor(cv2.imread(str(p)), cv2.COLOR_BGR2RGB)
         # Cached coordinate range -6..30; crop -2..26 plus the sampled integer shift.
         x0 = (SHIFT + 1 + shift) * 48
@@ -83,7 +85,7 @@ class Strips(Dataset):
             if rng.random() < 0.3:
                 x = int(rng.integers(0, self.width - 80))
                 out[:, x : x + 80] = rng.integers(30, 200, 3)
-        return torch.from_numpy(np.ascontiguousarray(out.transpose(2, 0, 1))), shift + SHIFT
+        return torch.from_numpy(np.ascontiguousarray(out.transpose(2, 0, 1))), shift + SHIFT, self.present[index]
 
 
 def main():
@@ -91,6 +93,7 @@ def main():
     ap.add_argument("--data", type=Path, default=ROOT / "data/datasets/scale-v1aug")
     ap.add_argument("--cache", type=Path, default=ROOT / "data/datasets/numbering-strips")
     ap.add_argument("--name", default="v7num_1024")
+    ap.add_argument("--arch", choices=["resnet18", "mobilenet_v3_small"], default="mobilenet_v3_small")
     ap.add_argument("--mode", choices=["offset", "sequence"], default="offset")
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--epochs", type=int, default=15)
@@ -118,7 +121,7 @@ def main():
     (out / "args.json").write_text(json.dumps(vars(a), default=str, indent=2))
     loaders = {
         s: DataLoader(
-            Strips(p, a.width, s == "train"),
+            Strips(p, a.width, s == "train", a.data / "labels" / s),
             batch_size=a.batch,
             shuffle=s == "train",
             num_workers=a.workers,
@@ -126,7 +129,7 @@ def main():
         )
         for s, p in splits.items()
     }
-    net = NumberingNet(a.width, pretrained=True, mode=a.mode).cuda()
+    net = NumberingNet(a.width, pretrained=True, mode=a.mode, arch=a.arch).cuda()
     opt = torch.optim.AdamW(net.parameters(), lr=2e-4, weight_decay=1e-3)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, a.epochs)
     best = -1
@@ -137,13 +140,17 @@ def main():
             net.train(split == "train")
             correct = count = total = 0
             with torch.set_grad_enabled(split == "train"):
-                for x, y in loader:
+                for x, y, present in loader:
                     x, y = x.cuda(non_blocking=True), y.cuda(non_blocking=True)
+                    present = present.cuda(non_blocking=True)
                     with torch.autocast("cuda", dtype=torch.bfloat16):
                         logits = net(x)
                         if a.mode == "sequence":
                             target = torch.arange(25, device=y.device)[None] + y[:, None] - SHIFT
                             valid = (target >= 0) & (target < 25)
+                            valid &= present.gather(1, target.clamp(0, 24))
+                            if not valid.any():
+                                continue
                             target = target.masked_fill(~valid, -100)
                             loss = torch.nn.functional.cross_entropy(logits.transpose(1, 2), target)
                         else:
@@ -165,6 +172,7 @@ def main():
             "kind": "gro_numbering",
             "width": a.width,
             "mode": a.mode,
+            "arch": a.arch,
             "epoch": epoch,
             "state_dict": net.state_dict(),
             "stats": stats,

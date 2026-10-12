@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import torch
 from torch import nn
-from torchvision.models import ResNet18_Weights, resnet18
+from torchvision.models import MobileNet_V3_Small_Weights, ResNet18_Weights, mobilenet_v3_small, resnet18
 
 from gro.anchors import Anchor
 from gro.geometry import fit_fretboard
@@ -33,17 +33,26 @@ def rectify(rgb, model, width=1024, lo=LO, hi=HI, height=HEIGHT):
 
 
 class NumberingNet(nn.Module):
-    def __init__(self, width=1024, pretrained=False, mode="offset"):
+    def __init__(self, width=1024, pretrained=False, mode="offset", arch="resnet18"):
         super().__init__()
-        base = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1 if pretrained else None)
-        self.features = nn.Sequential(*list(base.children())[:-2])
+        self.arch = arch
+        if arch == "resnet18":
+            base = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1 if pretrained else None)
+            self.features = nn.Sequential(*list(base.children())[:-2])
+            channels = 512
+        elif arch == "mobilenet_v3_small":
+            base = mobilenet_v3_small(weights=MobileNet_V3_Small_Weights.IMAGENET1K_V1 if pretrained else None)
+            self.features = base.features
+            channels = 576
+        else:
+            raise ValueError(f"unknown numbering architecture: {arch}")
         self.mode = mode
         if mode == "offset":
             self.head = nn.Sequential(
-                nn.AdaptiveAvgPool2d((1, 16)), nn.Flatten(), nn.Dropout(0.25), nn.Linear(512 * 16, 2 * SHIFT + 1)
+                nn.AdaptiveAvgPool2d((1, 16)), nn.Flatten(), nn.Dropout(0.25), nn.Linear(channels * 16, 2 * SHIFT + 1)
             )
         elif mode == "sequence":
-            self.projection = nn.Conv1d(512, 256, 3, padding=1)
+            self.projection = nn.Conv1d(channels, 256, 3, padding=1)
             self.position = nn.Parameter(torch.zeros(1, 25, 256))
             nn.init.normal_(self.position, std=0.02)
             layer = nn.TransformerEncoderLayer(256, 4, 512, dropout=0.1, batch_first=True)
@@ -72,8 +81,10 @@ def load_numbering(path, device="cpu"):
     c = torch.load(path, map_location="cpu", weights_only=True)
     if c.get("kind") != "gro_numbering":
         raise ValueError("not a numbering checkpoint")
-    net = NumberingNet(c["width"], mode=c.get("mode", "offset"))
+    net = NumberingNet(c["width"], mode=c.get("mode", "offset"), arch=c.get("arch", "resnet18"))
     net.load_state_dict(c["state_dict"])
+    net.metadata = {key: c.get(key) for key in ("epoch", "stats", "seed", "training_data", "selection")}
+    net.metadata.update(arch=net.arch, mode=net.mode, width=net.width, offset_range=[-SHIFT, SHIFT])
     return net.to(device).eval()
 
 
@@ -157,6 +168,8 @@ class NumberingRefiner:
         if not 0 <= threshold <= 1:
             raise ValueError("numbering confidence must be in [0, 1]")
         self.net = load_numbering(path, device)
+        if self.net.mode == "sequence" and reassign:
+            raise ValueError("sequence models perform their own per-wire assignment; omit wire_reassign")
         self.device, self.threshold = device, threshold
         self.reassign = reassign
         self.reject_ambiguous = reject_ambiguous

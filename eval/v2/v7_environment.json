@@ -1,0 +1,23 @@
+{
+  "python": "3.12.15",
+  "torch": "2.11.0+cu128",
+  "torchvision": "0.26.0+cu128",
+  "opencv": "5.0.0",
+  "numpy": "2.5.4",
+  "cuda": "12.8",
+  "stage1": "runs/fretnet/v4q_r50_832/last.pt",
+  "eval_config_sha256": "b5e59264d9b93a051272c2feec5d749935d19fa0c5d6c84e6acab7459b636c60",
+  "resnet18_init": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+  "mobilenet_init": "https://download.pytorch.org/models/mobilenet_v3_small-047dcff4.pth",
+  "splits": {
+    "train": {
+      "images": 5798,
+      "names_and_labels_sha256": "f8755896430c6aec752fe848547b8a2001ae7534d8bb3ae25d6ea27f1daa798c"
+    },
+    "val": {
+      "images": 1498,
+      "names_and_labels_sha256": "a36142568cc749aa449754d9dfe69b14e9f3facaaab992156848ab9db68197a3"
+    }
+  },
+  "stage1_sha256": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031"
+}

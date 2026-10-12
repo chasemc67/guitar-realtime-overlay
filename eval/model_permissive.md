@@ -252,3 +252,4 @@ accuracy does not imply every wire is correctly numbered.
 | Variant | eval v2 D13 mean / median px | Numbering | Coverage / detection | 09-06 D13 px | 09-06 numbering | 09-06 coverage | GT / stage-1 offset accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | [Geometry-only control](v2/v7_geometry_control.md) | 5.56 / 2.24 | 0.620 | 0.879 / 1.000 | 0.78 | 0.933 | 0.990 | — |
+| [Geometry + reject ambiguous](v2/v7_geometry_reject.md) | 5.37 / 2.21 | 0.665 | 0.870 / 1.000 | 0.77 | 1.000 | 0.989 | — |

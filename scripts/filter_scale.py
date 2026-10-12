@@ -72,10 +72,23 @@ def frame_rho(fr: A.FrameLabel, resolved: bool) -> tuple[float, float] | None:
     return float(rho[k, 0]), float(rho[k, 1])
 
 
+BAD_INDEX = [0]
+
+
 def analyse(label_dir: Path, a) -> list[dict]:
     rows = []
     for path in sorted(label_dir.glob("*.json")):
-        lf = A.load(path)
+        d = json.loads(path.read_text())
+        ok = []
+        for fr in d["frames"]:
+            try:
+                for name in fr.get("kpts", {}):
+                    A.slot_fret(name)
+                ok.append(fr)
+            except ValueError:  # fret index beyond 24 = mis-numbered relative run
+                BAD_INDEX[0] += 1
+        d["frames"] = ok
+        lf = A.from_dict(d)
         stem = lf.clip_id
         video_stem = Path(lf.video.get("path", "")).stem
         split = "test" if video_stem in TEST_VIDEOS else "trainval"

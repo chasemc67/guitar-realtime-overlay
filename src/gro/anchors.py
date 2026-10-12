@@ -216,7 +216,17 @@ def to_dict(lf: LabelFile) -> dict[str, Any]:
 
 
 def load(path: str | Path) -> LabelFile:
-    return from_dict(json.loads(Path(path).read_text()))
+    d = json.loads(Path(path).read_text())
+    ok = []
+    for fr in d.get("frames", []):
+        try:
+            for name in fr.get("kpts", {}):
+                slot_fret(name)
+            ok.append(fr)
+        except ValueError:  # e.g. f25 from a mis-numbered relative run: drop the frame
+            pass
+    d["frames"] = ok
+    return from_dict(d)
 
 
 def save(lf: LabelFile, path: str | Path) -> None:

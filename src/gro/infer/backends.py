@@ -129,7 +129,8 @@ class GeometryBackend(Backend):
 
     name = "geometry_control"
 
-    def __init__(self, path, device=None):
+    def __init__(self, path, device=None, reject_ambiguous=False):
+        self.reject_ambiguous = reject_ambiguous
         self.stage1 = FretNetBackend(path, device=device)
         self.imgsz = self.stage1.imgsz
 
@@ -143,7 +144,7 @@ class GeometryBackend(Backend):
         if score >= 0.25 and np.isfinite(k).all():
             try:
                 fit = fit_fretboard(anchors_from_k(k), ransac_iters=100)
-                raw[5:, 0] = reassign_wires(k, fit).reshape(-1)
+                raw[5:, 0] = reassign_wires(k, fit, reject_ambiguous=self.reject_ambiguous).reshape(-1)
             except (FitError, ValueError, np.linalg.LinAlgError):
                 pass
         return raw
@@ -154,11 +155,13 @@ class TwoStageBackend(Backend):
 
     name = "two_stage"
 
-    def __init__(self, stage1, numbering, device=None, threshold=0.8, wire_reassign=False):
+    def __init__(self, stage1, numbering, device=None, threshold=0.8, wire_reassign=False, reject_ambiguous=False):
         from gro.fretnet.numbering import NumberingRefiner
 
         self.stage1 = FretNetBackend(stage1, device=device)
-        self.refiner = NumberingRefiner(numbering, self.stage1.device, threshold, reassign=wire_reassign)
+        self.refiner = NumberingRefiner(
+            numbering, self.stage1.device, threshold, reassign=wire_reassign, reject_ambiguous=reject_ambiguous
+        )
         self.imgsz = self.stage1.imgsz
 
     def __call__(self, rgb):

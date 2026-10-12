@@ -91,6 +91,7 @@ def main():
     ap.add_argument("--data", type=Path, default=ROOT / "data/datasets/scale-v1aug")
     ap.add_argument("--cache", type=Path, default=ROOT / "data/datasets/numbering-strips")
     ap.add_argument("--name", default="v7num_1024")
+    ap.add_argument("--mode", choices=["offset", "sequence"], default="offset")
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--epochs", type=int, default=15)
     ap.add_argument("--batch", type=int, default=8)
@@ -125,7 +126,7 @@ def main():
         )
         for s, p in splits.items()
     }
-    net = NumberingNet(a.width, pretrained=True).cuda()
+    net = NumberingNet(a.width, pretrained=True, mode=a.mode).cuda()
     opt = torch.optim.AdamW(net.parameters(), lr=2e-4, weight_decay=1e-3)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, a.epochs)
     best = -1
@@ -140,21 +141,30 @@ def main():
                     x, y = x.cuda(non_blocking=True), y.cuda(non_blocking=True)
                     with torch.autocast("cuda", dtype=torch.bfloat16):
                         logits = net(x)
-                        loss = torch.nn.functional.cross_entropy(logits, y)
+                        if a.mode == "sequence":
+                            target = torch.arange(25, device=y.device)[None] + y[:, None] - SHIFT
+                            valid = (target >= 0) & (target < 25)
+                            target = target.masked_fill(~valid, -100)
+                            loss = torch.nn.functional.cross_entropy(logits.transpose(1, 2), target)
+                        else:
+                            target = y
+                            valid = torch.ones_like(y, dtype=torch.bool)
+                            loss = torch.nn.functional.cross_entropy(logits, y)
                     if split == "train":
                         opt.zero_grad(set_to_none=True)
                         loss.backward()
                         torch.nn.utils.clip_grad_norm_(net.parameters(), 5)
                         opt.step()
-                    correct += int((logits.argmax(-1) == y).sum())
-                    count += len(y)
-                    total += float(loss.detach()) * len(y)
+                    correct += int(((logits.argmax(-1) == target) & valid).sum())
+                    count += int(valid.sum())
+                    total += float(loss.detach()) * int(valid.sum())
             stats[split + "_accuracy"] = correct / count
             stats[split + "_loss"] = total / count
         sched.step()
         checkpoint = {
             "kind": "gro_numbering",
             "width": a.width,
+            "mode": a.mode,
             "epoch": epoch,
             "state_dict": net.state_dict(),
             "stats": stats,

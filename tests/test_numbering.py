@@ -84,3 +84,35 @@ def test_training_guard_excludes_clip_ids_and_honest_date(tmp_path):
         with pytest.raises(ValueError, match="held-out"):
             guard(tmp_path, "train", cfg)
         bad.unlink()
+
+
+def test_sequence_head_and_per_wire_fallback():
+    from gro.fretnet.numbering import NumberingNet, offset_summary, sequence_renumber
+
+    net = NumberingNet(width=128, mode="sequence").eval()
+    with torch.inference_mode():
+        assert net(torch.zeros(1, 3, 128, 128)).shape == (1, 25, 25)
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    k[10, :2] = model.fret_line(6)[0]
+    k[10, 2] = 0.9
+    p = np.eye(25)
+    assert offset_summary(p) == (0, 1.0)
+    np.testing.assert_array_equal(sequence_renumber(k, model, p, 0.8)[12], k[10])
+    p[6] = 1 / 25
+    np.testing.assert_array_equal(sequence_renumber(k, model, p, 0.8)[10], k[10])
+
+
+def test_reject_ambiguous_only_drops_between_wire_points():
+    from gro.fretnet.numbering import reassign_wires
+
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    k[10, :2] = model.fret_line(5.49)[0]
+    k[10, 2] = 0.9
+    k[12, :2] = model.fret_line(6.1)[0]
+    k[12, 2] = 0.9
+    assert reassign_wires(k, model)[10, 2] == pytest.approx(0.9)
+    out = reassign_wires(k, model, reject_ambiguous=True)
+    assert out[10, 2] == 0
+    np.testing.assert_array_equal(out[12], k[12])

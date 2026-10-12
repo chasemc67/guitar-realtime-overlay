@@ -204,8 +204,11 @@ def main() -> None:
     ap.add_argument("--stage1", type=Path, help="FretNet neck-box checkpoint for RTMPose --weights (no GT boxes)")
     ap.add_argument("--numbering", type=Path, help="Whole-neck stage-2 numbering checkpoint")
     ap.add_argument("--wire-reassign", action="store_true", help="Assign points to robust-fit wires")
+    ap.add_argument("--wire-reject-ambiguous", action="store_true", help="Drop points between fitted wires")
     ap.add_argument("--numbering-confidence", type=float, default=0.8)
     a = ap.parse_args()
+    if a.wire_reject_ambiguous and not a.wire_reassign:
+        ap.error("--wire-reject-ambiguous requires --wire-reassign")
     if a.stage1 and (a.numbering or a.wire_reassign):
         ap.error("--stage1 (RTMPose) cannot be combined with numbering or wire reassignment")
     if a.stage1 is not None:
@@ -220,10 +223,11 @@ def main() -> None:
             device=a.device,
             threshold=a.numbering_confidence,
             wire_reassign=a.wire_reassign,
+            reject_ambiguous=a.wire_reject_ambiguous,
         )
         a.imgsz = model.imgsz
     elif a.wire_reassign:
-        model = load_backend(a.weights, wire_reassign=True, device=a.device)
+        model = load_backend(a.weights, wire_reassign=True, device=a.device, reject_ambiguous=a.wire_reject_ambiguous)
         a.imgsz = model.imgsz
     elif a.weights.suffix == ".pt" and not is_checkpoint(a.weights):  # ultralytics weights: ultralytics' predict
         from ultralytics import YOLO
@@ -263,6 +267,7 @@ def main() -> None:
     report = {
         "weights": str(a.weights),
         "wire_reassign": a.wire_reassign,
+        "wire_reject_ambiguous": a.wire_reject_ambiguous,
         "numbering_weights": str(a.numbering) if a.numbering else None,
         "numbering_confidence": a.numbering_confidence if a.numbering else None,
         "stage1": str(a.stage1) if a.stage1 else None,

@@ -214,3 +214,41 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
   - a ConvNeXt or R50 v4q at 832 trained longer;
   - more distinct guitars (21- and 24-fret boards, 480p footage like the SG Special), since generalisation, not fit,
     is the gap.
+
+## Two-stage numbering experiments (2026-10-12)
+
+Implementation: `src/gro/fretnet/numbering.py`, `scripts/train_numbering.py`,
+`gro.infer.TwoStageBackend`, and `scripts/eval_v2.py --numbering CHECKPOINT`.
+Stage 1 is `v4q_r50_832/last.pt`. A torchvision ImageNet ResNet-18 classifies the
+absolute numbering correction in −3..+3 from the whole rectified RGB neck. Pooling retains
+16 longitudinal bins, so the head can use the inlay sequence and both ends of the board.
+The strip covers fitted frets −2..26 and transverse coordinates −0.35..1.35.
+Only the numbering slots change; observed pixel coordinates are preserved. A fixed 0.8
+confidence threshold falls back to stage 1. No threshold is selected using eval_v2.
+
+Training uses all 5798 scale-v1aug train / 1498 val images. Filename guards reject every
+configured eval_v2 clip ID and the 09-06 recording date, including augmented copies.
+GT homographies generate extended strips; random integer shifts, corner perturbations,
+colour changes, blur and occlusion provide augmentation. Validation tests all seven
+integer offsets. Checkpoints are selected by validation offset accuracy only (12 epochs,
+AdamW 2e-4, cosine decay, batch 4, bf16). The concurrent v6 training jobs are left running.
+
+**Limitation established before evaluating stage 2:** in the existing raw-832 reports,
+most errors are mixed local slips. Without dropping predictions, frames with a uniform
+GT index shift have macro fraction **0.531**, versus stage-1 numbering 0.522; with the old
+wire gates this fraction is **0.563**, versus numbering 0.554. These are oracle feasibility
+figures, not learned results. The failing 09-06 frame contains both 0 and −1 shifts.
+A global offset alone therefore cannot meet the requested 0.601 / 1.000 goals while
+retaining those predictions. We also test `--wire-reassign`: assign observed points to
+nearby integer fret coordinates in the robust fit, retaining their pixel positions and
+sides. Ambiguous points retain their original slot; collisions keep the higher-confidence
+observation. Geometry-only is reported as a control.
+
+Stage-2 diagnostics are pooled, separate from the macro headline: GT-strip offset accuracy
+(target zero) and stage-1-strip accuracy against the dominant GT correction, with the
+always-zero baseline and uniform-offset feasibility alongside them. High dominant-offset
+accuracy does not imply every wire is correctly numbered.
+
+| Variant | eval v2 D13 mean / median px | Numbering | Coverage / detection | 09-06 D13 px | 09-06 numbering | 09-06 coverage | GT / stage-1 offset accuracy |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| [Geometry-only control](v2/v7_geometry_control.md) | 5.56 / 2.24 | 0.620 | 0.879 / 1.000 | 0.78 | 0.933 | 0.990 | — |

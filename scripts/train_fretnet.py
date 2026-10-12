@@ -57,6 +57,9 @@ def neighbor_margin(hm: torch.Tensor, k: torch.Tensor, margin: float = 2.0) -> t
     return sum(terms) / pairs.clamp_min(1)
 
 
+PRETRAINED = ("stem", "layers.", "rt_backbone.", "rt_proj.", "rt_encoder.")  # parameters at --backbone-lr-mult
+
+
 def losses(net: FretNet, hm: torch.Tensor, conf: torch.Tensor, k: torch.Tensor, sigma: float) -> dict:
     b, n, h, w = hm.shape
     vis = k[..., 2] > 0  # (B, K)
@@ -186,8 +189,8 @@ def main() -> None:
         assert not unexpected, unexpected
         print("init", a.init, "new parameters:", missing, flush=True)
     net = net.to(device).to(memory_format=torch.channels_last)
-    backbone = [p for n, p in net.named_parameters() if n.startswith(("stem", "layers."))]
-    head = [p for n, p in net.named_parameters() if not n.startswith(("stem", "layers."))]
+    backbone = [p for n, p in net.named_parameters() if n.startswith(PRETRAINED)]
+    head = [p for n, p in net.named_parameters() if not n.startswith(PRETRAINED)]
     opt = torch.optim.AdamW(
         [{"params": backbone, "lr": a.lr * a.backbone_lr_mult}, {"params": head, "lr": a.lr}], weight_decay=a.wd
     )

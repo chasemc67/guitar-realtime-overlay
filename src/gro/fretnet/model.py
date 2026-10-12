@@ -22,6 +22,11 @@ Global-context variants (round 2, numbering is a global decision: inlay pattern,
   over all positions), the 50 tokens attend to each other, and each classifies its x and y over the full canvas in
   1D bins (split 2). Every coordinate is a global decision.
 Backbones: torchvision ResNet-18/34/50 or ConvNeXt-T (BSD-3-Clause code, ImageNet-1k weights; see LICENSES.md).
+
+Round 2b:
+- RTDetrFretNet (arch "rtdetr_r50vd"): the backbone (ResNet-50-vd) and hybrid encoder (AIFI self-attention on stride 32
+  + CCFM fusion) of RT-DETR, from HF transformers with the COCO-trained `PekingU/rtdetr_r50vd` weights (Apache-2.0),
+  feeding the FPN and the keypoint-query head (head="query"): one query per keypoint, RT-DETR-pose style.
 """
 
 from __future__ import annotations
@@ -347,7 +352,48 @@ def export_head(net: nn.Module, gate: bool | str | None = None) -> ExportHead:
     return ExportHead(net, getattr(net, "gate", False) if gate is None else gate).eval()
 
 
+RTDETR_HUB = "PekingU/rtdetr_r50vd"
+
+
+class RTDetrFretNet(FretNet):
+    """FretNet whose features come from RT-DETR (HF transformers): backbone stride 4 (c2) plus the hybrid encoder's
+    256-channel maps at strides 8 / 16 / 32. The keypoint queries decode against the encoder's stride-32 map. RT-DETR
+    takes RGB in [0, 1] without mean / std normalisation (its image processor only rescales)."""
+
+    def __init__(self, arch: str = "rtdetr_r50vd", pretrained: bool = True, ch: int = 128, window: int = 2,
+                 head: str = "query", imgsz: int = 640):  # fmt: skip
+        nn.Module.__init__(self)
+        from transformers import RTDetrConfig, RTDetrModel
+
+        self.arch, self.window, self.head, self.imgsz = arch, window, head, imgsz
+        rt = RTDetrModel.from_pretrained(RTDETR_HUB) if pretrained else RTDetrModel(RTDetrConfig())
+        self.rt_backbone, self.rt_proj, self.rt_encoder = rt.backbone.model, rt.encoder_input_proj, rt.encoder
+        d = rt.config.encoder_hidden_dim
+        self.glob = GlobalQuery(d, ch, d=d, enc=1, reg=head == "queryreg") if head in ("query", "queryreg") else None
+        self.prior_sigma = 8.0
+        self.pos = nn.Conv2d(32, ch, 1)
+        self.lateral = nn.ModuleList([nn.Conv2d(c, ch, 1) for c in (256, d, d, d)])
+        self.fuse = nn.Sequential(conv_bn(ch, ch), conv_bn(ch, ch))
+        self.heatmap = nn.Conv2d(ch, N_KPTS, 1)
+        self.conf = nn.Conv2d(ch, N_KPTS, 1)
+
+    def features(self, x: torch.Tensor):
+        out = self.rt_backbone(x, output_hidden_states=True)
+        c2 = out.hidden_states[1]  # stride 4, 256 ch
+        proj = [p(f) for p, f in zip(self.rt_proj, out.feature_maps, strict=True)]
+        feats = [c2, *self.rt_encoder(inputs_embeds=proj)[0]]
+        glob = None
+        if self.glob is not None:
+            feats[3], *glob = self.glob(feats[3])
+        p = self.lateral[3](feats[3])
+        for i in (2, 1, 0):
+            p = self.lateral[i](feats[i]) + F.interpolate(p, scale_factor=2.0, mode="nearest")
+        return self.fuse(p), glob
+
+
 def build(arch: str, head: str = "heatmap", pretrained: bool = True, imgsz: int = 640, **kw) -> nn.Module:
+    if arch.startswith("rtdetr"):
+        return RTDetrFretNet(arch, pretrained=pretrained, head=head, imgsz=imgsz, **kw)
     if head == "simcc":
         return SimCCNet(arch, pretrained=pretrained, imgsz=imgsz, **kw)
     return FretNet(arch, pretrained=pretrained, head=head, imgsz=imgsz, **kw)

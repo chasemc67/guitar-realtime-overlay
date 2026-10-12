@@ -257,7 +257,7 @@ def main() -> None:
 
 
 def summary_md(rows: list[dict], runs: list[dict], a) -> str:
-    out = ["# scale-v1: label + filter summary", ""]
+    out = [f"# {a.review.name}: label + filter summary", ""]
     vid_s = sum(r["t1"] - r["t0"] for r in runs)
     secs = sum(r["seconds"] for r in runs)
     cost = sum((r.get("ai") or {}).get("cost_usd", 0.0) for r in runs)

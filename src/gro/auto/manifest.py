@@ -20,6 +20,18 @@ def excluded_ids(manifest_dir: Path = MANIFEST_DIR) -> dict[str, str]:
     return out
 
 
+def eval_ids(manifest_dir: Path = MANIFEST_DIR) -> set[str]:
+    """Video ids reserved for evaluation (`split` = test / eval_*): never exported to train/val."""
+    out: set[str] = set()
+    for p in sorted(Path(manifest_dir).glob("*.tsv")):
+        with p.open(newline="") as f:
+            for row in csv.DictReader(f, delimiter="\t"):
+                split = (row.get("split") or "").strip()
+                if split == "test" or split.startswith("eval"):
+                    out.add(row["id"])
+    return out
+
+
 def video_id(clip_id: str) -> str:
     """`<videoid>_<t>` (scraped stills) -> `<videoid>`."""
     parts = clip_id.rsplit("_", 1)

@@ -38,9 +38,14 @@ TEST_RAW = ["2026-09-06_09-00-01"]
 LEDGER = ROOT / ".cache" / "ai" / "usage.jsonl"
 
 
-def videos(include_test: bool) -> list[tuple[Path, bool, str]]:
-    """(path, mirrored, split hint) for every video to label."""
-    from gro.auto.manifest import excluded_ids
+def videos(include_test: bool, globs: list[str] | None = None, split: str = "trainval") -> list[tuple[Path, bool, str]]:
+    """(path, mirrored, split hint) for every video to label. `globs` (repo-relative) replaces the default set; the
+    D1 mirrored flag then comes from data_manifests/."""
+    from gro.auto.manifest import clip_info, excluded_ids
+
+    if globs:
+        paths = sorted({p for g in globs for p in ROOT.glob(g) if p.suffix.lower() == ".mp4"})
+        return [(p, clip_info(p)["mirrored"], split) for p in paths if p.stem.removeprefix("yt_") not in excluded_ids()]
 
     excl = excluded_ids()
     out = []
@@ -163,6 +168,8 @@ def main() -> None:
     pr.add_argument("--workers", type=int, default=4)
     pr.add_argument("--seg-s", type=float, default=45.0)
     pr.add_argument("--include-test", action="store_true", help="also label the test-only 2026-09-06 video")
+    pr.add_argument("--videos", action="append", help="repo-relative glob(s) replacing the default video set")
+    pr.add_argument("--split", default="trainval", help="split hint recorded for --videos")
     pr.add_argument("--only", default="", help="comma-separated substrings of segment ids")
     pr.add_argument("--limit", type=int, default=0)
     pr.add_argument("--budget", type=float, default=12.0, help="USD of AI for this run (ledger) before going no-AI")
@@ -177,13 +184,15 @@ def main() -> None:
     ps = sub.add_parser("status", parents=[common])
     ps.add_argument("--include-test", action="store_true")
     ps.add_argument("--seg-s", type=float, default=45.0)
+    ps.add_argument("--videos", action="append")
+    ps.add_argument("--split", default="trainval")
     a = ap.parse_args()
 
     if a.cmd == "one":
         run_one(a)
         return
 
-    segs = segments(videos(a.include_test), a.seg_s)
+    segs = segments(videos(a.include_test, a.videos, a.split), a.seg_s)
     done = {p.stem for p in a.out.glob("*.json")}
     todo = [s for s in segs if s["seg_id"] not in done]
     if a.cmd == "status":

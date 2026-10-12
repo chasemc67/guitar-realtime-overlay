@@ -63,21 +63,114 @@ def make_splits(videos: list[str], n_test: int, val_frac: float, seed: int) -> d
 
 
 def load_splits(videos: list[str], a) -> dict:
-    if SPLITS.exists() and not a.new_splits:
-        sp = json.loads(SPLITS.read_text())
+    path = a.splits
+    if path.exists() and not a.new_splits:
+        sp = json.loads(path.read_text())
+    elif path != SPLITS and SPLITS.exists() and not a.new_splits:
+        sp = json.loads(SPLITS.read_text())  # a new split file starts from v1's assignment (same val/test clips)
     else:
         sp = make_splits(videos, a.n_test, a.val_frac, a.seed)
-        SPLITS.parent.mkdir(parents=True, exist_ok=True)
-        SPLITS.write_text(json.dumps(sp, indent=1) + "\n")
+    from gro.auto.manifest import eval_ids
+
+    known = {v for k in ("train", "val", "test") for v in sp[k]}
+    new = sorted(v for v in videos if v not in known)
+    if new:  # clips labelled after the split was drawn: ~val_frac to val, the rest to train (eval clips to test)
+        rng = random.Random(a.seed + 1)
+        ev = eval_ids()
+        for v in new:
+            if v.removeprefix("yt_") in ev or v in ev:
+                sp["test"].append(v)
+            else:
+                sp["val" if rng.random() < a.val_frac else "train"].append(v)
+        sp["note"] = sp.get("note", "") + f"; +{len(new)} clips assigned after the first draw"
+    if new or not path.exists() or a.new_splits:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(sp, indent=1) + "\n")
     assert TEST_OWNER not in sp["train"] + sp["val"], "2026-09-06 must stay out of train/val"
+    leak = {v.removeprefix("yt_") for v in sp["train"] + sp["val"]} & eval_ids()
+    assert not leak, f"eval clips (data_manifests split test/eval_*) in train/val: {sorted(leak)}"
     return sp
 
 
-def yolo_line(anchors: list[A.Anchor], w: int, h: int) -> str | None:
+def wire_points(kp: np.ndarray, f: int) -> tuple[np.ndarray, np.ndarray] | None:
+    """(bass, treble) px of wire f from a (50, 3) x, y, v array, or None if not labelled on both sides."""
+    b, t = kp[2 * f], kp[2 * f + 1]
+    return (b[:2], t[:2]) if b[2] > 0 and t[2] > 0 else None
+
+
+def paint_wrap(img: np.ndarray, kp: np.ndarray, rng: random.Random) -> bool:
+    """Synthetic fret wrap (D4 footage): a dark band across the neck between the nut and fret 1, extending past the
+    board edges; the nut keypoints become occluded (vis 1, still supervised). False if the frets aren't labelled."""
+    w1, w2 = wire_points(kp, 1), wire_points(kp, 2)
+    if w1 is None or w2 is None:
+        return False
+    w0 = wire_points(kp, 0) or tuple(p1 + (p1 - p2) * 2 ** (1 / 12) for p1, p2 in zip(w1, w2, strict=True))
+    c0, c1 = rng.uniform(0.15, 0.45), rng.uniform(0.6, 0.85)  # band between nut (0) and fret 1 (1)
+    ext = rng.uniform(0.08, 0.25)  # beyond the outer strings
+    quad = []
+    for c, sides in ((c0, (0, 1)), (c1, (1, 0))):
+        for s in sides:
+            p = w0[s] + c * (w1[s] - w0[s])
+            q = w0[1 - s] + c * (w1[1 - s] - w0[1 - s])
+            quad.append(p + ext * (p - q))
+    poly = np.round(np.array(quad)).astype(np.int32)
+    h, w = img.shape[:2]
+    if not ((poly[:, 0] >= 0) & (poly[:, 0] < w) & (poly[:, 1] >= 0) & (poly[:, 1] < h)).any():
+        return False
+    mask = np.zeros((h, w), np.uint8)
+    cv2.fillPoly(mask, [poly], 255)
+    base = (
+        np.array([rng.uniform(8, 45)] * 3) if rng.random() < 0.8 else np.array([rng.uniform(20, 200) for _ in range(3)])
+    )
+    tex = np.random.default_rng(rng.randrange(1 << 30)).normal(0, rng.uniform(2, 10), (h, w, 1))
+    layer = np.clip(base[None, None, :] + tex, 0, 255)
+    m = cv2.GaussianBlur(mask, (3, 3), 0)[..., None] / 255.0
+    img[:] = (img * (1 - m) + layer * m).astype(np.uint8)
+    for i in (0, 1):
+        if kp[i, 2] > 0:
+            kp[i, 2] = 1
+    return True
+
+
+def paint_fingers(img: np.ndarray, kp: np.ndarray, rng: random.Random) -> bool:
+    """1-3 skin-toned finger-like ellipses across the neck at random labelled frets; covered keypoints -> vis 1."""
+    frets = [f for f in range(1, 24) if wire_points(kp, f) is not None and wire_points(kp, f + 1) is not None]
+    if not frets:
+        return False
+    h, w = img.shape[:2]
+    mask = np.zeros((h, w), np.uint8)
+    for f in rng.sample(frets, min(len(frets), rng.randint(1, 3))):
+        (b0, t0), (b1, t1) = wire_points(kp, f), wire_points(kp, f + 1)
+        c = rng.uniform(0.2, 0.8)
+        b, t = b0 + c * (b1 - b0), t0 + c * (t1 - t0)
+        s0, s1 = rng.uniform(-0.3, 0.4), rng.uniform(0.5, 1.3)  # finger spans part of the neck from the bass side
+        p, q = b + s0 * (t - b), b + s1 * (t - b)
+        width = np.linalg.norm(b1 - b0) * rng.uniform(0.35, 0.7)
+        ctr = (p + q) / 2
+        ang = np.degrees(np.arctan2(*(q - p)[::-1]))
+        axes = (int(np.linalg.norm(q - p) / 2) + 1, int(width / 2) + 1)
+        cv2.ellipse(mask, (int(ctr[0]), int(ctr[1])), axes, ang, 0, 360, 255, -1, cv2.LINE_AA)
+    skin = np.array([rng.uniform(60, 150), rng.uniform(90, 175), rng.uniform(130, 230)])  # BGR
+    shade = cv2.GaussianBlur(np.random.default_rng(rng.randrange(1 << 30)).normal(0, 12, (h, w)), (0, 0), 3)
+    layer = np.clip(skin[None, None, :] + shade[..., None], 0, 255)
+    m = cv2.GaussianBlur(mask, (5, 5), 0)[..., None] / 255.0
+    img[:] = (img * (1 - m) + layer * m).astype(np.uint8)
+    for i, (x, y, v) in enumerate(kp):
+        if v > 0 and 0 <= int(y) < h and 0 <= int(x) < w and mask[int(y), int(x)] > 127:
+            kp[i, 2] = 1
+    return True
+
+
+def kpt_array(anchors: list[A.Anchor]) -> np.ndarray:
     kp = np.zeros((N_KPTS, 3))
     for a in anchors:
         if a.vis > 0 and 0 <= a.fret <= N_FRETS:
             kp[2 * a.fret + (a.side == "treble")] = (a.x, a.y, 2 if a.vis == 2 else 1)
+    return kp
+
+
+def yolo_line(anchors: list[A.Anchor], w: int, h: int, kp: np.ndarray | None = None) -> str | None:
+    kp = kpt_array(anchors) if kp is None else kp
     lab = kp[kp[:, 2] > 0]
     if len(lab) < 4:
         return None
@@ -104,7 +197,14 @@ def yolo_line(anchors: list[A.Anchor], w: int, h: int) -> str | None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--labels", type=Path, default=ROOT / "data" / "labels" / "scale-v1")
+    ap.add_argument("--labels", type=Path, action="append", help="label dir(s) with frames.csv (default scale-v1)")
+    ap.add_argument("--splits", type=Path, default=SPLITS, help="split file (created from scale-v1's if missing)")
+    ap.add_argument(
+        "--wrap-aug", type=float, default=0.0, help="fraction of train frames also exported with a fake fret wrap"
+    )
+    ap.add_argument(
+        "--occ-aug", type=float, default=0.0, help="fraction of train frames also exported with fake fingers"
+    )
     ap.add_argument("--out", type=Path, default=ROOT / "data" / "datasets" / "scale-v1")
     ap.add_argument("--max-side", type=int, default=1280)
     ap.add_argument("--n-test", type=int, default=5, help="held-out YouTube clips")
@@ -116,7 +216,13 @@ def main() -> None:
     ap.add_argument("--include-relative", action="store_true", help="also export non-anchorable frames")
     a = ap.parse_args()
 
-    rows = list(csv.DictReader((a.labels / "frames.csv").open()))
+    a.labels = a.labels or [ROOT / "data" / "labels" / "scale-v1"]
+    rows = []
+    label_dir = {}
+    for d in a.labels:
+        for r in csv.DictReader((d / "frames.csv").open()):
+            rows.append(r)
+            label_dir[r["seg_id"]] = d
     sp = load_splits(sorted({r["video"] for r in rows}), a)
     split_of = {v: s for s, vs in sp.items() if isinstance(vs, list) for v in vs}
     counts = Counter()
@@ -151,8 +257,9 @@ def main() -> None:
         (a.out / "images" / s).mkdir(parents=True, exist_ok=True)
         (a.out / "labels" / s).mkdir(parents=True, exist_ok=True)
     manifest = []
+    aug_rng = random.Random(a.seed + 7)
     for seg, rs in sorted(todo.items()):
-        lf = A.load(a.labels / f"{seg}.json")
+        lf = A.load(label_dir[seg] / f"{seg}.json")
         by_idx = {int(f.extra["frame_index"]): f for f in lf.frames if "frame_index" in f.extra}
         want = sorted(int(r["frame_index"]) for r in rs)
         split_by = {int(r["frame_index"]): r["split"] for r in rs}
@@ -175,15 +282,28 @@ def main() -> None:
             if line is None:
                 counts["too_few_kpts"] += 1
                 continue
-            k = min(1.0, a.max_side / max(h, w))
-            if k < 1:
-                img = cv2.resize(img, (round(w * k), round(h * k)), interpolation=cv2.INTER_AREA)
             s = split_by[fi]
-            name = f"{seg}_{fi:06d}"
-            cv2.imwrite(str(a.out / "images" / s / f"{name}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 95])
-            (a.out / "labels" / s / f"{name}.txt").write_text(line + "\n")
-            counts[f"{s}: exported"] += 1
-            manifest.append({"name": name, "split": s, "seg_id": seg, "video": lf.video["path"], "frame_index": fi})
+            variants = [("", img, None)]
+            if s == "train":
+                for tag, p, paint in (("wrap", a.wrap_aug, paint_wrap), ("occ", a.occ_aug, paint_fingers)):
+                    if p > 0 and aug_rng.random() < p:
+                        im2, kp2 = img.copy(), kpt_array(by_idx[fi].anchors)
+                        if paint(im2, kp2, aug_rng):
+                            if tag == "wrap" and aug_rng.random() < 0.5:
+                                paint_fingers(im2, kp2, aug_rng)
+                            variants.append((f"_{tag}", im2, kp2))
+            for tag, im, kp in variants:
+                line = yolo_line(by_idx[fi].anchors, w, h, kp)
+                if line is None:
+                    continue
+                k = min(1.0, a.max_side / max(h, w))
+                if k < 1:
+                    im = cv2.resize(im, (round(w * k), round(h * k)), interpolation=cv2.INTER_AREA)
+                name = f"{seg}_{fi:06d}{tag}"
+                cv2.imwrite(str(a.out / "images" / s / f"{name}.jpg"), im, [cv2.IMWRITE_JPEG_QUALITY, 95])
+                (a.out / "labels" / s / f"{name}.txt").write_text(line + "\n")
+                counts[f"{s}: exported{tag}"] += 1
+                manifest.append({"name": name, "split": s, "seg_id": seg, "video": lf.video["path"], "frame_index": fi})
         cap.release()
 
     data = {

@@ -1,0 +1,229 @@
+{
+ "name": "eval_v2",
+ "frozen": "2026-10-12",
+ "note": "Held-out non-Ibanez clips; pseudo-GT from the auto pipeline (labels data/labels/eval-v2), spot-checked by eye; never in train/val (data_manifests split test/eval_v2 + export_yolo guard). Plus the 09-06 hand-label honest set (samples/anchors_0906).",
+ "labels": "data/labels/eval-v2",
+ "gt_dir": "samples/eval_v2",
+ "honest": [
+  "samples/anchors_0906"
+ ],
+ "clips": [
+  {
+   "id": "yt_3KFaO1RfTcE",
+   "video": "data/clips_eval/yt_3KFaO1RfTcE.mp4",
+   "mirrored": false,
+   "guitar": "Schecter Omen Extreme-6, blue quilt, rosewood, vector inlays, 480p",
+   "frets": 24,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_9oJLRxucpNI",
+   "video": "data/clips_eval/yt_9oJLRxucpNI.mp4",
+   "mirrored": false,
+   "guitar": "Gretsch 6120 orange hollow body, ebony-ish board, hump-block inlays",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_FbEe_5tGOFM",
+   "video": "data/clips_eval/yt_FbEe_5tGOFM.mp4",
+   "mirrored": false,
+   "guitar": "Gibson SG Special cherry, rosewood, dot inlays, 640x480 12.6 fps",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_cgYA0Xt417w",
+   "video": "data/clips_eval/yt_cgYA0Xt417w.mp4",
+   "mirrored": false,
+   "guitar": "Gibson SG Standard '61 cherry, rosewood, trapezoid inlays, 1080p24, steep close-up",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_GEljpsfLj8o",
+   "video": "data/clips_eval/yt_GEljpsfLj8o.mp4",
+   "mirrored": false,
+   "guitar": "Gibson Les Paul goldtop, rosewood, trapezoid inlays, dark scene",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_N_nayTl9HGY",
+   "video": "data/clips_eval/yt_N_nayTl9HGY.mp4",
+   "mirrored": false,
+   "guitar": "Rickenbacker 360 mapleglo, bound red-stained board, triangle inlays, 480p",
+   "frets": 24,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_ixOqhZfAjMg",
+   "video": "data/clips_eval/yt_ixOqhZfAjMg.mp4",
+   "mirrored": false,
+   "guitar": "PRS singlecut teal flame, rosewood, bird inlays, wide shot",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_j4D7XFUK7II",
+   "video": "data/clips_eval/yt_j4D7XFUK7II.mp4",
+   "mirrored": false,
+   "guitar": "Jackson V red, ebony, shark-fin inlays, 480p steep angle, headstock out of view",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_eM8DB4FT-jM",
+   "video": "data/clips_eval/yt_eM8DB4FT-jM.mp4",
+   "mirrored": false,
+   "guitar": "ESP George Lynch tiger graphic, rosewood, dot inlays, reverse headstock",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_yIYrqh7ulSk",
+   "video": "data/clips_eval/yt_yIYrqh7ulSk.mp4",
+   "mirrored": false,
+   "guitar": "Fender Jazzmaster sunburst, rosewood, block inlays, 1080p",
+   "frets": 21,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_cM5FBuumVMI",
+   "video": "data/clips_eval/yt_cM5FBuumVMI.mp4",
+   "mirrored": false,
+   "guitar": "Gibson Les Paul Custom black, ebony, block inlays, 480p",
+   "frets": 22,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_wxz-P64DfNo",
+   "video": "data/clips_eval/yt_wxz-P64DfNo.mp4",
+   "mirrored": false,
+   "guitar": "Charvel San Dimas white, maple board, dot inlays",
+   "frets": null,
+   "source": "new (downloaded 2026-10-11)"
+  },
+  {
+   "id": "yt_VT4VkOkFIRE",
+   "video": "data/clips/yt_VT4VkOkFIRE.mp4",
+   "mirrored": false,
+   "guitar": "ESP Eclipse-style singlecut black, ebony, flag inlays (licklibrary close-up)",
+   "frets": 24,
+   "source": "v1 test split (configs/scale-v1_splits.json)"
+  },
+  {
+   "id": "yt_nBpe2YQEzZo",
+   "video": "data/clips/yt_nBpe2YQEzZo.mp4",
+   "mirrored": false,
+   "guitar": "Fender Stratocaster sunburst, maple board, dot inlays",
+   "frets": 22,
+   "source": "v1 test split (configs/scale-v1_splits.json)"
+  },
+  {
+   "id": "yt_tNAX9maMla8",
+   "video": "data/clips/yt_tNAX9maMla8.mp4",
+   "mirrored": false,
+   "guitar": "Superstrat flame top, ebony, no face inlays (steep close-ups)",
+   "frets": 24,
+   "source": "v1 test split (configs/scale-v1_splits.json)"
+  },
+  {
+   "id": "yt_vXzydcRC1bA",
+   "video": "data/clips/yt_vXzydcRC1bA.mp4",
+   "mirrored": false,
+   "guitar": "ESP superstrat black, rosewood, dot inlays (licklibrary)",
+   "frets": 22,
+   "source": "v1 test split (configs/scale-v1_splits.json)"
+  },
+  {
+   "id": "yt_Beb0HdyBhd8",
+   "video": "data/clips/yt_Beb0HdyBhd8.mp4",
+   "mirrored": false,
+   "guitar": "ESP/LTD superstrat, ebony, abalone binding, offset dots (licklibrary)",
+   "frets": null,
+   "source": "v1 test split (configs/scale-v1_splits.json)"
+  },
+  {
+   "id": "stan_june2",
+   "video": "data/test_ext/stan_june2.mp4",
+   "mirrored": true,
+   "guitar": "Fender Telecaster butterscotch, maple board, dot inlays (Chase's friend, phone)",
+   "frets": 22,
+   "source": "owner test_ext"
+  }
+ ],
+ "checks": {
+  "yt_9oJLRxucpNI": {
+   "index_offset": 1,
+   "drop": [
+    126,
+    144,
+    750,
+    768,
+    756,
+    774
+   ],
+   "note": "pipeline numbering -1 (6120 blocks at 1,3,5,7,9,12,15,17 read as 2,4,..); 126/144 fit stretched over the pickup, 750/768 shifted",
+   "drop_ranges": [
+    [
+     700,
+     99999
+    ]
+   ]
+  },
+  "yt_N_nayTl9HGY": {
+   "drop": [
+    186,
+    204,
+    192
+   ],
+   "note": "186/204 numbering/fit off by ~1 fret",
+   "drop_ranges": [
+    [
+     170,
+     230
+    ]
+   ]
+  },
+  "yt_wxz-P64DfNo": {
+   "exclude": "720p motion blur, maple board with only high frets in the kept frames; numbering not verifiable"
+  },
+  "yt_3KFaO1RfTcE": {
+   "exclude": "480p, heavy motion blur; inlay columns inconsistent across frames, numbering not verifiable"
+  },
+  "yt_yIYrqh7ulSk": {
+   "verified": [
+    120
+   ],
+   "note": "zoom 120: every wire on its ridge, 12th inlay cell 12, wire 21 at board end"
+  },
+  "yt_cgYA0Xt417w": {
+   "verified": [
+    375
+   ],
+   "note": "zoom 375: wire 23 was the board-end edge (dropped by frets=22)"
+  },
+  "yt_FbEe_5tGOFM": {
+   "verified": [
+    108
+   ]
+  },
+  "yt_j4D7XFUK7II": {
+   "verified": [
+    660
+   ],
+   "note": "23/24 on the pickup (dropped by frets=22)"
+  },
+  "yt_cM5FBuumVMI": {
+   "exclude": "480p; no frames kept by the filter and wires not resolvable by eye for hand GT"
+  },
+  "yt_Beb0HdyBhd8": {
+   "exclude": "no frames kept by the filter; board end / wire 24 ambiguous at the binding for hand GT (note: real fret wrap at the nut)"
+  },
+  "yt_GEljpsfLj8o": {
+   "note": "no frames kept by the filter; 1 hand frame (545) via zoom+snap, scripts/hand_anchors_eval_v2.py; wide-angle lens bows the wires"
+  }
+ },
+ "checks_method": "Every sampled GT frame was rectified through its own GT fit and stacked by fret number (build_eval_v2.py strips -> review/eval-v2/strips/); numbering verified by eye from inlay columns, nut and board end; wire positions checked on full-res zooms (build_eval_v2.py zoom) on >=1 frame per clip. GT wires beyond the clip's fret count (board-end edge / pickup labelled as a wire by the pipeline) are removed."
+}

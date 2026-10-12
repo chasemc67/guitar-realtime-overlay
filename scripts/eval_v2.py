@@ -1,0 +1,181 @@
+"""Evaluate pose weights on the frozen eval set v2 (configs/eval_v2.json + samples/eval_v2/) and the 09-06 hand set.
+
+    .venv/bin/python scripts/eval_v2.py --weights runs/pose/v1/weights/best.pt --name v1 [--imgsz 640]
+
+Metrics per frame are scripts/eval_model.py's (canonical D1 frame, absolute slots, prediction conf > 0.5):
+D13 = perpendicular px from each predicted slot to the GT wire of the same index (headline), numbering = every
+prediction lying on a GT wire carries that wire's index, coverage = GT vis-2 slots predicted, detection = board found.
+nearest-wire px is index-agnostic (does the grid line up, whatever the numbers). Errors are in source pixels and also
+normalised by the local GT fret spacing (% fret), which makes 480p and 1080p clips comparable.
+Aggregates: per clip, `macro` = mean over clips (each clip weighs the same; the headline), `pooled` = over frames.
+Output: eval/v2/<name>.json and .md.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from build_eval_v2 import read_frames  # noqa: E402
+from eval_auto import frame_image, load_gt  # noqa: E402
+from eval_model import canonical, metrics, nearest_wire_px, predict  # noqa: E402
+
+from gro import anchors as A  # noqa: E402
+
+
+def fret_spacing(gt: list[A.Anchor]) -> float | None:
+    """Median distance between consecutive GT wire midpoints (px per fret, local scale of the frame)."""
+    by = defaultdict(dict)
+    for g in gt:
+        if g.vis > 0:
+            by[g.fret][g.side] = np.array([g.x, g.y])
+    mids = {f: (d["bass"] + d["treble"]) / 2 for f, d in by.items() if len(d) == 2}
+    fs = sorted(mids)
+    gaps = [np.linalg.norm(mids[b] - mids[a]) / (b - a) for a, b in zip(fs, fs[1:], strict=False)]
+    return float(np.median(gaps)) if gaps else None
+
+
+def frame_row(model, image, gt, a, item, clip):
+    pred, detected = predict(model, image, a.imgsz, a.device)
+    m = metrics(gt, pred, detected)
+    sp = fret_spacing(gt)
+    m["fret_px"] = sp
+    m["wire_perp_pct"] = [100 * e / sp for e in m["wire_perp_px"]] if sp else []
+    m["nearest_wire_px"] = nearest_wire_px(gt, pred)
+    return {"item": item, "clip": clip, **{k: v for k, v in m.items() if k != "per_keypoint_px"}}
+
+
+def agg(rows: list[dict]) -> dict:
+    perp = [e for r in rows for e in r["wire_perp_px"]]
+    pct = [e for r in rows for e in r["wire_perp_pct"]]
+    near = [e for r in rows for e in r["nearest_wire_px"]]
+    num = [r["numbering_ok"] for r in rows if r["numbering_ok"] is not None]
+    vis = sum(r["visible"] for r in rows)
+    f = lambda v, q=None: None if not v else float(np.mean(v) if q is None else np.percentile(v, q))  # noqa: E731
+    return {
+        "frames": len(rows),
+        "d13_mean_px": f(perp),
+        "d13_median_px": f(perp, 50),
+        "d13_p95_px": f(perp, 95),
+        "d13_mean_pct_fret": f(pct),
+        "nearest_wire_mean_px": f(near),
+        "numbering": sum(num) / len(num) if num else None,
+        "numbering_frames": len(num),
+        "coverage": sum(r["covered"] for r in rows) / vis if vis else None,
+        "detection": sum(r["detected"] for r in rows) / len(rows) if rows else None,
+    }
+
+
+def macro(per_clip: dict[str, dict]) -> dict:
+    keys = ["d13_mean_px", "d13_median_px", "d13_mean_pct_fret", "nearest_wire_mean_px", "numbering", "coverage",
+            "detection"]  # fmt: skip
+    out = {"clips": len(per_clip), "frames": sum(s["frames"] for s in per_clip.values())}
+    for k in keys:
+        v = [s[k] for s in per_clip.values() if s[k] is not None]
+        out[k] = float(np.mean(v)) if v else None
+    return out
+
+
+def fmt(v, d=2):
+    return "n/a" if v is None else f"{v:.{d}f}"
+
+
+def row_md(name, s):
+    return (
+        f"| {name} | {s['frames']} | {fmt(s['d13_mean_px'])} / {fmt(s['d13_median_px'])} | "
+        f"{fmt(s['d13_mean_pct_fret'], 1)} | {fmt(s['nearest_wire_mean_px'])} | {fmt(s['numbering'], 3)} | "
+        f"{fmt(s['coverage'], 3)} | {fmt(s['detection'], 3)} |"
+    )
+
+
+HEADER = [
+    "| Set / clip | Frames | D13 mean / median px | D13 % fret | Nearest-wire px | Numbering | Coverage | Detection |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|",
+]
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--weights", type=Path, required=True)
+    ap.add_argument("--name", required=True)
+    ap.add_argument("--config", type=Path, default=ROOT / "configs" / "eval_v2.json")
+    ap.add_argument("--imgsz", type=int, default=640)
+    ap.add_argument("--device", default=None)
+    ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
+    a = ap.parse_args()
+    from ultralytics import YOLO
+
+    model = YOLO(str(a.weights), task="pose")
+    cfg = json.loads(a.config.read_text())
+    gt_dir = ROOT / cfg["gt_dir"]
+    rows, guitar = [], {}
+    for clip in cfg["clips"]:
+        p = gt_dir / f"{clip['id']}.json"
+        if not p.exists() or cfg.get("checks", {}).get(clip["id"], {}).get("exclude"):
+            continue
+        lf = A.load(p)
+        guitar[clip["id"]] = clip["guitar"]
+        imgs = read_frames(ROOT / clip["video"], [int(f.extra["frame_index"]) for f in lf.frames], clip["mirrored"])
+        for fr in lf.frames:
+            fi = int(fr.extra["frame_index"])
+            if fi in imgs:
+                r = frame_row(model, imgs[fi], fr.present(), a, f"{clip['id']}#{fi}", clip["id"])
+                r["source"] = fr.source
+                rows.append(r)
+    honest = []
+    for path, lf, i, fr in load_gt([ROOT / g for g in cfg.get("honest", [])]):
+        image = frame_image(lf, fr, path)
+        if image is None:
+            continue
+        canon, gt = canonical(image, lf, fr.anchors)
+        honest.append(frame_row(model, canon, [g for g in gt if g.vis > 0], a, f"{path.name}#{i}", path.stem))
+    by = defaultdict(list)
+    for r in rows:
+        by[r["clip"]].append(r)
+    per_clip = {c: agg(rs) for c, rs in by.items()}
+    hand_rows = [r for r in rows if r["source"] == "hand"]
+    report = {
+        "weights": str(a.weights),
+        "imgsz": a.imgsz,
+        "config": cfg["name"],
+        "macro": macro(per_clip),
+        "pooled": agg(rows),
+        "hand_corrected_frames": agg(hand_rows) if hand_rows else None,
+        "honest_0906": agg(honest) if honest else None,
+        "per_clip": per_clip,
+        "guitar": guitar,
+        "frames": rows,
+        "honest_frames": honest,
+    }
+    a.out.mkdir(parents=True, exist_ok=True)
+    (a.out / f"{a.name}.json").write_text(json.dumps(report, indent=1) + "\n")
+    lines = [
+        f"# Eval v2: {a.name}",
+        "",
+        f"Weights `{a.weights}`, imgsz {a.imgsz}. Frozen set `{a.config.relative_to(ROOT)}`. Macro = mean over clips.",
+        "",
+        *HEADER,
+        row_md("**eval v2 macro**", report["macro"]),
+        row_md("eval v2 pooled", report["pooled"]),
+    ]
+    if hand_rows:
+        lines.append(row_md("eval v2 hand-corrected frames only", report["hand_corrected_frames"]))
+    if honest:
+        lines.append(row_md("09-06 hand GT (honest)", report["honest_0906"]))
+    lines += ["", "## Per clip", "", *HEADER]
+    lines += [row_md(f"{c} ({guitar[c]})", s) for c, s in per_clip.items()]
+    (a.out / f"{a.name}.md").write_text("\n".join(lines) + "\n")
+    print((a.out / f"{a.name}.md").read_text())
+
+
+if __name__ == "__main__":
+    main()

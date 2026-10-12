@@ -16,9 +16,10 @@ def main() -> None:
     ap.add_argument("src", type=Path)
     ap.add_argument("dst", type=Path)
     ap.add_argument("--off", action="store_true")
+    ap.add_argument("--wires", action="store_true", help="also the cross-side wire gate (gate='wires')")
     a = ap.parse_args()
     ck = torch.load(a.src, map_location="cpu", weights_only=True)
-    ck["gate"] = not a.off
+    ck["gate"] = False if a.off else "wires" if a.wires else True
     torch.save(ck, a.dst)
     print(f"wrote {a.dst} (gate={ck['gate']})")
 

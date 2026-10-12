@@ -156,6 +156,11 @@ Goal: beat v1's eval v2 numbering of 0.601 without regressing wire error (v1 D13
   shifted +1, or the SG's bass frets 4–6 placed on wires 11–14. Locally those runs are self-consistent; the model
   lost count where wires are dense. Counting needs global reasoning (the query / SimCC heads) or more pixels per
   fret.
+- **The cross-side wire gate doesn't help numbering either.** `wire_gate` drops a wire whose two ends sit on
+  different wires: the treble-minus-bass offset along the neck, from a robust line fit over frets, is more than half a
+  fret gap off. Many v4q failures are one-sided runs (PRS bass 19–23 +1, Jazzmaster treble 16–19 −1). Numbering moves
+  only 0.441 → 0.444, because a frame still fails on any one surviving wrong keypoint: unpaired ends past the board
+  end, low frets 1–4 off by 2. Both gates cut D13, so they are worth keeping on whichever model ships.
 
 ### Candidates
 
@@ -171,3 +176,5 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v4q_r50 best (val, ep 45): ResNet-50 + keypoint-query transformer (`--head query`), frets 23+ oversampled ×2, 50 ep | b | BSD-3 + own | 8.45 / 2.89 | 0.407 | 0.945 / 1.000 | 1.07 | 0.933 | 0.972 |
 | v4q_r50 last (ep 50) | b | BSD-3 + own | 6.73 / 2.79 | 0.441 | 0.951 / 1.000 | 1.12 | 0.933 | 0.973 |
 | v4q_r50 last + order gate | b | BSD-3 + own | 5.44 / 2.62 | 0.441 | 0.916 / 1.000 | 1.12 | 0.933 | 0.973 |
+| v4q_r50 last + order + cross-side wire gate (`gate="wires"`) | b | BSD-3 + own | 5.32 / 2.52 | 0.444 | 0.901 / 1.000 | 1.12 | 0.933 | 0.973 |
+| v3b + order + wire gate | b | BSD-3 + own | 5.21 / 2.81 | 0.389 | 0.870 / 1.000 | 1.11 | 0.867 | 0.990 |

@@ -72,3 +72,21 @@ def test_gate_flag_roundtrips(net, tmp_path):
     save(net, p)
     net.gate = False
     assert load(p).gate and export_head(load(p)).gate
+
+
+def test_wire_gate_drops_one_sided_slips():
+    from gro.fretnet.model import R, order_gate
+
+    xs = [20 + 600 * (1 - R**f) for f in range(25)]
+    xy = torch.zeros(1, 50, 2)
+    for f in range(23):  # slanted wires: the treble end leans forward a little more up the neck
+        xy[0, 2 * f] = torch.tensor([xs[f], 100.0])
+        xy[0, 2 * f + 1] = torch.tensor([xs[f] + 0.1 * f, 150.0])
+    conf = torch.zeros(1, 50)
+    conf[0, :46] = 0.9
+    assert torch.equal(order_gate(xy, conf, wires=True), conf)
+    for f in (19, 20, 21):  # bass ends of 19..21 one wire too far up the neck (a self-consistent run)
+        xy[0, 2 * f, 0] = xs[f + 1]
+    dropped = (order_gate(xy, conf, wires=True)[0, :46] < 0.5).nonzero().flatten().tolist()
+    # 21b duplicates wire 22, so the order gate drops it and 21t (correct) has no pair to check; 19 and 20 lose both
+    assert dropped == [38, 39, 40, 41, 42]

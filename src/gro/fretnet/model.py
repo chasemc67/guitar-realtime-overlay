@@ -1,7 +1,8 @@
 """FretNet: a permissively licensed 50-keypoint fretboard model (model v3). No Ultralytics code or weights.
 
 Backbone: torchvision ResNet (BSD-3-Clause code, ImageNet weights from torchvision; see LICENSES.md). Head (ours): an
-FPN that merges strides 4..32 into one stride-4 map, one heatmap per keypoint, and a per-keypoint confidence. Input is
+FPN that merges strides 4..32 into one stride-4 map, one heatmap per keypoint, and one confidence map per keypoint, read
+at the predicted location (local evidence only, like a detector's per-anchor keypoint confidence). Input is
 the same 640x640 letterboxed RGB frame as v1, in [0, 1] (the ImageNet normalisation is inside the network), so every
 pre-processing path (Python, Swift) is shared with v1.
 
@@ -49,11 +50,11 @@ class FretNet(nn.Module):
         self.lateral = nn.ModuleList([nn.Conv2d(c, ch, 1) for c in chans])
         self.fuse = nn.Sequential(conv_bn(ch, ch), conv_bn(ch, ch))
         self.heatmap = nn.Conv2d(ch, N_KPTS, 1)
-        self.conf = nn.Sequential(nn.Linear(chans[-1] + N_KPTS, 256), nn.ReLU(inplace=True), nn.Linear(256, N_KPTS))
+        self.conf = nn.Conv2d(ch, N_KPTS, 1)
         self.register_buffer("mean", torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1))
         self.register_buffer("std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
 
-    def features(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def features(self, x: torch.Tensor) -> torch.Tensor:
         x = self.stem((x - self.mean) / self.std)
         feats = []
         for layer in self.layers:
@@ -62,24 +63,29 @@ class FretNet(nn.Module):
         p = self.lateral[3](feats[3])
         for i in (2, 1, 0):
             p = self.lateral[i](feats[i]) + F.interpolate(p, scale_factor=2.0, mode="nearest")
-        return self.fuse(p), feats[3]
+        return self.fuse(p)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """x (B, 3, S, S) RGB in [0, 1] -> (heatmap logits (B, 50, S/4, S/4), confidence logits (B, 50))."""
-        f, c5 = self.features(x)
+        """x (B, 3, S, S) RGB in [0, 1] -> (heatmap logits (B, 50, S/4, S/4), confidence logits (B, 50)).
+
+        Confidence logit = the confidence map averaged under softmax(heatmap), i.e. read where the keypoint is."""
+        f = self.features(x)
         hm = self.heatmap(f)
-        pooled = torch.cat([c5.mean((2, 3)), hm.flatten(2).amax(-1)], 1)
-        return hm, self.conf(pooled)
+        p = torch.softmax(hm.flatten(2).float(), -1).detach()  # the confidence loss must not move the heatmap
+        return hm, (p * self.conf(f).flatten(2).float()).sum(-1)
 
     def locate(self, hm: torch.Tensor) -> torch.Tensor:
         """Heatmap logits (B, K, H, W) -> (B, K, 2) x, y in input px: soft-argmax in a window around the argmax."""
+        # The peak cell comes from an equality one-hot rather than a flat argmax index: the index (up to 25599) is not
+        # exact in fp16, which CoreML uses on the Neural Engine. Every value here stays below 160.
         b, k, h, w = hm.shape
         flat = hm.flatten(2)
-        idx = flat.argmax(-1, keepdim=True)  # (B, K, 1)
-        iy = torch.div(idx, w, rounding_mode="floor").to(hm.dtype)
-        ix = (idx - torch.div(idx, w, rounding_mode="floor") * w).to(hm.dtype)
         gx = torch.arange(w, device=hm.device, dtype=hm.dtype).repeat(h).view(1, 1, -1)
         gy = torch.arange(h, device=hm.device, dtype=hm.dtype).repeat_interleave(w).view(1, 1, -1)
+        peak = (flat >= flat.amax(-1, keepdim=True)).to(hm.dtype)
+        n = peak.sum(-1, keepdim=True)
+        ix = ((peak * gx).sum(-1, keepdim=True) / n).round()  # ties: their mean
+        iy = ((peak * gy).sum(-1, keepdim=True) / n).round()
         inside = ((gx - ix).abs() <= self.window) & ((gy - iy).abs() <= self.window)
         p = torch.softmax(flat.masked_fill(~inside, -1e4), -1)
         x = (p * gx).sum(-1)

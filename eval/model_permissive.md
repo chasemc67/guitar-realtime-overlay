@@ -181,3 +181,36 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v5s_cnxt (best = last, ep 45): ConvNeXt-T + RTMPose-style SimCC head (own code), frets 23+ ×2 | a | BSD-3 + own | 18.14 / 16.41 | 0.207 | 0.946 / 1.000 | 3.80 | 0.533 | 0.987 |
 | v4r_r50 (best = last, 30 ep fine-tune of v4q last): queries also regress x,y; Gaussian prior σ 8 px on the heatmap (`--head queryreg`) | b | BSD-3 + own | 9.91 / 6.51 | 0.431 | 0.942 / 1.000 | 1.17 | 0.933 | 0.984 |
 | v4r_r50 prior σ 4 / 16 / off (eval-time sweep) | b | BSD-3 + own | 11.41 / 8.52 · 8.95 / 5.52 · 7.72 / 2.98 | 0.425 · 0.434 · 0.429 | 0.942 / 1.000 | 1.56 · 1.07 · 1.07 | 0.933 · 0.867 · 0.867 | 0.984 |
+| **v4q_r50_832** (best = last, ep 45): v4q at 832×832 input, batch 24, scale aug 0.3, frets 23+ ×2 | b | BSD-3 + own | 7.22 / 2.56 | 0.522 | 0.917 / 1.000 | **0.78** | 0.933 | 0.990 |
+| **v4q_r50_832 + order + wire gate** | b | BSD-3 + own | 5.64 / **2.05** | **0.554** | 0.854 / 1.000 | **0.78** | 0.933 | 0.990 |
+
+### Round 2 reading
+
+- **No candidate beats v1 on numbering, so nothing ships.** The closest is v4q_r50_832 with both gates:
+  - numbering 0.554 vs 0.601;
+  - wire error 5.64 / 2.05 px vs 8.44 / 5.80;
+  - 09-06 D13 0.78 vs 0.82 px, but 09-06 numbering 0.933 vs 1.000.
+
+  v1 stays the default. v3 stays the permissive option in the app. No CoreML export, app change or release this round.
+- **What helped:**
+  - **Resolution helped most:** v4q went from 0.441 at 640 to 0.522 at 832. Dense high-fret wires get more cells
+    apart, and that is where v3/v4q lose count.
+  - **Global attention helped modestly:** v3b's 0.367 rose to 0.441 with the keypoint-query transformer. Coverage
+    also went up (0.907 → 0.951).
+  - **The gates add about 0.03:** the fret-order and cross-side wire gates in the export head drop slipped
+    keypoints. They always cut D13, at some coverage cost.
+- **What didn't:**
+  - **SimCC (path a, ConvNeXt-T) failed on new guitars:** 4.2 px on val but 18 px on eval v2.
+  - **The query regression prior (v4r) didn't help.** Its coarse coordinates fit val (2.5 px) but not the held-out
+    guitars.
+
+  Both learn fully connected maps from image position to keypoint. On 14 unseen guitars they generalise worse than
+  convolutional heatmaps. That makes the training set's limited guitar variety, not head capacity, the likely ceiling
+  for absolute fret numbering.
+- **Latency:** 832 input costs about 1.7× the 640 compute, roughly 21 ms on the M4 ANE by scaling v3's 12.7 ms. Not
+  measured.
+- **Next:**
+  - v4q at 960 or a neck-crop second pass (resolution is the lever that works);
+  - a ConvNeXt or R50 v4q at 832 trained longer;
+  - more distinct guitars (21- and 24-fret boards, 480p footage like the SG Special), since generalisation, not fit,
+    is the gap.

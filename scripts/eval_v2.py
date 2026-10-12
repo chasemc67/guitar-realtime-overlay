@@ -144,6 +144,7 @@ def main() -> None:
         model = YOLO(str(a.weights), task="pose")
     else:
         model = load_backend(a.weights, **({"device": a.device} if a.device else {}))
+        a.imgsz = model.imgsz  # FretNet checkpoints carry their own input size
     cfg = json.loads(a.config.read_text())
     gt_dir = ROOT / cfg["gt_dir"]
     rows, guitar = [], {}

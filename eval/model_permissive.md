@@ -119,3 +119,43 @@ Latency, model call, batch 1, 200 calls, median / p95 ms (`eval/v3/bench_v3b.jso
 - **Backbone cost** on the ANE: ResNet-50 at 640 is about 10 ms of the 12.7 ms. ResNet-34 would be about 7.5 ms and
   ResNet-18 about 5.7 ms in total (untrained-weights export; accuracy not measured).
 - **Size:** the CoreML package is 47 MB (v1: 22 MB).
+
+## Round 2 (2026-10-12): numbering, permissive candidates vs v1
+
+Goal: beat v1's eval v2 numbering of 0.601 without regressing wire error (v1 D13 8.44 / 5.80 px) or 09-06 (v1 D13
+0.82 px, numbering 1.000, coverage 0.949).
+
+### Why v3 numbering fails (`eval_model.metrics` now records the slot behind each index shift: `shift_keypoints`)
+
+| Model | Failing frames | Wrong slots: ±1 / ±2 / larger jumps / beyond the last GT wire | Wrong slots at frets 0–8 / 9–14 / 15–23 | Whole-frame shifts |
+|---|---:|---|---|---:|
+| v1 | 79 of 232 | 384 / 90 / 62 / 30 | 101 / 157 / 308 | 2 (vXzydcRC1bA, +4) |
+| v3b | 139 of 231 | 537 / 121 / 156 / 38 | 154 / 105 / 593 | 2 (same frames) |
+
+- **v3 failures are scattered, single-keypoint slips.** A failing v3 frame has a median of 3 to 5 wrong slots out of
+  about 40. Almost none are a consistent ±k shift of the whole board. v1 fails differently: it misses whole boards
+  (detection 0.835) or shifts a run of wires (SG '61 close-up, Jackson V).
+- **The slips cluster at frets 15–23.** That is where wires are 2 to 3 heatmap cells apart at 640, so the
+  neighbouring wire's peak is a near-tie.
+  - Two v3 clips also jump 7 to 10 frets: FbEe_5tGOFM (−7/−8) and j4D7XFUK7II (−9/−10). A single heatmap jumps to a
+    look-alike wire far up the neck.
+- **v1 does use the whole neck.** YOLO-pose regresses all 50 keypoints from one anchor's feature vector, which comes
+  through C2PSA attention at stride 32. That makes the fret indices one joint decision, consistent but imprecise.
+- **v3 does not.** Each of v3's 50 heatmaps is an independent 1×1 conv on local stride-4 features. Nothing ties fret
+  k's peak to fret k±1's peak or to the inlay pattern.
+- **Round-2 fix:** give every keypoint a global decision. Two heads:
+  - `head="query"`: a transformer over the stride-32 tokens, plus 50 keypoint queries that attend to each other and
+    to the image and add a dynamic term to each heatmap.
+  - `SimCCNet`: per-keypoint tokens built from the whole stride-16 map, then 1D x/y classification.
+- **Training data:** 1447 of 5798 train frames are labelled to fret 23 or higher. Round 2 oversamples them ×2.
+
+### Candidates
+
+All are permissive: torchvision code and ImageNet weights (BSD-3-Clause), own head code. "last" = final-epoch
+checkpoint. Wire = eval v2 D13 mean / median px (macro).
+
+| Candidate | Path | Licence | eval v2 wire px | Numbering | Coverage / detection | 09-06 D13 px | 09-06 numbering | 09-06 coverage |
+|---|---|---|---|---:|---|---:|---:|---:|
+| v1 (reference, AGPL) | — | AGPL-3.0 | 8.44 / 5.80 | 0.601 | 0.805 / 0.835 | 0.82 | 1.000 | 0.949 |
+| v3b_r50 (shipped v3) | — | BSD-3 + own | 6.08 / 2.89 | 0.367 | 0.907 / 1.000 | 1.11 | 0.867 | 0.990 |
+| v3c_r50nb last (ep 50) | b | BSD-3 + own | 7.53 / 2.62 | 0.406 | 0.914 / 1.000 | 1.78 | 0.800 | 0.986 |

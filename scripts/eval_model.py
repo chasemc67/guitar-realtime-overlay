@@ -94,7 +94,7 @@ def metrics(gt, pred, detected):
     # Numbering: each predicted keypoint is matched to the GT wire it lies on (perpendicular distance below half the
     # local GT fret spacing); it is correct if it carries that wire's index. Frames with no match are not assessable.
     order = sorted(wires)
-    shifts = []
+    shifts, shift_at = [], []
     for p in pred:
         if not wires:
             break
@@ -109,6 +109,7 @@ def metrics(gt, pred, detected):
         ]
         if gaps and d[f] < 0.5 * min(gaps):
             shifts.append(p.fret - f)
+            shift_at.append(f"{p.fret}{p.side[0]}")
     numbering = (all(s == 0 for s in shifts) if shifts else None) if detected else False
     gt_set = {g.fret for g in gt}  # labelled (vis > 0): the model is trained to infer occluded wires too
     pred_set = {p.fret for p in pred}
@@ -121,6 +122,7 @@ def metrics(gt, pred, detected):
         "outer_string_px": outer,
         "numbering_ok": numbering,
         "index_shifts": shifts,
+        "shift_keypoints": shift_at,  # the predicted slot behind each index_shifts entry
         "gt_frets": sorted(gt_set),
         "pred_frets": sorted(pred_set),
         "index_set_exact": gt_set == pred_set if gt_set else None,

@@ -106,15 +106,16 @@ class FretNetBackend(Backend):
 
     name = "fretnet"
 
-    def __init__(self, path, device: str | None = None, imgsz: int = 640):
+    def __init__(self, path, device: str | None = None, imgsz: int | None = None):
         import torch
 
         from gro.fretnet.model import export_head, load
 
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-        self.torch, self.device, self.imgsz = torch, device, imgsz
-        self.model = export_head(load(path, device))
+        net = load(path, device)
+        self.torch, self.device, self.imgsz = torch, device, imgsz or net.imgsz  # the checkpoint's training size
+        self.model = export_head(net)
 
     def __call__(self, rgb):
         torch = self.torch

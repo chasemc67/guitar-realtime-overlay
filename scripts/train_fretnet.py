@@ -9,6 +9,11 @@ side's neighbouring frets (fret +-1), against picking the adjacent wire (wrong f
 Validation every --val-every epochs on the val split (inference letterbox): mean / median px error at 640 of labelled
 keypoints, confidence accuracy at 0.5, coverage, and slip rate (a keypoint nearer to a neighbouring fret's GT than to
 its own). Writes runs/fretnet/<name>/{best,last}.pt + log.jsonl.
+
+Round 2 (global context for numbering): --head query (FretNet + keypoint-query transformer) or --head simcc
+(RTMPose-style SimCC; loss = cross-entropy of each axis' 1D bins against a Gaussian of --simcc-sigma bins, L1 of the
+located px / 4 and the confidence BCE), --arch convnext_tiny, --imgsz, and --oversample-high W (frames whose last
+labelled fret is >= 23 are drawn W times as often).
 """
 
 from __future__ import annotations
@@ -23,13 +28,13 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from gro.fretnet.data import PoseDataset  # noqa: E402
-from gro.fretnet.model import STRIDE, FretNet, save  # noqa: E402
+from gro.fretnet.data import PoseDataset, read_label  # noqa: E402
+from gro.fretnet.model import STRIDE, FretNet, SimCCNet, build, save  # noqa: E402
 
 
 def neighbor_margin(hm: torch.Tensor, k: torch.Tensor, margin: float = 2.0) -> torch.Tensor:
@@ -76,15 +81,32 @@ def losses(net: FretNet, hm: torch.Tensor, conf: torch.Tensor, k: torch.Tensor, 
     }
 
 
+def simcc_losses(net: SimCCNet, sx: torch.Tensor, sy: torch.Tensor, conf: torch.Tensor, k: torch.Tensor,
+                 sigma: float) -> dict:  # fmt: skip
+    vis = k[..., 2] > 0
+    nv = vis.sum().clamp_min(1)
+    ce = 0.0
+    for logits, c in ((sx, k[..., 0]), (sy, k[..., 1])):
+        g = torch.arange(logits.shape[-1], device=logits.device, dtype=torch.float32)
+        t = torch.exp(-((g - ((c[..., None] + 0.5) * net.split - 0.5)) ** 2) / (2 * sigma**2))
+        t = t / t.sum(-1, keepdim=True).clamp_min(1e-12)
+        ce = ce + (-(t * torch.log_softmax(logits.float(), -1)).sum(-1) * vis).sum() / nv
+    xy = torch.stack([net.locate1d(sx.float()), net.locate1d(sy.float())], -1)
+    l1 = (xy - k[..., :2]).abs().sum(-1) / STRIDE
+    zero = torch.zeros((), device=sx.device)
+    return {"ce": ce, "l1": (l1 * vis).sum() / nv, "bce": F.binary_cross_entropy_with_logits(conf.float(), vis.float()),
+            "nb": zero}  # fmt: skip
+
+
 @torch.no_grad()
-def validate(net: FretNet, loader: DataLoader, device: str) -> dict:
+def validate(net, loader: DataLoader, device: str) -> dict:
     net.eval()
     errs, correct, total, covered, nvis, slips, slip_n = [], 0, 0, 0, 0, 0, 0
     for x, k in loader:
         x, k = x.to(device, non_blocking=True).float() / 255, k.to(device)
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            hm, conf = net(x.contiguous(memory_format=torch.channels_last))
-        xy = net.locate(hm.float())
+            xy, conf = net.predict(x.contiguous(memory_format=torch.channels_last))
+        xy = xy.float()
         vis = k[..., 2] > 0
         p = torch.sigmoid(conf.float()) > 0.5
         errs.append(torch.linalg.norm(xy - k[..., :2], dim=-1)[vis].cpu())
@@ -129,6 +151,10 @@ def main() -> None:
     ap.add_argument("--scale", type=float, default=0.25)
     ap.add_argument("--degrees", type=float, default=10.0)
     ap.add_argument("--init", type=Path, default=None, help="start from a FretNet checkpoint (fine-tune)")
+    ap.add_argument("--head", default="heatmap", choices=["heatmap", "query", "simcc"])
+    ap.add_argument("--imgsz", type=int, default=640)
+    ap.add_argument("--simcc-sigma", type=float, default=4.0, help="SimCC Gaussian target sigma in bins")
+    ap.add_argument("--oversample-high", type=float, default=1.0, help="sampling weight of frames labelled to fret 23+")
     a = ap.parse_args()
     out = ROOT / "runs/fretnet" / a.name
     if out.exists():
@@ -138,18 +164,26 @@ def main() -> None:
     device = "cuda"
     torch.backends.cudnn.benchmark = True
 
-    train = PoseDataset(a.data, "train", train=True, aug={"scale": a.scale, "degrees": a.degrees})
-    val = PoseDataset(a.data, "val", train=False)
-    tl = DataLoader(train, a.batch, shuffle=True, num_workers=a.workers, pin_memory=True, drop_last=True,
-                    persistent_workers=True, prefetch_factor=4)  # fmt: skip
-    vl = DataLoader(val, 64, num_workers=a.workers // 2, pin_memory=True, persistent_workers=True)
+    train = PoseDataset(a.data, "train", size=a.imgsz, train=True, aug={"scale": a.scale, "degrees": a.degrees})
+    val = PoseDataset(a.data, "val", size=a.imgsz, train=False)
+    sampler = None
+    if a.oversample_high != 1.0:
+        last = [max((f for f, v in enumerate(read_label(train.labels / f"{p.stem}.txt", 1, 1)[1::2, 2]) if v > 0),
+                    default=-1) for p in train.images]  # fmt: skip
+        w = torch.tensor([a.oversample_high if f >= 23 else 1.0 for f in last], dtype=torch.double)
+        sampler = WeightedRandomSampler(w, len(train), replacement=True)
+        print(f"oversampling {sum(f >= 23 for f in last)} / {len(last)} frames labelled to fret 23+", flush=True)
+    tl = DataLoader(train, a.batch, shuffle=sampler is None, sampler=sampler, num_workers=a.workers, pin_memory=True,
+                    drop_last=True, persistent_workers=True, prefetch_factor=4)  # fmt: skip
+    vl = DataLoader(val, 64 if a.imgsz <= 640 else 32, num_workers=a.workers // 2, pin_memory=True,
+                    persistent_workers=True)  # fmt: skip
 
-    net = FretNet(a.arch, pretrained=a.init is None)
+    net = build(a.arch, a.head, pretrained=a.init is None, imgsz=a.imgsz)
     if a.init:
         net.load_state_dict(torch.load(a.init, map_location="cpu", weights_only=True)["state_dict"])
     net = net.to(device).to(memory_format=torch.channels_last)
-    backbone = [p for n, p in net.named_parameters() if n.startswith(("stem", "layers"))]
-    head = [p for n, p in net.named_parameters() if not n.startswith(("stem", "layers"))]
+    backbone = [p for n, p in net.named_parameters() if n.startswith(("stem", "layers."))]
+    head = [p for n, p in net.named_parameters() if not n.startswith(("stem", "layers."))]
     opt = torch.optim.AdamW(
         [{"params": backbone, "lr": a.lr * a.backbone_lr_mult}, {"params": head, "lr": a.lr}], weight_decay=a.wd
     )
@@ -167,8 +201,11 @@ def main() -> None:
             x = (x.to(device, non_blocking=True).float() / 255).contiguous(memory_format=torch.channels_last)
             k = k.to(device, non_blocking=True)
             with torch.autocast("cuda", dtype=torch.bfloat16):
-                hm, conf = net(x)
-            ls = losses(net, hm, conf, k, a.sigma)
+                pred = net(x)
+            if a.head == "simcc":
+                ls = simcc_losses(net, *pred, k, a.simcc_sigma)
+            else:
+                ls = losses(net, *pred, k, a.sigma)
             loss = ls["ce"] + a.l1 * ls["l1"] + ls["bce"] + a.neighbor_margin * ls["nb"]
             opt.zero_grad(set_to_none=True)
             loss.backward()

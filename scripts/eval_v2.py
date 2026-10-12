@@ -1,6 +1,10 @@
 """Evaluate pose weights on the frozen eval set v2 (configs/eval_v2.json + samples/eval_v2/) and the 09-06 hand set.
 
     .venv/bin/python scripts/eval_v2.py --weights runs/pose/v1/weights/best.pt --name v1 [--imgsz 640]
+    .venv/bin/python scripts/eval_v2.py --weights runs/fretnet/v3_r50/best.pt --name v3_r50   # no ultralytics
+
+Ultralytics .pt weights go through ultralytics' predict (as before). FretNet checkpoints and .onnx / .mlpackage exports
+go through gro.infer (letterbox -> backend -> decode -> unletterbox with clipping), the tracker's own path.
 
 Metrics per frame are scripts/eval_model.py's (canonical D1 frame, absolute slots, prediction conf > 0.5):
 D13 = perpendicular px from each predicted slot to the GT wire of the same index (headline), numbering = every
@@ -19,6 +23,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +35,24 @@ from eval_auto import frame_image, load_gt  # noqa: E402
 from eval_model import canonical, metrics, nearest_wire_px, predict  # noqa: E402
 
 from gro import anchors as A  # noqa: E402
+from gro.fretnet.model import is_checkpoint  # noqa: E402
+from gro.infer import Letterbox, decode, load_backend  # noqa: E402
+from gro.infer.backends import Backend  # noqa: E402
+
+
+def predict_backend(backend: Backend, image: np.ndarray) -> tuple[list[A.Anchor], bool]:
+    """gro.infer path: same letterbox, best-board decode (score >= 0.25) and clipping as the tracker."""
+    lb = Letterbox.for_shape(image.shape, backend.imgsz)
+    k, _, _ = decode(backend(cv2.cvtColor(lb.apply(image), cv2.COLOR_BGR2RGB)), 0.25)
+    if not np.isfinite(k[:, 0]).all():
+        return [], False
+    k[:, :2] = lb.to_frame(k[:, :2])
+    anchors = [
+        A.Anchor(i // 2, ("bass", "treble")[i % 2], float(x), float(y), conf=float(c))
+        for i, (x, y, c) in enumerate(k)
+        if c > 0.5
+    ]
+    return anchors, True
 
 
 def fret_spacing(gt: list[A.Anchor]) -> float | None:
@@ -45,7 +68,10 @@ def fret_spacing(gt: list[A.Anchor]) -> float | None:
 
 
 def frame_row(model, image, gt, a, item, clip):
-    pred, detected = predict(model, image, a.imgsz, a.device)
+    if isinstance(model, Backend):
+        pred, detected = predict_backend(model, image)
+    else:
+        pred, detected = predict(model, image, a.imgsz, a.device)
     m = metrics(gt, pred, detected)
     sp = fret_spacing(gt)
     m["fret_px"] = sp
@@ -112,9 +138,12 @@ def main() -> None:
     ap.add_argument("--device", default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
     a = ap.parse_args()
-    from ultralytics import YOLO
+    if a.weights.suffix == ".pt" and not is_checkpoint(a.weights):  # ultralytics weights: ultralytics' predict
+        from ultralytics import YOLO
 
-    model = YOLO(str(a.weights), task="pose")
+        model = YOLO(str(a.weights), task="pose")
+    else:
+        model = load_backend(a.weights, **({"device": a.device} if a.device else {}))
     cfg = json.loads(a.config.read_text())
     gt_dir = ROOT / cfg["gt_dir"]
     rows, guitar = [], {}

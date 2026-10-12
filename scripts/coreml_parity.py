@@ -8,6 +8,7 @@ References: "torch" = the .pt as a plain nn.Module on the same 640x640 letterbox
 "ultralytics" = YOLO.predict (rect letterbox, e.g. 640x384 for 16:9: the path demo v2 used). Per candidate vs
 reference: keypoint px diff (mean / p95 / max over slots with conf > 0.5 in both), |conf diff|, anchor-set flips at
 the 0.5 threshold, and wire-midpoint diff (px) between the per-frame fits (no smoothing, known fret count).
+For a FretNet (v3) checkpoint there is no ultralytics reference: only "torch" (FretNet in PyTorch on the CPU).
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from gro.fretnet.model import is_checkpoint  # noqa: E402
 from gro.infer import FretboardTracker, load_backend  # noqa: E402
 from gro.infer.tracker import anchors_from, safe_fit  # noqa: E402
 
@@ -102,13 +104,16 @@ def main():
     ap.add_argument("--compute-units", default="ALL")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
-    from ultralytics import YOLO
+    yolo = None
+    if not is_checkpoint(a.pt):
+        from ultralytics import YOLO
 
-    yolo = YOLO(a.pt, task="pose")
+        yolo = YOLO(a.pt, task="pose")
     trackers = {"torch": FretboardTracker(load_backend(a.pt, device="cpu"))}
     for p in a.coreml:
         trackers[Path(p).stem] = FretboardTracker(load_backend(p, compute_units=a.compute_units))
-    pairs = [(c, "torch") for c in trackers if c != "torch"] + [(c, "ultralytics") for c in trackers]
+    pairs = [(c, "torch") for c in trackers if c != "torch"]
+    pairs += [(c, "ultralytics") for c in trackers] if yolo else []
     rows = {f"{c}|{r}": {} for c, r in pairs}
     for spec in a.clip:
         path, mirrored, frets = (spec.split(":") + ["", ""])[:3]
@@ -117,7 +122,8 @@ def main():
         for _, frame in sample_frames(path, a.frames):
             canon = cv2.flip(frame, 1) if mirrored else frame
             k = {n: t.infer(canon)[0] for n, t in trackers.items()}
-            k["ultralytics"] = ultralytics_kpts(yolo, canon)
+            if yolo:
+                k["ultralytics"] = ultralytics_kpts(yolo, canon)
             for c, r in pairs:
                 rows[f"{c}|{r}"].setdefault(name, []).append(compare(k[c], k[r], frets))
         print(name, "done", flush=True)

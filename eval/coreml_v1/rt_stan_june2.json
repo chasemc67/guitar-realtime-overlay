@@ -1,0 +1,15 @@
+{
+ "source": "videos/stan_june2.mp4",
+ "mode": "realtime",
+ "source_fps": 29.97,
+ "frames_read": 899,
+ "frames_processed": 899,
+ "dropped": 0,
+ "achieved_fps": 30.0,
+ "latency_ms_median": 12.5,
+ "latency_ms_p95": 19.1,
+ "process_ms_median": 12.5,
+ "process_ms_p95": 19.1,
+ "valid_frac": 1.0,
+ "frets": 22
+}

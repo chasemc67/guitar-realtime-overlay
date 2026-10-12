@@ -1,0 +1,83 @@
+{
+ "model": {
+  "v1_fp16|ALL": {
+   "median_ms": 4.43,
+   "p95_ms": 5.2,
+   "load_s": 2.2
+  }
+ },
+ "e2e": {
+  "720p": {
+   "shape": [
+    720,
+    1280
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 87.8,
+    "median_ms": 10.42,
+    "p95_ms": 15.91
+   },
+   "parts_median_ms": {
+    "mirror": 0.15,
+    "letterbox": 0.16,
+    "model": 4.43,
+    "post": 5.62,
+    "total": 10.42
+   },
+   "decode_included": {
+    "fps": 85.3,
+    "median_ms": 10.74,
+    "p95_ms": 16.41
+   }
+  },
+  "1080p": {
+   "shape": [
+    1080,
+    1920
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 86.6,
+    "median_ms": 9.8,
+    "p95_ms": 14.26
+   },
+   "parts_median_ms": {
+    "mirror": 0.33,
+    "letterbox": 0.17,
+    "model": 4.46,
+    "post": 4.47,
+    "total": 9.8
+   },
+   "decode_included": {
+    "fps": 81.1,
+    "median_ms": 11.21,
+    "p95_ms": 15.22
+   }
+  },
+  "1080p_nBpe2": {
+   "shape": [
+    1080,
+    1920
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 91.0,
+    "median_ms": 9.11,
+    "p95_ms": 16.28
+   },
+   "parts_median_ms": {
+    "mirror": 0.0,
+    "letterbox": 0.22,
+    "model": 4.42,
+    "post": 4.41,
+    "total": 9.11
+   },
+   "decode_included": {
+    "fps": 85.1,
+    "median_ms": 9.82,
+    "p95_ms": 17.92
+   }
+  }
+ }
+}

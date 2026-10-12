@@ -1,0 +1,15 @@
+{
+ "source": "videos/2026-09-06_09-00-01.mp4",
+ "mode": "realtime",
+ "source_fps": 60.0,
+ "frames_read": 1800,
+ "frames_processed": 1799,
+ "dropped": 1,
+ "achieved_fps": 60.0,
+ "latency_ms_median": 14.2,
+ "latency_ms_p95": 22.2,
+ "process_ms_median": 13.6,
+ "process_ms_p95": 20.9,
+ "valid_frac": 1.0,
+ "frets": 24
+}

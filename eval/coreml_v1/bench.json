@@ -1,0 +1,146 @@
+{
+ "model": {
+  "v1_fp16|ALL": {
+   "median_ms": 4.25,
+   "p95_ms": 4.94,
+   "load_s": 2.21
+  },
+  "v1_fp16|CPU_AND_NE": {
+   "median_ms": 4.25,
+   "p95_ms": 4.57,
+   "load_s": 0.8
+  },
+  "v1_fp16|CPU_AND_GPU": {
+   "median_ms": 11.68,
+   "p95_ms": 11.78,
+   "load_s": 0.16
+  },
+  "v1_fp16|CPU_ONLY": {
+   "median_ms": 22.98,
+   "p95_ms": 23.16,
+   "load_s": 0.14
+  },
+  "v1_int8|ALL": {
+   "median_ms": 4.1,
+   "p95_ms": 4.37,
+   "load_s": 0.96
+  },
+  "v1_int8|CPU_AND_NE": {
+   "median_ms": 4.1,
+   "p95_ms": 4.36,
+   "load_s": 0.93
+  },
+  "v1_int8|CPU_AND_GPU": {
+   "median_ms": 17.7,
+   "p95_ms": 18.22,
+   "load_s": 0.15
+  },
+  "v1_int8|CPU_ONLY": {
+   "median_ms": 22.92,
+   "p95_ms": 23.06,
+   "load_s": 0.15
+  },
+  "v1_fp32|ALL": {
+   "median_ms": 13.2,
+   "p95_ms": 13.32,
+   "load_s": 0.24
+  },
+  "v1_fp32|CPU_AND_NE": {
+   "median_ms": 40.06,
+   "p95_ms": 40.21,
+   "load_s": 0.22
+  },
+  "v1_fp32|CPU_AND_GPU": {
+   "median_ms": 13.23,
+   "p95_ms": 13.35,
+   "load_s": 0.19
+  },
+  "v1_fp32|CPU_ONLY": {
+   "median_ms": 40.04,
+   "p95_ms": 40.23,
+   "load_s": 0.16
+  },
+  "torch|mps": {
+   "median_ms": 23.83,
+   "p95_ms": 24.17
+  },
+  "torch|cpu": {
+   "median_ms": 106.4,
+   "p95_ms": 107.26
+  }
+ },
+ "e2e": {
+  "720p": {
+   "shape": [
+    720,
+    1280
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 66.6,
+    "median_ms": 15.03,
+    "p95_ms": 16.37
+   },
+   "parts_median_ms": {
+    "mirror": 0.25,
+    "letterbox": 0.15,
+    "model": 4.41,
+    "post": 10.19,
+    "total": 15.03
+   },
+   "decode_included": {
+    "fps": 65.2,
+    "median_ms": 15.39,
+    "p95_ms": 16.68
+   }
+  },
+  "1080p": {
+   "shape": [
+    1080,
+    1920
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 68.8,
+    "median_ms": 14.45,
+    "p95_ms": 15.7
+   },
+   "parts_median_ms": {
+    "mirror": 0.58,
+    "letterbox": 0.18,
+    "model": 4.48,
+    "post": 9.2,
+    "total": 14.45
+   },
+   "decode_included": {
+    "fps": 66.0,
+    "median_ms": 14.82,
+    "p95_ms": 16.97
+   }
+  },
+  "1080p_nBpe2": {
+   "shape": [
+    1080,
+    1920
+   ],
+   "frames": 300,
+   "decode_excluded": {
+    "fps": 68.2,
+    "median_ms": 14.07,
+    "p95_ms": 17.45
+   },
+   "parts_median_ms": {
+    "mirror": 0.0,
+    "letterbox": 0.33,
+    "model": 4.39,
+    "post": 9.17,
+    "total": 14.07
+   },
+   "decode_included": {
+    "fps": 64.6,
+    "median_ms": 14.72,
+    "p95_ms": 18.69
+   }
+  }
+ }
+}

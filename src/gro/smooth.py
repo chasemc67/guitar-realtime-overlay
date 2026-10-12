@@ -45,7 +45,9 @@ class OneEuroModel:
     def reset(self):
         self.x, self.dx, self.key = None, 0.0, None
 
-    def update(self, model: FretboardModel, shape) -> FretboardModel:
+    def update(self, model: FretboardModel, shape, dt: float | None = None) -> FretboardModel:
+        """Filter one fit. `dt` (s since the previous update) defaults to 1 / fps; pass it when frames are dropped."""
+        dt = self.dt if dt is None or not dt > 0 else dt
         canon, img, fw = self._controls(model)
         key = (model.n_frets, model.tau)
         if self.x is None or key != self.key or not np.isfinite(img).all():
@@ -54,11 +56,11 @@ class OneEuroModel:
         h, w = shape[:2]
         inview = (img[:, 0] >= 0) & (img[:, 0] < w) & (img[:, 1] >= 0) & (img[:, 1] < h)
         sel = inview if inview.sum() >= 2 else np.ones(len(img), bool)
-        speed = float(np.median(np.linalg.norm(img[sel] - self.x[sel], axis=1) / np.maximum(fw[sel], 1e-3))) / self.dt
-        a_d = _alpha(self.d_cutoff, self.dt)
+        speed = float(np.median(np.linalg.norm(img[sel] - self.x[sel], axis=1) / np.maximum(fw[sel], 1e-3))) / dt
+        a_d = _alpha(self.d_cutoff, dt)
         self.dx = a_d * speed + (1 - a_d) * self.dx
         cutoff = self.min_cutoff + self.beta * max(0.0, self.dx - self.speed_floor)
-        a = _alpha(cutoff, self.dt)
+        a = _alpha(cutoff, dt)
         self.x = a * img + (1 - a) * self.x
         out = FretboardModel(**{**model.__dict__})
         H = dlt(canon, self.x)

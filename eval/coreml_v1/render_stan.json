@@ -1,0 +1,15 @@
+{
+ "source": "videos/stan_june2.mp4",
+ "mode": "offline",
+ "source_fps": 29.97,
+ "frames_read": 1348,
+ "frames_processed": 1348,
+ "dropped": 0,
+ "achieved_fps": 24.8,
+ "latency_ms_median": 50.7,
+ "latency_ms_p95": 56.9,
+ "process_ms_median": 10.7,
+ "process_ms_p95": 16.3,
+ "valid_frac": 1.0,
+ "frets": 22
+}

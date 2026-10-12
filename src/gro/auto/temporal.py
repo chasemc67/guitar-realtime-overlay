@@ -22,7 +22,7 @@ from gro import anchors as A
 from gro.auto.ai import AIClient
 from gro.auto.detect import Detection, anchors_from_segments, prep_gray, snap_wire_fast, wire_support
 from gro.auto.numbering import Numbering
-from gro.auto.pipeline import ANNOTATOR, AutoConfig, annotate_frame
+from gro.auto.pipeline import ANNOTATOR, AutoConfig, FrameResult, annotate_frame
 from gro.geometry import FitError, FretboardModel, fit_fretboard, fret_u, transform_model
 
 
@@ -34,7 +34,9 @@ class TrackConfig:
     jump_px: float = 1.5
     min_wire_frac: float = 0.6
     snap_search: float = 3.0
-    ai_min_interval_s: float = 5.0  # with a session lock, re-ask the AI for numbering at most this often
+    ai_min_interval_s: float = 5.0  # re-ask the AI for numbering (or the rescue box) at most this often
+    ai_max_numbering: int = 0  # max numbering asks per clip (0 = unlimited)
+    ai_span_every_s: float = 0.0  # AI span check on a keyframe at most this often (0 = every keyframe with AI on)
 
 
 def board_mask(model: FretboardModel, shape, f_lo: int, f_hi: int, shrink: float = 0.06) -> np.ndarray:
@@ -120,6 +122,14 @@ def _align_shift(det: Detection, model: FretboardModel, min_match: int = 5) -> t
     return s, ok / len(mids)
 
 
+def _numbering_asks(ai: AIClient | None) -> int:
+    if ai is None:
+        return 0
+    t = ai.usage.by_task.get("numbering") or {}
+    r = ai.usage.by_task.get("rescue") or {}
+    return t.get("calls", 0) + t.get("cached", 0) + r.get("calls", 0) + r.get("cached", 0) + ai.usage.failed
+
+
 def annotate_clip(
     video: str,
     mirrored: bool,
@@ -145,6 +155,8 @@ def annotate_clip(
     rms_hist: deque = deque(maxlen=15)
     bad_run = 0
     last_ai_t = -1e9
+    last_span_t = -1e9
+    n_num_asks = 0
     k = 0
     idx = i0
     while idx <= int(round(t1 * fps)):
@@ -179,12 +191,40 @@ def annotate_clip(
                     return None
                 return Numbering(s, True, "session_lock", lock.cue, lock.confidence, lock.nut_visible)
 
-            # Usability is a clip-level question: ask on the first keyframe only.
-            kcfg = cfg if not labels else AutoConfig(**{**cfg.__dict__, "ai_usability": False})
-            if lock is not None and t - last_ai_t < T.ai_min_interval_s:
-                kcfg = AutoConfig(**{**kcfg.__dict__, "use_ai": False})
-            res = annotate_frame(img, ai, kcfg, t=t, extra=extra, numbering_hint=hint)
+            # Usability is a clip-level question: ask on the first keyframe only. AI budget: numbering / rescue at
+            # most every ai_min_interval_s (and ai_max_numbering per clip), the span check every ai_span_every_s.
+            allow_num = t - last_ai_t >= T.ai_min_interval_s and (
+                not T.ai_max_numbering or n_num_asks < T.ai_max_numbering
+            )
+            allow_span = t - last_span_t >= T.ai_span_every_s
+            kcfg = AutoConfig(
+                **{
+                    **cfg.__dict__,
+                    "ai_usability": cfg.ai_usability and not labels,
+                    "ai_numbering": cfg.ai_numbering and allow_num,
+                    "ai_rescue": cfg.ai_rescue and allow_num,
+                    "ai_span_check": cfg.ai_span_check and allow_span,
+                }
+            )
+            asks0 = _numbering_asks(ai)
+            try:
+                res = annotate_frame(img, ai, kcfg, t=t, extra=extra, numbering_hint=hint)
+            except Exception as e:  # noqa: BLE001 - one bad frame must not stop a clip
+                log(f"    keyframe error: {type(e).__name__}: {e}")
+                res = None
+            if _numbering_asks(ai) > asks0:
+                n_num_asks += 1
+                last_ai_t = t
+            if res is None:
+                lab = A.FrameLabel(
+                    t=t, anchors=[], source="pseudo", annotator=ANNOTATOR, status="rejected", flags=["error"],
+                    extra=dict(extra),
+                )
+                lab.anchorable, lab.anchor_cue = False, None
+                res = FrameResult(lab, None, None, None)
             lab = res.label
+            if (lab.extra.get("auto") or {}).get("span_check") is not None:
+                last_span_t = t
             if res.numbering is not None and res.numbering.source == "ai":
                 last_ai_t = t
             key_ok = res.model is not None and bool(lab.anchors)
@@ -204,7 +244,11 @@ def annotate_clip(
                 lab.extra["keyframe"] = True
         if not is_key or not key_ok:
             # Propagated frame (or a keyframe whose detection failed: keep tracking instead).
-            m2, anchors, n_ok = (None, [], 0) if prop is None else resnap(gray, prop, frets, T)
+            try:
+                m2, anchors, n_ok = (None, [], 0) if prop is None else resnap(gray, prop, frets, T)
+            except Exception as e:  # noqa: BLE001
+                log(f"    resnap error: {type(e).__name__}: {e}")
+                m2, anchors, n_ok = None, [], 0
             flags = [] if not is_key else ["keyframe_unaligned" if unaligned else "keyframe_detect_failed"]
             if prop is None:
                 flags.append("klt_lost")

@@ -35,6 +35,7 @@ class AutoConfig:
     usability_model: str = FAST_MODEL
     rmse_flag_px: float = 1.5
     nut: bool = True  # add nut anchors when the AI says the nut is visible
+    ai_numbering: bool = True  # ask the AI for the fret numbering (off: hint / relative only)
     ai_span_check: bool = True  # AI verifier "does the grid cover all 6 strings?" (flag only, cached)
     params: DetectParams = field(default_factory=DetectParams)
 
@@ -213,12 +214,12 @@ def annotate_frame(
 
     gray = prep_gray(img)
     numbering = numbering_hint(det) if numbering_hint is not None else None
-    if numbering is None and use_ai:
+    if numbering is None and use_ai and cfg.ai_numbering:
         numbering = ask_numbering(ai, img, det, cfg.frets, cfg.numbering_model)
     if numbering is None:
         numbering = relative_numbering(det)
         flags.append("index_unresolved")
-        if use_ai:
+        if use_ai and cfg.ai_numbering:
             notes.append(f"AI numbering failed ({ai.last_error or 'no answer'}); relative numbering")
     # Drop wires that can't be fret wires: AI-flagged ones and anything past the last fret / before the nut.
     keep = {n for n in det.wires if n not in numbering.false_wires}

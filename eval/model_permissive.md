@@ -179,3 +179,5 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v4q_r50 last + order + cross-side wire gate (`gate="wires"`) | b | BSD-3 + own | 5.32 / 2.52 | 0.444 | 0.901 / 1.000 | 1.12 | 0.933 | 0.973 |
 | v3b + order + wire gate | b | BSD-3 + own | 5.21 / 2.81 | 0.389 | 0.870 / 1.000 | 1.11 | 0.867 | 0.990 |
 | v5s_cnxt (best = last, ep 45): ConvNeXt-T + RTMPose-style SimCC head (own code), frets 23+ ×2 | a | BSD-3 + own | 18.14 / 16.41 | 0.207 | 0.946 / 1.000 | 3.80 | 0.533 | 0.987 |
+| v4r_r50 (best = last, 30 ep fine-tune of v4q last): queries also regress x,y; Gaussian prior σ 8 px on the heatmap (`--head queryreg`) | b | BSD-3 + own | 9.91 / 6.51 | 0.431 | 0.942 / 1.000 | 1.17 | 0.933 | 0.984 |
+| v4r_r50 prior σ 4 / 16 / off (eval-time sweep) | b | BSD-3 + own | 11.41 / 8.52 · 8.95 / 5.52 · 7.72 / 2.98 | 0.425 · 0.434 · 0.429 | 0.942 / 1.000 | 1.56 · 1.07 · 1.07 | 0.933 · 0.867 · 0.867 | 0.984 |

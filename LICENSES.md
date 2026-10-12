@@ -31,6 +31,20 @@ Options checked for round 2 and not used (licences recorded for later):
 | RT-DETR (lyuwenyu/RT-DETR, HF `PekingU/rtdetr_*`) | Apache-2.0 | Apache-2.0 (COCO / Objects365 trained) | A detector plus keypoint head is a bigger port; its AIFI idea (self-attention on stride-32 tokens only) is used in `head="query"` |
 | YOLOX (Megvii) | Apache-2.0 | Apache-2.0 (COCO trained) | Same: per-anchor regression like v1, not needed to test global context |
 
+### Round 2b (2026-10-12): RTMPose-style and RT-DETR-based candidates, checked code AND weights
+
+| Part | What we use | Code licence | Weights licence / terms | Source |
+|---|---|---|---|---|
+| RTMPose-style net | `src/gro/fretnet/rtmpose.py`: CSPNeXt backbone and RTMCC head (GAU + SimCC) re-implemented in plain PyTorch with MMDet's parameter names; no MMPose / mmcv / mmengine code is imported or copied | this repo's own code (the design follows the Apache-2.0 MMPose / MMDet papers and configs) | — | [MMPose (Apache-2.0)](https://github.com/open-mmlab/mmpose/blob/main/LICENSE), [RTMPose project](https://github.com/open-mmlab/mmpose/tree/main/projects/rtmpose) |
+| CSPNeXt-m ImageNet init | `cspnext-m_8xb256-rsb-a1-600e_in1k-ecb3bbd9.pth` (md5 `13fdc36df67cbf319d345383c3b1e39b`), backbone keys only, loaded strictly | — | Released in the MMDetection model zoo (`download.openmmlab.com`), which is distributed under the repo's Apache-2.0; no separate weights licence is stated. Trained on ImageNet-1k: same ImageNet caveat as below | [MMDet RTMDet configs](https://github.com/open-mmlab/mmdetection/tree/main/configs/rtmdet), [MMDet LICENSE](https://github.com/open-mmlab/mmdetection/blob/main/LICENSE) |
+| RTMPose body checkpoints (checked, **not used**) | e.g. `rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504.pth` | Apache-2.0 | Model zoo under Apache-2.0, but trained on Body7 = AI Challenger, COCO, CrowdPose, MPII, sub-JHMDB, Halpe, PoseTrack18. Several of these (AI Challenger, PoseTrack18, JHMDB) are released for non-commercial research only, so we use the ImageNet CSPNeXt instead | [RTMPose model zoo](https://github.com/open-mmlab/mmpose/tree/main/projects/rtmpose) |
+| RT-DETR model code | HF `transformers` `RTDetrModel` (backbone ResNet-50-vd + hybrid encoder; decoder unused) | Apache-2.0 (transformers) | — | [transformers LICENSE](https://github.com/huggingface/transformers/blob/main/LICENSE), [lyuwenyu/RT-DETR (Apache-2.0)](https://github.com/lyuwenyu/RT-DETR) |
+| RT-DETR weights | `PekingU/rtdetr_r50vd` (HF hub), COCO 2017 detection; its ResNet-50-vd was initialised from PaddleClas ImageNet weights (Apache-2.0) | — | Model card licence: `apache-2.0`. COCO annotations are CC-BY-4.0; the COCO images are Flickr photos under their own (mostly CC) licences. Same unsettled training-data question as ImageNet | [model card](https://huggingface.co/PekingU/rtdetr_r50vd) |
+| New runtime dep | `transformers` (Apache-2.0), `safetensors` (Apache-2.0); only for the RT-DETR candidate | Apache-2.0 | — | — |
+
+MMPose itself was not installed: its mmcv dependency has no wheels for the PC's torch 2.11 / cu128. The re-implementation
+loads the MMDet checkpoint with `strict=True`, so the architecture matches the published one.
+
 The v3 training, export and inference paths do not import `ultralytics` and do not load Ultralytics weights. The
 data loader reads the YOLO-pose *label text format* produced by `scripts/export_yolo.py`. That is a plain file format;
 no Ultralytics code is involved in reading it.

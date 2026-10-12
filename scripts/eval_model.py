@@ -29,8 +29,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from eval_auto import frame_image, load_gt, stats  # noqa: E402
 
-from gro.anchors import Anchor  # noqa: E402
+from gro.anchors import (
+    Anchor,  # noqa: E402
+    mirror_anchors,  # noqa: E402
+)
 from gro.anchors import load as load_label  # noqa: E402
+from gro.auto.manifest import clip_info  # noqa: E402
 from gro.snap import fit_line  # noqa: E402
 
 
@@ -260,7 +264,17 @@ def by_clip(rows):
     return {c: {k: v for k, v in summarize(rs).items() if k != "per_keypoint_px"} for c, rs in sorted(clips.items())}
 
 
-def heldout_frames(labels, frames_csv, video_stem, stride):
+def canonical(image, lf, anchors, override=None):
+    """D1: (model input, GT anchors) in the canonical frame. The mirror flag is `override` (CLI), else the clip's
+    manifest entry, else the label file's; GT stored under a different flag is re-mirrored to match."""
+    info = clip_info(lf.video.get("path", ""))
+    mirrored = override if override is not None else info["mirrored"] if info["manifest"] else lf.mirrored
+    if mirrored != lf.mirrored:
+        anchors = mirror_anchors(list(anchors), image.shape[1])
+    return (cv2.flip(image, 1) if mirrored else image), anchors
+
+
+def heldout_frames(labels, frames_csv, video_stem, stride, mirrored=None):
     """Pseudo-GT frames of a held-out owner video, read at full resolution and canonicalised (D1)."""
     kept = {
         (r["seg_id"], int(r["frame_index"]))
@@ -285,7 +299,7 @@ def heldout_frames(labels, frames_csv, video_stem, stride):
             ok, image = cap.read()
             if not ok:
                 continue
-            yield f"{video_stem}#{fi}", cv2.flip(image, 1) if lf.mirrored else image, fr.anchors
+            yield f"{video_stem}#{fi}", *canonical(image, lf, fr.anchors, mirrored)
     finally:
         cap.release()
 
@@ -433,6 +447,10 @@ def main() -> None:
     ap.add_argument(
         "--align", type=Path, help="visual-alignment mode: render pred vs GT for every held-out hand frame here"
     )
+    ap.add_argument(
+        "--mirrored", action=argparse.BooleanOptionalAction, default=None,
+        help="D1 override for owner/hand-GT videos (default: data_manifests, else the label file's flag)",
+    )
     ap.add_argument("--hand-only", action="store_true", help="skip the pseudo-GT sets (hand GT only)")
     a = ap.parse_args()
     if not a.hand_only and not a.dataset.is_file():
@@ -455,7 +473,9 @@ def main() -> None:
         groups["pseudo_gt_test"].append({"item": item, "clip": clip, **metrics(gt, pred, detected)})
     frame = None
     if (a.labels / "frames.csv").is_file() and not a.hand_only:
-        for item, image, gt in heldout_frames(a.labels, a.labels / "frames.csv", a.heldout, a.stride_0906):
+        for item, image, gt in heldout_frames(
+            a.labels, a.labels / "frames.csv", a.heldout, a.stride_0906, a.mirrored
+        ):
             frame = image if frame is None else frame
             pred, detected = predict(model, image, a.imgsz, a.device)
             clip = f"{a.heldout} t={int(item.split('#')[1]) // 60 // 30 * 30:03d}s+"  # 30 s bins at 60 fps
@@ -466,12 +486,12 @@ def main() -> None:
         if image is None:
             skipped.append(f"{path}#{i}: image unavailable")
             continue
-        canon = cv2.flip(image, 1) if lf.mirrored else image  # D1: GT and model both live in the canonical frame
+        canon, gt = canonical(image, lf, fr.anchors, a.mirrored)  # D1: GT and model both in the canonical frame
         pred, detected = predict(model, canon, a.imgsz, a.device)
         key = "hand_gt_heldout" if a.heldout in lf.video.get("path", "") else "hand_gt_in_train_videos"
-        row = {"item": f"{path.parent.name}/{path.name}#{i}", "clip": path.stem, **metrics(fr.anchors, pred, detected)}
+        row = {"item": f"{path.parent.name}/{path.name}#{i}", "clip": path.stem, **metrics(gt, pred, detected)}
         row["index_shift"], row["index_shift_support"] = index_shift(row["index_shifts"])
-        row["nearest_wire_px"] = nearest_wire_px(fr.anchors, pred)
+        row["nearest_wire_px"] = nearest_wire_px(gt, pred)
         groups[key].append(row)
         if a.align and key == "hand_gt_heldout":
             d13, nw = np.median(row["wire_perp_px"]) if row["wire_perp_px"] else np.nan, row["nearest_wire_px"]
@@ -479,7 +499,7 @@ def main() -> None:
                 f"{path.stem}  GT green / pred magenta  D13(slot) med {d13:.1f}px  nearest-wire med "
                 f"{np.median(nw) if nw else np.nan:.1f}px  index shift {row['index_shift']}"
             )
-            render_alignment(canon, fr.anchors, pred, title, a.align / f"{path.stem}.jpg")
+            render_alignment(canon, gt, pred, title, a.align / f"{path.stem}.jpg")
     groups = {k: v for k, v in groups.items() if v}
     timing = (
         {}

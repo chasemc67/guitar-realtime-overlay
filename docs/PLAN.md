@@ -19,6 +19,14 @@ These decisions come from Chase (owner) and override anything below that conflic
 - **Data.** Left-handed footage is not annotated separately. Left-handed source clips, and clips whose creator mirrored
   the video, get one clip-level `mirrored: true` flag during the ingest yes/no pass (§4). They are mirrored before frame
   extraction and labeled like any other right-handed clip.
+- **Where the flag lives (2026-10-11).** It's the `mirrored` column (yes/no) in `data_manifests/*.tsv`:
+  `yt_batch0*.tsv` for YouTube clips (all `no` so far) and `owner_videos.tsv` for Chase's videos and `data/test_ext`
+  clips (Chase's 08-30/09-03/09-06 and Stan's Telecaster are `yes`). An optional `frets` column holds a known fret count
+  (blank = detect the board end). `gro.auto.manifest.clip_info(video)` reads both by file stem (with or without the
+  `yt_` prefix). `demo_model.py` and `cache_preds.py` use the flag automatically, and `eval_model.py` uses it for owner
+  and hand-GT frames, re-mirroring stored GT if its label file disagrees. In all three, `--mirrored` /
+  `--no-mirrored` overrides it, and in the demo `--frets N` overrides the fret count. The flag in label JSON
+  (`video.mirrored`) records the frame its keypoints were stored in.
 - **Flip augmentation must keep the canonical orientation.** A plain horizontal flip of a right-handed frame produces a
   left-handed-looking frame. Physically correct labels on that frame would teach the model the orientation we just
   removed. So h-flip = mirror the x coordinates **and swap bass↔treble for every slot** (YOLO `flip_idx` =

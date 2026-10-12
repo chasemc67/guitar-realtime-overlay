@@ -1,0 +1,6 @@
+id	path	split	mirrored	frets	note
+2026-08-30_15-06-39	data/raw/2026-08-30_15-06-39.mp4	train	yes		Chase, Ibanez 24 fret, left-handed + unmirrored camera (D1)
+2026-09-03_20-38-02	data/raw/2026-09-03_20-38-02.mp4	train	yes		Chase, Ibanez 24 fret (D1)
+2026-09-06_09-00-01	data/raw/2026-09-06_09-00-01.mp4	test	yes		Chase, Ibanez 24 fret, held out (D1)
+ScreenRecording_08-12-2026_18-40-38_1	data/raw/ScreenRecording_08-12-2026_18-40-38_1.mp4	reference	no		reference product video, not data
+stan_june2	data/test_ext/stan_june2.mp4	test	yes		Chase's friend Stan, Telecaster, TEST ONLY

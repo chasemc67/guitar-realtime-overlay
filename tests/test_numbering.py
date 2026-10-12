@@ -1,0 +1,86 @@
+"""Geometry, offset sign and safe fallback for the two-stage numbering path."""
+
+import numpy as np
+import pytest
+
+torch = pytest.importorskip("torch")
+pytest.importorskip("torchvision")
+
+from gro.fretnet.numbering import NumberingRefiner, rectify, renumber  # noqa: E402
+from gro.geometry import FretboardModel, fret_u  # noqa: E402
+
+
+def test_renumber_preserves_wire_coordinates_and_sides():
+    k = np.arange(150, dtype=np.float32).reshape(50, 3)
+    for offset in (-3, 0, 3):
+        out = renumber(k, offset)
+        for fret in range(25):
+            if 0 <= fret + offset < 25:
+                np.testing.assert_array_equal(
+                    out[2 * (fret + offset) : 2 * (fret + offset) + 2], k[2 * fret : 2 * fret + 2]
+                )
+        if offset:
+            empty = out[: 2 * offset] if offset > 0 else out[2 * offset :]
+            assert np.all(empty == 0)
+
+
+def test_rectify_runs_from_nut_to_body():
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0)
+    image = np.zeros((128, 320, 3), np.uint8)
+    image[:, :, 0] = np.arange(320).clip(0, 255)
+    out = rectify(image, model, width=25, lo=0, hi=24, height=3)
+    np.testing.assert_allclose(out[1, :, 0], 40 + 250 * fret_u(np.arange(25)), atol=1)
+
+
+def test_low_confidence_and_degenerate_fit_fall_back():
+    refiner = object.__new__(NumberingRefiner)
+    refiner.threshold = 0.8
+    refiner.reassign = False
+    refiner.net = type("Net", (), {"width": 128})()
+    refiner.classify = lambda strip: (2, 0.7)
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    for f in range(25):
+        k[2 * f : 2 * f + 2, :2] = model.fret_line(f)
+    k[:, 2] = 0.9
+    image = np.zeros((128, 320, 3), np.uint8)
+    np.testing.assert_array_equal(refiner(image, k), k)
+    assert refiner.last["fit_ok"] and not refiner.last["applied"]
+    refiner.classify = lambda strip: (-2, 0.9)
+    np.testing.assert_array_equal(refiner(image, k), renumber(k, -2))
+    k[:, 2] = 0
+    np.testing.assert_array_equal(refiner(image, k), k)
+    assert not refiner.last["fit_ok"]
+
+
+def test_reassignment_corrects_isolated_slip_without_moving_pixels():
+    from gro.fretnet.numbering import reassign_wires
+
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    k[10, :2] = model.fret_line(6)[0]
+    k[10, 2] = 0.9
+    out = reassign_wires(k, model)
+    np.testing.assert_array_equal(out[12], k[10])
+    assert out[10, 2] == 0
+    out = reassign_wires(k, model, offset=-1)
+    np.testing.assert_array_equal(out[10], k[10])
+
+
+def test_training_guard_excludes_clip_ids_and_honest_date(tmp_path):
+    import runpy
+    from pathlib import Path
+
+    guard = runpy.run_path(str(Path(__file__).resolve().parents[1] / "scripts/train_numbering.py"))["guarded_images"]
+    directory = tmp_path / "images/train"
+    directory.mkdir(parents=True)
+    regular = directory / "yt_train_000906.jpg"
+    regular.touch()
+    cfg = {"clips": [{"id": "yt_heldout"}]}
+    assert guard(tmp_path, "train", cfg) == [regular]
+    for name in ["yt_heldout_000000_wrap.jpg", "2026-09-06_09-00-01_000000.jpg"]:
+        bad = directory / name
+        bad.touch()
+        with pytest.raises(ValueError, match="held-out"):
+            guard(tmp_path, "train", cfg)
+        bad.unlink()

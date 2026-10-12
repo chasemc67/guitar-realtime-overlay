@@ -71,10 +71,15 @@ def frame_row(model, image, gt, a, item, clip):
     if a.stage1 is not None:
         k = model.predict_frame(image)
         detected = k is not None and np.isfinite(k).all()
-        pred = [] if not detected else [
-            A.Anchor(i // 2, ("bass", "treble")[i % 2], float(x), float(y), conf=float(c))
-            for i, (x, y, c) in enumerate(k) if c > 0.5
-        ]
+        pred = (
+            []
+            if not detected
+            else [
+                A.Anchor(i // 2, ("bass", "treble")[i % 2], float(x), float(y), conf=float(c))
+                for i, (x, y, c) in enumerate(k)
+                if c > 0.5
+            ]
+        )
     elif isinstance(model, Backend):
         pred, detected = predict_backend(model, image)
     else:
@@ -84,7 +89,38 @@ def frame_row(model, image, gt, a, item, clip):
     m["fret_px"] = sp
     m["wire_perp_pct"] = [100 * e / sp for e in m["wire_perp_px"]] if sp else []
     m["nearest_wire_px"] = nearest_wire_px(gt, pred)
-    return {"item": item, "clip": clip, **{k: v for k, v in m.items() if k != "per_keypoint_px"}}
+    row = {"item": item, "clip": clip, **{k: v for k, v in m.items() if k != "per_keypoint_px"}}
+    if getattr(a, "numbering", None):
+        from gro.fretnet.numbering import rectify
+        from gro.geometry import FitError, fit_fretboard
+
+        row["stage2"] = dict(model.refiner.last)
+        original = model.last_k.copy()
+        original[:, :2] = Letterbox.for_shape(image.shape, model.imgsz).to_frame(original[:, :2])
+        from gro.fretnet.numbering import anchors_from_k
+
+        baseline = metrics(gt, anchors_from_k(original), detected)
+        shifts = baseline["index_shifts"]
+        if shifts:
+            values, counts = np.unique(shifts, return_counts=True)
+            target = -int(values[counts.argmax()])
+            row["stage2"]["target_offset"] = target
+            row["stage2"]["target_support"] = float(counts.max() / len(shifts))
+            row["stage2"]["uniform_offset_possible"] = len(values) == 1
+            row["stage2"]["offset_correct"] = row["stage2"]["offset"] == target
+        else:
+            row["stage2"]["target_offset"] = None
+        row["stage2"]["baseline_numbering"] = baseline["numbering_ok"]
+        # GT strip diagnosis is evaluation only; never influences the prediction above.
+        try:
+            fit = fit_fretboard(gt, ransac_iters=100)
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            offset, confidence = model.refiner.classify(rectify(rgb, fit, model.refiner.net.width))
+            row["stage2"]["gt_offset"] = offset
+            row["stage2"]["gt_confidence"] = confidence
+        except (FitError, ValueError, np.linalg.LinAlgError):
+            row["stage2"]["gt_offset"] = None
+    return row
 
 
 def agg(rows: list[dict]) -> dict:
@@ -118,6 +154,27 @@ def macro(per_clip: dict[str, dict]) -> dict:
     return out
 
 
+def numbering_diagnostics(rows):
+    """Pooled classifier accuracy; dominant GT offset is not necessarily a valid global fix."""
+    ds = [r["stage2"] for r in rows if "stage2" in r]
+    gt = [d for d in ds if d.get("gt_offset") is not None]
+    pred = [d for d in ds if d.get("target_offset") is not None and d["fit_ok"]]
+
+    def mean(xs):
+        return float(np.mean(xs)) if xs else None
+
+    return {
+        "frames": len(ds),
+        "gt_fit_frames": len(gt),
+        "stage1_fit_scored_frames": len(pred),
+        "gt_strip_offset_accuracy": mean([d["gt_offset"] == 0 for d in gt]),
+        "stage1_strip_offset_accuracy": mean([d["offset_correct"] for d in pred]),
+        "zero_offset_baseline_accuracy": mean([d["target_offset"] == 0 for d in pred]),
+        "uniform_offset_possible_fraction": mean([d["uniform_offset_possible"] for d in pred]),
+        "nonzero_changes": sum(d["applied"] and d["offset"] != 0 for d in ds),
+    }
+
+
 def fmt(v, d=2):
     return "n/a" if v is None else f"{v:.{d}f}"
 
@@ -145,11 +202,28 @@ def main() -> None:
     ap.add_argument("--device", default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
     ap.add_argument("--stage1", type=Path, help="FretNet neck-box checkpoint for RTMPose --weights (no GT boxes)")
+    ap.add_argument("--numbering", type=Path, help="Whole-neck stage-2 numbering checkpoint")
+    ap.add_argument("--wire-reassign", action="store_true", help="Assign points to robust-fit wires")
+    ap.add_argument("--numbering-confidence", type=float, default=0.8)
     a = ap.parse_args()
+    if a.stage1 and (a.numbering or a.wire_reassign):
+        ap.error("--stage1 (RTMPose) cannot be combined with numbering or wire reassignment")
     if a.stage1 is not None:
         from gro.fretnet.rtmpose import TopDown
 
         model = TopDown(a.stage1, a.weights, device=a.device or "cuda")
+        a.imgsz = model.imgsz
+    elif a.numbering:
+        model = load_backend(
+            a.weights,
+            numbering=a.numbering,
+            device=a.device,
+            threshold=a.numbering_confidence,
+            wire_reassign=a.wire_reassign,
+        )
+        a.imgsz = model.imgsz
+    elif a.wire_reassign:
+        model = load_backend(a.weights, wire_reassign=True, device=a.device)
         a.imgsz = model.imgsz
     elif a.weights.suffix == ".pt" and not is_checkpoint(a.weights):  # ultralytics weights: ultralytics' predict
         from ultralytics import YOLO
@@ -188,6 +262,9 @@ def main() -> None:
     hand_rows = [r for r in rows if r["source"] == "hand"]
     report = {
         "weights": str(a.weights),
+        "wire_reassign": a.wire_reassign,
+        "numbering_weights": str(a.numbering) if a.numbering else None,
+        "numbering_confidence": a.numbering_confidence if a.numbering else None,
         "stage1": str(a.stage1) if a.stage1 else None,
         "imgsz": a.imgsz,
         "config": cfg["name"],
@@ -195,6 +272,9 @@ def main() -> None:
         "pooled": agg(rows),
         "hand_corrected_frames": agg(hand_rows) if hand_rows else None,
         "honest_0906": agg(honest) if honest else None,
+        "stage2_diagnostics": {"eval_v2": numbering_diagnostics(rows), "honest_0906": numbering_diagnostics(honest)}
+        if a.numbering
+        else None,
         "per_clip": per_clip,
         "guitar": guitar,
         "frames": rows,
@@ -216,6 +296,16 @@ def main() -> None:
         lines.append(row_md("eval v2 hand-corrected frames only", report["hand_corrected_frames"]))
     if honest:
         lines.append(row_md("09-06 hand GT (honest)", report["honest_0906"]))
+    if a.numbering:
+        lines += [
+            "",
+            f"Stage-2 checkpoint: `{a.numbering}`, confidence threshold {a.numbering_confidence}.",
+            "Classifier diagnostics (pooled; GT strips have target offset zero):",
+            "",
+            "```json",
+            json.dumps(report["stage2_diagnostics"], indent=2),
+            "```",
+        ]
     lines += ["", "## Per clip", "", *HEADER]
     lines += [row_md(f"{c} ({guitar[c]})", s) for c, s in per_clip.items()]
     (a.out / f"{a.name}.md").write_text("\n".join(lines) + "\n")

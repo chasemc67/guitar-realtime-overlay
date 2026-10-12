@@ -64,3 +64,15 @@ same caveat, including timm's Apache-2.0-tagged ones. If that matters for a rele
 Shipping v1 (for example the CoreML `FretTrackerV1` in the Jam Dashboard desktop app) brings in the AGPL-3.0
 obligations for the model: source availability for the work that includes it, including over a network. Alternatively,
 an Ultralytics Enterprise licence removes them. Removing v1 from shipped builds leaves only the permissive v3 path.
+
+## Two-stage numbering (v7 experiments, 2026-10-12)
+
+`src/gro/fretnet/numbering.py` and `scripts/train_numbering.py` use torchvision ResNet-18
+(`ResNet18_Weights.IMAGENET1K_V1`, `resnet18-f37072fd.pth`) with our own spatial pooling/classification head,
+rectification, augmentation and label reader. Stage 1 is the existing permissive FretNet checkpoint.
+No Ultralytics imports or weights are used in this path. Code licence: torchvision BSD-3-Clause;
+PyTorch BSD-3-Clause; OpenCV Apache-2.0; our new code is original to this repository.
+The ImageNet weights retain the dataset-terms caveat recorded above; a BSD code licence alone does not
+establish unrestricted rights to the pretraining images.
+Sources checked: [torchvision licence](https://github.com/pytorch/vision/blob/main/LICENSE),
+[ResNet-18 weight documentation](https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.resnet18.html).

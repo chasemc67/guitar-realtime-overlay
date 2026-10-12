@@ -124,9 +124,64 @@ class FretNetBackend(Backend):
             return self.model(x)[0].float().cpu().numpy()
 
 
+class GeometryBackend(Backend):
+    """Geometry-only control: relabel observed points using the robust stage-1 fit."""
+
+    name = "geometry_control"
+
+    def __init__(self, path, device=None):
+        self.stage1 = FretNetBackend(path, device=device)
+        self.imgsz = self.stage1.imgsz
+
+    def __call__(self, rgb):
+        from gro.fretnet.numbering import anchors_from_k, reassign_wires
+        from gro.geometry import FitError, fit_fretboard
+        from gro.infer.preprocess import decode
+
+        raw = self.stage1(rgb).copy()
+        k, score, _ = decode(raw)
+        if score >= 0.25 and np.isfinite(k).all():
+            try:
+                fit = fit_fretboard(anchors_from_k(k), ransac_iters=100)
+                raw[5:, 0] = reassign_wires(k, fit).reshape(-1)
+            except (FitError, ValueError, np.linalg.LinAlgError):
+                pass
+        return raw
+
+
+class TwoStageBackend(Backend):
+    """FretNet wires plus confidence-gated whole-neck numbering, sharing the raw layout."""
+
+    name = "two_stage"
+
+    def __init__(self, stage1, numbering, device=None, threshold=0.8, wire_reassign=False):
+        from gro.fretnet.numbering import NumberingRefiner
+
+        self.stage1 = FretNetBackend(stage1, device=device)
+        self.refiner = NumberingRefiner(numbering, self.stage1.device, threshold, reassign=wire_reassign)
+        self.imgsz = self.stage1.imgsz
+
+    def __call__(self, rgb):
+        from gro.infer.preprocess import decode
+
+        raw = self.stage1(rgb).copy()
+        k, score, _ = decode(raw)
+        self.last_k = k.copy()
+        if score >= 0.25 and np.isfinite(k).all():
+            raw[5:, 0] = self.refiner(rgb, k).reshape(-1)
+        else:
+            self.refiner.last = {"offset": 0, "confidence": 0.0, "applied": False, "fit_ok": False}
+        return raw
+
+
 def load_backend(path, **kw) -> Backend:
     """By suffix: .mlpackage / .mlmodel -> CoreML (kw compute_units), .onnx -> ONNX (providers), .pt -> torch
     (FretNet checkpoint or ultralytics weights). CoreML / ONNX exports of either model share the raw layout."""
+    numbering = kw.pop("numbering", None)
+    if numbering is not None:
+        return TwoStageBackend(path, numbering, **kw)
+    if kw.pop("wire_reassign", False):
+        return GeometryBackend(path, **kw)
     suffix = Path(path).suffix.lower()
     if suffix in (".mlpackage", ".mlmodel"):
         return CoreMLBackend(path, **kw)

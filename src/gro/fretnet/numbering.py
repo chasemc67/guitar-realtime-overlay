@@ -208,6 +208,6 @@ class NumberingRefiner:
         offset, confidence = self.classify(strip)
         applied = confidence >= self.threshold
         self.last = {"offset": offset, "confidence": confidence, "applied": applied, "fit_ok": True}
-        if applied and self.reassign:
-            return reassign_wires(k, model, offset, reject_ambiguous=self.reject_ambiguous)
+        if self.reassign:
+            return reassign_wires(k, model, offset if applied else 0, reject_ambiguous=self.reject_ambiguous)
         return renumber(k, offset) if applied else k

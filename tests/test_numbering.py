@@ -46,6 +46,14 @@ def test_low_confidence_and_degenerate_fit_fall_back():
     image = np.zeros((128, 320, 3), np.uint8)
     np.testing.assert_array_equal(refiner(image, k), k)
     assert refiner.last["fit_ok"] and not refiner.last["applied"]
+    refiner.reassign = True
+    refiner.reject_ambiguous = False
+    k[10, :2] = model.fret_line(6)[0]
+    out = refiner(image, k)
+    assert out[10, 2] == 0 and not refiner.last["applied"]
+    np.testing.assert_array_equal(out[12], k[10])
+    k[10, :2] = model.fret_line(5)[0]
+    refiner.reassign = False
     refiner.classify = lambda strip: (-2, 0.9)
     np.testing.assert_array_equal(refiner(image, k), renumber(k, -2))
     k[:, 2] = 0

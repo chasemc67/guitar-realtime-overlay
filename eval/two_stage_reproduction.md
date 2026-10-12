@@ -57,8 +57,14 @@ OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python scripts/eval_v2.py \
 ```
 
 Substitute the other numbering checkpoint paths to evaluate them. Add `--wire-reassign`
-to combine classifier offsets with geometric slot reassignment, and
+to make geometric slot reassignment the stage-1 fallback and apply confident classifier offsets on top, and
 `--wire-reject-ambiguous` for the explicit rejection policy. Those two optional flags
 apply to offset models; the sequence model has its own per-wire assignment and fallback.
 All runs use the same frozen `configs/eval_v2.json` and report GT-strip and predicted-strip
 offset accuracy separately from the all-wires-correct numbering metric.
+
+The geometry controls retain predictions in all 232 eval_v2 frames. One Jackson V frame
+becomes unassessable for numbering under the frozen nearest-wire criterion; counting it
+as a failure leaves both macro numbering values unchanged. All 15 honest frames remain
+assessable. `eval/v2/v7_environment.json` records runtime versions and hashes of the
+stage-1 weights, frozen config, and training/validation filenames plus labels.

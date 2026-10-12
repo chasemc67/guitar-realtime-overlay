@@ -72,6 +72,10 @@ YOLO("best.pt").export(format="coreml", imgsz=640, half=True, nms=False)   # fp1
 YOLO("best.pt").export(format="coreml", imgsz=640, int8=True, nms=False)   # 8-bit palettized, 11 MB
 ```
 
+Model v3 (FretNet, permissive, no Ultralytics; `eval/model_permissive.md`) has the same interface with one anchor:
+`python scripts/export_fretnet.py runs/fretnet/v3b_r50/best.pt --coreml v3_fp16.mlpackage` writes an image input
+`image` and one output `(1, 155, 1)`, and `FretboardTracker("best.pt")` loads a FretNet checkpoint directly.
+
 Weights are not in git. v1 = `runs/pose/v1/weights/best.pt` on the PC; the `.mlpackage` files live in
 `~/gro-coreml/weights/` on the Mac Mini.
 

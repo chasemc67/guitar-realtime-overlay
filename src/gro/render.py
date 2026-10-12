@@ -44,6 +44,8 @@ class Style:
     label: str = "name"  # "name" | "degree" | "none"
     min_label_px: float = 11.0  # skip text on markers smaller than this
     outline_cells: bool = True
+    board_end_color: tuple[int, int, int] = WHITE
+    board_end_gap: float = 0.4  # board end drawn this far past the last wire, in fractions of the last cell
 
 
 REFERENCE = Style()
@@ -109,6 +111,12 @@ def render_overlay(
         _poly(layer, q, style.cell_color)
         _poly(mask, q, 255)
     _blend(out, layer, mask, style.cell_alpha)
+
+    # 1b. Board end (the detected last fret, gro.board_end): a solid line just past the last wire.
+    if f1 == model.n_frets:
+        ue = fret_u(f1) + style.board_end_gap * (fret_u(f1) - fret_u(f1 - 1))
+        a, b = model.project(np.array([ue, ue]), np.array([-BOARD_PAD, 1.0 + BOARD_PAD]))
+        _line(out, a, b, style.board_end_color, 2)
 
     # 2. Strings: thin light lines over the drawn range (from the nut if it's in range).
     layer = out.copy()

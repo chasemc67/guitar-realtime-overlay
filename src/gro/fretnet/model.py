@@ -75,8 +75,10 @@ class GlobalQuery(nn.Module):
     """Self-attention over the stride-32 tokens (returned as a map for the FPN top) and 50 keypoint queries decoded
     against them. Outputs: refined stride-32 map (B, d, h, w), heatmap kernels (B, 50, ch), global conf (B, 50)."""
 
-    def __init__(self, c5: int, ch: int, d: int = 256, enc: int = 2, dec: int = 3):
+    def __init__(self, c5: int, ch: int, d: int = 256, enc: int = 2, dec: int = 3, reg: bool = False):
         super().__init__()
+        # reg: each query also regresses its keypoint (x, y) in [0, 1] of the canvas (a coarse, joint estimate)
+        self.reg = nn.Sequential(nn.Linear(d, d), nn.ReLU(inplace=True), nn.Linear(d, 2)) if reg else None
         self.inp = nn.Conv2d(c5, d, 1)
         self.enc = encoder(d, enc)
         layer = nn.TransformerDecoderLayer(d, 8, 4 * d, dropout=0.0, batch_first=True, norm_first=True)
@@ -94,7 +96,8 @@ class GlobalQuery(nn.Module):
         t = (t + sine_pos(d, h, w, t.device, t.dtype)).flatten(2).transpose(1, 2)  # (B, hw, d)
         m = self.enc(t)
         q = self.dec(self.query.to(m.dtype).expand(b, -1, -1), m)  # (B, 50, d)
-        return m.transpose(1, 2).reshape(b, d, h, w), self.kernel(q), self.gconf(q)[..., 0]
+        reg = torch.sigmoid(self.reg(q).float()) if self.reg is not None else None
+        return m.transpose(1, 2).reshape(b, d, h, w), self.kernel(q), self.gconf(q)[..., 0], reg
 
 
 def conv_bn(cin: int, cout: int, k: int = 3) -> nn.Sequential:
@@ -109,7 +112,8 @@ class FretNet(nn.Module):
         super().__init__()
         self.arch, self.window, self.head, self.imgsz = arch, window, head, imgsz
         self.stem, self.layers, chans = backbone(arch, pretrained)
-        self.glob = GlobalQuery(chans[3], ch) if head == "query" else None
+        self.glob = GlobalQuery(chans[3], ch, reg=head == "queryreg") if head in ("query", "queryreg") else None
+        self.prior_sigma = 8.0  # px, head="queryreg": Gaussian prior around the regressed keypoint, added to the heatmap
         if self.glob is not None:
             chans = (*chans[:3], self.glob.inp.out_channels)
             self.pos = nn.Conv2d(32, ch, 1)  # sine position code -> the dynamic heatmap's feature space
@@ -141,8 +145,9 @@ class FretNet(nn.Module):
         for head="query", each keypoint query's global term)."""
         f, glob = self.features(x)
         hm = self.heatmap(f)
+        self._reg = None
         if glob is not None:
-            kernel, gconf = glob
+            kernel, gconf, self._reg = glob
             _, c, h, w = f.shape
             g = f + self.pos(sine_pos(32, h, w, f.device, f.dtype))
             hm = hm + torch.einsum("bkc,bchw->bkhw", kernel, g) / c**0.5
@@ -153,7 +158,18 @@ class FretNet(nn.Module):
     def predict(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """x -> (keypoints (B, 50, 2) in input px, confidence logits (B, 50))."""
         hm, conf = self(x)
-        return self.locate(hm.float()), conf
+        hm = hm.float()
+        if self._reg is not None:  # coarse-to-fine: the joint regression picks the wire, the heatmap places it
+            hm = hm + self.prior(self._reg * hm.shape[-1] * STRIDE, hm.shape[-2], hm.shape[-1])
+        return self.locate(hm), conf
+
+    def prior(self, xy: torch.Tensor, h: int, w: int) -> torch.Tensor:
+        """(B, K, 2) px -> (B, K, h, w) log Gaussian of sigma `prior_sigma` px on the heatmap cell centres."""
+        gx = (torch.arange(w, device=xy.device, dtype=xy.dtype) + 0.5) * STRIDE - 0.5
+        gy = (torch.arange(h, device=xy.device, dtype=xy.dtype) + 0.5) * STRIDE - 0.5
+        dx = (gx.view(1, 1, 1, w) - xy[..., 0, None, None]) / self.prior_sigma
+        dy = (gy.view(1, 1, h, 1) - xy[..., 1, None, None]) / self.prior_sigma
+        return -0.5 * (dx * dx + dy * dy)
 
     def locate(self, hm: torch.Tensor) -> torch.Tensor:
         """Heatmap logits (B, K, H, W) -> (B, K, 2) x, y in input px: soft-argmax in a window around the argmax."""
@@ -340,7 +356,8 @@ def build(arch: str, head: str = "heatmap", pretrained: bool = True, imgsz: int 
 def save(net: nn.Module, path, **meta) -> None:
     """Checkpoint of plain tensors and strings only, so torch.load(weights_only=True) can read it."""
     torch.save({"arch": net.arch, "window": net.window, "head": net.head, "imgsz": net.imgsz,
-                "gate": getattr(net, "gate", False), "state_dict": net.state_dict(), "meta": meta}, path)  # fmt: skip
+                "gate": getattr(net, "gate", False),
+                "prior_sigma": getattr(net, "prior_sigma", 0.0), "state_dict": net.state_dict(), "meta": meta}, path)  # fmt: skip
 
 
 def load(path, device: str = "cpu") -> nn.Module:
@@ -348,6 +365,8 @@ def load(path, device: str = "cpu") -> nn.Module:
     net = build(ck["arch"], ck.get("head", "heatmap"), pretrained=False, imgsz=ck.get("imgsz", 640),
                 window=ck.get("window", 2))  # fmt: skip
     net.load_state_dict(ck["state_dict"])
+    if "prior_sigma" in ck:
+        net.prior_sigma = ck["prior_sigma"]
     net.gate = ck.get("gate", False)  # False, True (order gate) or "wires" (order + cross-side wire gate)
     return net.to(device).eval()
 

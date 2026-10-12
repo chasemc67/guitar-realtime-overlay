@@ -151,7 +151,8 @@ def main() -> None:
     ap.add_argument("--scale", type=float, default=0.25)
     ap.add_argument("--degrees", type=float, default=10.0)
     ap.add_argument("--init", type=Path, default=None, help="start from a FretNet checkpoint (fine-tune)")
-    ap.add_argument("--head", default="heatmap", choices=["heatmap", "query", "simcc"])
+    ap.add_argument("--head", default="heatmap", choices=["heatmap", "query", "queryreg", "simcc"])
+    ap.add_argument("--reg", type=float, default=0.2, help="weight of the queries' coordinate L1 (head queryreg)")
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--simcc-sigma", type=float, default=4.0, help="SimCC Gaussian target sigma in bins")
     ap.add_argument("--oversample-high", type=float, default=1.0, help="sampling weight of frames labelled to fret 23+")
@@ -180,7 +181,10 @@ def main() -> None:
 
     net = build(a.arch, a.head, pretrained=a.init is None, imgsz=a.imgsz)
     if a.init:
-        net.load_state_dict(torch.load(a.init, map_location="cpu", weights_only=True)["state_dict"])
+        missing, unexpected = net.load_state_dict(torch.load(a.init, map_location="cpu", weights_only=True)["state_dict"],
+                                                  strict=False)  # fmt: skip
+        assert not unexpected, unexpected
+        print("init", a.init, "new parameters:", missing, flush=True)
     net = net.to(device).to(memory_format=torch.channels_last)
     backbone = [p for n, p in net.named_parameters() if n.startswith(("stem", "layers."))]
     head = [p for n, p in net.named_parameters() if not n.startswith(("stem", "layers."))]
@@ -193,7 +197,7 @@ def main() -> None:
     best, step = float("inf"), 0
     log = (out / "log.jsonl").open("a")
     for ep in range(a.epochs):
-        t0, agg = time.time(), {"ce": 0.0, "l1": 0.0, "bce": 0.0, "nb": 0.0}
+        t0, agg = time.time(), {"ce": 0.0, "l1": 0.0, "bce": 0.0, "nb": 0.0} | ({"reg": 0.0} if a.head == "queryreg" else {})
         for x, k in tl:
             f = step / warm if step < warm else 0.5 * (1 + math.cos(math.pi * (step - warm) / (steps - warm)))
             for g, lr in zip(opt.param_groups, base, strict=True):
@@ -206,7 +210,14 @@ def main() -> None:
                 ls = simcc_losses(net, *pred, k, a.simcc_sigma)
             else:
                 ls = losses(net, *pred, k, a.sigma)
-            loss = ls["ce"] + a.l1 * ls["l1"] + ls["bce"] + a.neighbor_margin * ls["nb"]
+            if getattr(net, "_reg", None) is not None:  # queryreg: L1 of the joint regression, in heatmap cells
+                vis = k[..., 2] > 0
+                l1 = (net._reg * a.imgsz - k[..., :2]).abs().sum(-1) / STRIDE
+                ls["reg"] = (l1 * vis).sum() / vis.sum().clamp_min(1)
+                loss_extra = a.reg * ls["reg"]
+            else:
+                loss_extra = 0.0
+            loss = ls["ce"] + a.l1 * ls["l1"] + ls["bce"] + a.neighbor_margin * ls["nb"] + loss_extra
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), 10.0)

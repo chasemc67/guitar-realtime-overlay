@@ -168,3 +168,6 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 | v3b_r50 (shipped v3) | — | BSD-3 + own | 6.08 / 2.89 | 0.367 | 0.907 / 1.000 | 1.11 | 0.867 | 0.990 |
 | v3c_r50nb last (ep 50) | b | BSD-3 + own | 7.53 / 2.62 | 0.406 | 0.914 / 1.000 | 1.78 | 0.800 | 0.986 |
 | v3b + order gate (`order_gate`, no retraining) | b | BSD-3 + own | 5.56 / 2.86 | 0.389 | 0.885 / 1.000 | 1.11 | 0.867 | 0.990 |
+| v4q_r50 best (val, ep 45): ResNet-50 + keypoint-query transformer (`--head query`), frets 23+ oversampled ×2, 50 ep | b | BSD-3 + own | 8.45 / 2.89 | 0.407 | 0.945 / 1.000 | 1.07 | 0.933 | 0.972 |
+| v4q_r50 last (ep 50) | b | BSD-3 + own | 6.73 / 2.79 | 0.441 | 0.951 / 1.000 | 1.12 | 0.933 | 0.973 |
+| v4q_r50 last + order gate | b | BSD-3 + own | 5.44 / 2.62 | 0.441 | 0.916 / 1.000 | 1.12 | 0.933 | 0.973 |

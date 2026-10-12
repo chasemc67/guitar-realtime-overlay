@@ -3,6 +3,8 @@
 Requires ultralytics (and TensorRT for --trt). First run scripts/export_yolo.py
 if data/datasets/scale-v1/data.yaml is absent; training never creates the dataset.
 Example: python scripts/train_yolo.py --name scale-v1 [--trt]
+         python scripts/train_yolo.py --name v2b --data data/datasets/scale-v2/data.yaml --degrees 15 --scale 0.5
+Augmentation defaults are v1's; fliplr stays 0 (the model is right-handed only, D1).
 """
 
 from __future__ import annotations
@@ -22,10 +24,19 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--name", default="scale-v1")
     ap.add_argument("--trt", action="store_true")
+    ap.add_argument("--data", type=Path, default=ROOT / "data/datasets/scale-v1/data.yaml")
+    ap.add_argument("--degrees", type=float, default=5.0)
+    ap.add_argument("--scale", type=float, default=0.2)
+    ap.add_argument("--translate", type=float, default=0.1)
+    ap.add_argument("--perspective", type=float, default=0.0005)
+    ap.add_argument("--hsv-s", type=float, default=0.3)
+    ap.add_argument("--hsv-v", type=float, default=0.2)
+    ap.add_argument("--erasing", type=float, default=0.4)
+    ap.add_argument("--close-mosaic", type=int, default=10)
     a = ap.parse_args()
     if Path(a.name).name != a.name or a.name in (".", ".."):
         ap.error("--name must be a single directory name")
-    data = ROOT / "data/datasets/scale-v1/data.yaml"
+    data = a.data.resolve()
     if not data.is_file():
         ap.error(f"missing {data}; run scripts/export_yolo.py first")
     if (ROOT / "runs/pose" / a.name).exists():
@@ -47,12 +58,14 @@ def main() -> None:
         mosaic=1.0,
         mixup=0.0,
         hsv_h=0.015,
-        hsv_s=0.3,
-        hsv_v=0.2,
-        scale=0.2,
-        translate=0.1,
-        degrees=5.0,
-        perspective=0.0005,
+        hsv_s=a.hsv_s,
+        hsv_v=a.hsv_v,
+        scale=a.scale,
+        translate=a.translate,
+        degrees=a.degrees,
+        perspective=a.perspective,
+        erasing=a.erasing,
+        close_mosaic=a.close_mosaic,
     )
     best = YOLO(str(model.trainer.best), task="pose")
     print(best.export(format="onnx", imgsz=a.imgsz, batch=1, dynamic=False))

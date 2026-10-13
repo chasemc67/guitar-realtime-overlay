@@ -82,3 +82,15 @@ The smaller v7 variants use torchvision `mobilenet_v3_small` and
 The optional per-wire sequence head uses two original `torch.nn.TransformerEncoder` layers
 and predicts absolute wire indices; it adds no external model code or weights.
 [MobileNetV3 Small weight documentation](https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.mobilenet_v3_small.html).
+
+## Landmark numbering (v8 experiment, 2026-10-12)
+
+`src/gro/fretnet/landmark.py` uses the same torchvision `mobilenet_v3_small` architecture
+and `MobileNet_V3_Small_Weights.IMAGENET1K_V1` initialization documented for v7 above.
+The 1D localization head, explicit absent class, rectification target transforms, and
+confidence-weighted wire voting are original repository code. Training and evaluation
+(`scripts/train_landmark.py`, `scripts/landmark_eval.py`) add no third-party model code
+or weights. Torchvision/PyTorch code is BSD-3-Clause and OpenCV is Apache-2.0; the same
+ImageNet pretrained-weight/dataset-terms caveat above applies. Stage 1 and the optional
+v7 offset-classifier vote retain their existing recorded provenance. No Ultralytics
+code or weights are used by these training or inference paths.

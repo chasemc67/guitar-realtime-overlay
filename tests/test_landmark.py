@@ -130,3 +130,32 @@ def test_detection_metrics_include_absence_and_localization_errors():
     assert report["predicted_strip"]["7"]["recall"] == 1
     assert report["predicted_strip"]["0"]["precision"] == 0
     assert report["predicted_strip"]["0"]["recall"] is None
+
+
+def test_diagnostics_transform_source_gt_into_stage1_strip_coordinates():
+    from types import SimpleNamespace
+
+    from gro.fretnet.numbering import anchors_from_k
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    from landmark_eval import frame_diagnostics
+
+    source = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    for f in range(25):
+        k[2 * f : 2 * f + 2, :2] = source.fret_line(f)
+    k[:, 2] = 0.9
+    predicted = FretboardModel(np.array([[1, 0, 0], [0, 1, 96], [0, 0, 1]]) @ source.H, tau=0.3)
+    detections = [detection(f, f) for f in LANDMARKS]
+    refiner = SimpleNamespace(
+        last=dict(fit_ok=True, landmarks=detections),
+        fitted_model=predicted,
+        threshold=0.8,
+        net=SimpleNamespace(width=128),
+        detect=lambda strip: detections,
+    )
+    backend = SimpleNamespace(source_resolution=False, imgsz=320, refiner=refiner)
+    result = frame_diagnostics(backend, np.zeros((128, 320, 3), np.uint8), anchors_from_k(k))
+    assert all(d["localized"] for d in result["predicted_strip"])
+    assert result["landmarks"] is detections
+    assert "predicted_strip" not in refiner.last

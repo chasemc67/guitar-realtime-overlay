@@ -1,0 +1,156 @@
+{
+  "kind": "gro_landmark",
+  "width": 1024,
+  "landmarks": [
+    12,
+    5,
+    7,
+    9,
+    3,
+    15,
+    0
+  ],
+  "epoch": 2,
+  "stats": {
+    "epoch": 2,
+    "train_loss": 1.6783794542146824,
+    "train_accuracy": 0.9143547035923718,
+    "val_loss": 2.00687552119129,
+    "val_accuracy": 0.8113675376692733,
+    "seconds": 31.71711015701294
+  },
+  "seed": 17,
+  "training_data": "/home/chase/gro/repo/data/datasets/scale-v1aug",
+  "selection": "val_loss",
+  "split_hashes": {
+    "train": "b4eb6bacb19e6f59402d7e85451e9b1cac3e66eaeedcff40ec08e4c85eef798d",
+    "val": "81cad3b733f39e26ae336218fa879e02666c388f5f929cf0928f7fd9f4267b40"
+  },
+  "args": {
+    "data": "/home/chase/gro/repo/data/datasets/scale-v1aug",
+    "cache": "/home/chase/gro/repo/data/datasets/numbering-strips",
+    "name": "v8_landmark_1024",
+    "width": 1024,
+    "epochs": 12,
+    "batch": 4,
+    "workers": 4,
+    "threads": 2,
+    "device": "cuda",
+    "split_hashes": {
+      "train": "b4eb6bacb19e6f59402d7e85451e9b1cac3e66eaeedcff40ec08e4c85eef798d",
+      "val": "81cad3b733f39e26ae336218fa879e02666c388f5f929cf0928f7fd9f4267b40"
+    }
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 2.0243035552418616,
+      "train_accuracy": 0.8325777361651802,
+      "val_loss": 2.179292564557614,
+      "val_accuracy": 0.7649246614533664,
+      "seconds": 31.919878244400024
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.6783794542146824,
+      "train_accuracy": 0.9143547035923718,
+      "val_loss": 2.00687552119129,
+      "val_accuracy": 0.8113675376692733,
+      "seconds": 31.71711015701294
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.6099266345519863,
+      "train_accuracy": 0.9321933671709457,
+      "val_loss": 2.160576870508283,
+      "val_accuracy": 0.7725538813656304,
+      "seconds": 31.058188915252686
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.5715374857362034,
+      "train_accuracy": 0.9413837283792441,
+      "val_loss": 2.1142042741597256,
+      "val_accuracy": 0.7834255197406065,
+      "seconds": 31.312906980514526
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.5480130986535743,
+      "train_accuracy": 0.9479623515497955,
+      "val_loss": 2.3908766339395013,
+      "val_accuracy": 0.7366965477779897,
+      "seconds": 31.437580585479736
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.5308823430073513,
+      "train_accuracy": 0.9522495441777953,
+      "val_loss": 2.3382056696870137,
+      "val_accuracy": 0.7540530230783903,
+      "seconds": 31.044431447982788
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.5113324703698159,
+      "train_accuracy": 0.9573991031390134,
+      "val_loss": 2.295331562472599,
+      "val_accuracy": 0.7963951935914553,
+      "seconds": 29.60383152961731
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.500720521136373,
+      "train_accuracy": 0.9598137288720249,
+      "val_loss": 2.1979433837656344,
+      "val_accuracy": 0.8245279420179287,
+      "seconds": 31.986220121383667
+    },
+    {
+      "epoch": 9,
+      "train_loss": 1.4892056468603077,
+      "train_accuracy": 0.9639038091952891,
+      "val_loss": 2.0898210432564466,
+      "val_accuracy": 0.821476254053023,
+      "seconds": 30.74119472503662
+    },
+    {
+      "epoch": 10,
+      "train_loss": 1.4827977575569904,
+      "train_accuracy": 0.9648893707189671,
+      "val_loss": 2.2013990842452515,
+      "val_accuracy": 0.8021171085256532,
+      "seconds": 31.20134162902832
+    },
+    {
+      "epoch": 11,
+      "train_loss": 1.4794652144964007,
+      "train_accuracy": 0.9666880204996797,
+      "val_loss": 2.175134507135969,
+      "val_accuracy": 0.8063131794773984,
+      "seconds": 30.669395685195923
+    },
+    {
+      "epoch": 12,
+      "train_loss": 1.4743621937362603,
+      "train_accuracy": 0.9673532745281624,
+      "val_loss": 2.200266634033264,
+      "val_accuracy": 0.8029753957657829,
+      "seconds": 31.738195657730103
+    }
+  ],
+  "runtime": {
+    "python": "3.12.15",
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "opencv": "5.0.0",
+    "numpy": "2.5.4"
+  },
+  "sha256": {
+    "runs/fretnet/v8_landmark_1024/best.pt": "c81010d12e8b333f9b6c40d91941dc27c110b1a7b1b86ee5c2d4a2c4d0da7bda",
+    "runs/fretnet/v4q_r50_832/last.pt": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031",
+    "runs/fretnet/v7num_1536/best.pt": "8aa06c07064f406627ad4e374e8eea234b433be9460342f7b466a84bdab61657",
+    "configs/eval_v2.json": "b5e59264d9b93a051272c2feec5d749935d19fa0c5d6c84e6acab7459b636c60",
+    "/home/chase/.cache/torch/hub/checkpoints/mobilenet_v3_small-047dcff4.pth": "047dcff4addef86ea5bc2eff13c9614dc11f47ab1160d0a71a25e7db994f4e1f"
+  }
+}

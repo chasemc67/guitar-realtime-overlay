@@ -297,3 +297,65 @@ until its report is recovered.
 A separate validation-only refit threshold-selection follow-up is recorded in
 [refit_validation.md](refit_validation.md); it reports 0.714 eval_v2 numbering and is
 separate from the learned-stage-2 comparisons above.
+
+## Landmark numbering and offset fusion (2026-10-13 UTC)
+
+Implemented `src/gro/fretnet/landmark.py`, `scripts/train_landmark.py`, and
+`scripts/landmark_eval.py`; `gro.infer.load_backend(..., landmark=...)` and
+`eval_v2.py --landmark` expose the detector. Adding `--numbering` fuses one offset
+classifier vote. All code/weights follow the existing torchvision MobileNetV3 Small
+provenance in `LICENSES.md`. [Reproduction and metric definitions](landmark_reproduction.md).
+
+Trained all 12 epochs on 5798 train / 1498 val scale-v1aug images, with held-out
+filename guards and jittered GT strips. Validation loss selected epoch 2
+(loss 2.006876; localization-or-absence accuracy 0.811368). Fret 12 receives
+double loss weight. Seven landmark heads predict quarter-fret locations plus
+absence. Fixed confidence 0.8 and snap distance 0.75 fret were set before
+held-out evaluation; no eval_v2 or 09-06 labels enter training or checkpoint selection.
+All four evaluations contain 232 eval_v2 frames and 15 honest 09-06 frames.
+
+| Approach | eval_v2 D13 mean / median px | Numbering | Coverage / detection | 09-06 D13 px | 09-06 numbering | 09-06 coverage |
+|---|---:|---:|---:|---:|---:|---:|
+| [Two-stage offset (MobileNet 1536, prior run)](v2/v7num_1536.md) | 8.44 / 2.74 | 0.522 | 0.910 / 1.000 | 0.782 | 0.933 | 0.990 |
+| [Geometry/reject control (prior run)](v2/v7_geometry_reject.md) | 5.37 / 2.21 | 0.665 | 0.870 / 1.000 | 0.769 | 1.000 | 0.989 |
+| [Landmarks](v2/v8_landmark.md) | 7.46 / 2.69 | 0.522 | 0.916 / 1.000 | 0.782 | 0.933 | 0.990 |
+| [Landmarks + offset vote](v2/v8_fusion.md) | 7.95 / 2.92 | 0.522 | 0.911 / 1.000 | 0.782 | 0.933 | 0.990 |
+| [Landmarks + geometry/reject](v2/v8_landmark_geometry.md) | 5.42 / 2.51 | 0.665 | 0.870 / 1.000 | 0.769 | 1.000 | 0.989 |
+| [Landmarks + offset + geometry/reject](v2/v8_fusion_geometry.md) | 6.20 / 2.93 | 0.665 | 0.868 / 1.000 | 0.769 | 1.000 | 0.989 |
+
+Per-landmark accuracy on **predicted stage-1 strips**, pooled. Precision/recall
+require confidence ≥0.8 and position error ≤0.5 fret; presence accuracy uses
+posterior presence ≥0.5. The GT-strip columns diagnose the geometry gap. All four
+variants use identical landmark detections. A dash means no denominator.
+
+| Landmark | eval_v2 present | Presence accuracy | Localization precision / recall | GT-strip precision / recall | 09-06 presence accuracy | 09-06 precision / recall |
+|---|---:|---:|---:|---:|---:|---:|
+| 12 | 212 | 0.901 | 0.968 / 0.854 | 0.930 / 0.943 | 1.000 | 1.000 / 0.733 |
+| 5 | 147 | 0.776 | 0.898 / 0.599 | 0.901 / 0.558 | 1.000 | — / 0.000 |
+| 7 | 180 | 0.819 | 0.930 / 0.661 | 0.900 / 0.643 | 1.000 | 1.000 / 0.333 |
+| 9 | 202 | 0.858 | 0.930 / 0.861 | 0.906 / 0.946 | 1.000 | 1.000 / 0.867 |
+| 3 | 131 | 0.789 | 0.754 / 0.397 | 0.788 / 0.313 | 1.000 | 1.000 / 0.467 |
+| 15 | 193 | 0.836 | 0.919 / 0.642 | 0.890 / 0.789 | 1.000 | 1.000 / 0.667 |
+| Nut (0) | 20 | 0.914 | — / 0.000 | — / 0.000 | 1.000 | — / — |
+
+**Result:** landmark localization works best at fret 12 (0.968 precision / 0.854
+recall on actual stage-1 strips), but neither learned approach improves whole-board
+numbering. The landmark-only raw model makes three nonzero corrections; fusion
+makes ten. With geometry/rejection those counts are one and ten. Every corrected
+frame still fails the all-wires-correct numbering criterion. Good anchor localization
+does not repair the remaining mixed local wire slips through a single global offset.
+The nut head emits no confident detections: its 0.914 eval presence accuracy is
+dominated by absence (only 20 labelled-present frames), and its localization recall
+is zero. It is not a successful nut detector.
+
+The landmark+geometry variant meets the original numerical targets only because
+its geometry baseline already does; D13 is slightly worse than that control.
+Fusion adds wire error without a numbering gain. The separate validation-selected
+0.30-fret refit remains stronger at 0.714 numbering (see [refit validation](refit_validation.md)).
+No model promotion, app change, or export is made from these results. The reused
+0.45 geometry/rejection policy was evaluation-informed in the prior experiment;
+its passing scores should not be described as a fresh independent test.
+
+[Training log, runtime, split and weight hashes](v2/v8_landmark_training.json).
+PC full suite: **100 passed**; local suite: 74 passed, three torch-dependent skips;
+Ruff passes. No existing v6 job was signalled and this session made no git commits.

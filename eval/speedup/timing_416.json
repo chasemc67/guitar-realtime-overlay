@@ -1,0 +1,17 @@
+{
+ "model": "../resize_416.mlpackage",
+ "latency": {
+  "CPU_AND_NE": {
+   "median_ms": 5.492687487276271,
+   "p95_ms": 5.570617305056658
+  },
+  "ALL": {
+   "median_ms": 8.214125002268702,
+   "p95_ms": 8.519872894976288
+  }
+ },
+ "held": {},
+ "parity": {},
+ "warmups": 20,
+ "calls": 200
+}

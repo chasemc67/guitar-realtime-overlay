@@ -94,3 +94,22 @@ or weights. Torchvision/PyTorch code is BSD-3-Clause and OpenCV is Apache-2.0; t
 ImageNet pretrained-weight/dataset-terms caveat above applies. Stage 1 and the optional
 v7 offset-classifier vote retain their existing recorded provenance. No Ultralytics
 code or weights are used by these training or inference paths.
+
+## Speed experiments (2026-10-13 UTC)
+
+The new `scripts/speedup_train.py` uses only the existing v4q ResNet-50 teacher,
+original GT/distillation code, and torchvision backbones. ResNet-18 and ResNet-34
+use `ResNet18_Weights.DEFAULT` (IMAGENET1K_V1) and `ResNet34_Weights.DEFAULT`
+(IMAGENET1K_V1). MobileNetV3-Large uses `MobileNet_V3_Large_Weights.DEFAULT`
+(IMAGENET1K_V2); EfficientNet-B0 uses `EfficientNet_B0_Weights.DEFAULT`
+(IMAGENET1K_V1). Architecture/loaders are torchvision BSD-3-Clause. The published
+weights retain the same ImageNet dataset-terms caveat recorded above. No
+Ultralytics code/weights enter these experiments. Teacher provenance and split
+hashes are recorded in each training protocol.
+
+Sources: [torchvision BSD licence](https://github.com/pytorch/vision/blob/main/LICENSE),
+[ResNet weights](https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py),
+[MobileNetV3 weights](https://github.com/pytorch/vision/blob/main/torchvision/models/mobilenetv3.py),
+[EfficientNet weights](https://github.com/pytorch/vision/blob/main/torchvision/models/efficientnet.py).
+CoreML compression uses the already documented BSD-3-Clause coremltools dependency;
+LK optical flow and homography propagation use the existing Apache-2.0 OpenCV dependency.

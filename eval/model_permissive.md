@@ -363,3 +363,10 @@ Ruff passes. No existing v6 job was signalled and this session made no git commi
 ## v6d_rtdetr (RT-DETR R50vd, Apache-2.0, 30/30 epochs, best.pt, 640)
 
 eval_v2 macro D13 11.14/8.76 px, numbering 0.556, cov/det 0.911/1.000; 09-06 1.02 px, numbering 0.933, cov 0.993. Below v1 (0.601) and below v4q-832+refit@0.30 (0.714). Plain decode only; refit not applied. Full table: eval/v2/v6d_rtdetr.md.
+
+## Speed experiments (2026-10-13 UTC, in progress)
+
+See [speedup protocol and results](speedup.md). Inference-only resizing has Mini
+CPU_AND_NE median/p95 14.110/14.732 ms at 640, 8.103/8.260 at 512, and
+5.493/5.571 at 416. Corresponding VAL numbering is 0.750334, 0.456914, 0.357143;
+all independently select the 0.30-fret refit threshold. Held-out accuracy pending.

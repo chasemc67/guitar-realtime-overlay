@@ -42,6 +42,8 @@ ARCHS = {
     "resnet18": ("resnet18", "ResNet18_Weights", (64, 128, 256, 512)),
     "resnet34": ("resnet34", "ResNet34_Weights", (64, 128, 256, 512)),
     "resnet50": ("resnet50", "ResNet50_Weights", (256, 512, 1024, 2048)),
+    "mobilenet_v3_large": ("mobilenet_v3_large", "MobileNet_V3_Large_Weights", (24, 40, 112, 960)),
+    "efficientnet_b0": ("efficientnet_b0", "EfficientNet_B0_Weights", (24, 40, 112, 1280)),
     "convnext_tiny": ("convnext_tiny", "ConvNeXt_Tiny_Weights", (96, 192, 384, 768)),
 }
 
@@ -53,6 +55,12 @@ def backbone(arch: str, pretrained: bool) -> tuple[nn.Module, nn.ModuleList, tup
     ctor, wname, chans = ARCHS[arch]
     weights = getattr(torchvision.models, wname).DEFAULT if pretrained else None
     r = getattr(torchvision.models, ctor)(weights=weights)
+    if arch in ("mobilenet_v3_large", "efficientnet_b0"):
+        f = r.features
+        # End each stage at strides 4/8/16/32, before the next downsampling block.
+        ends = (4, 7, 13, 17) if arch == "mobilenet_v3_large" else (3, 4, 6, 9)
+        starts = (1, *ends[:-1])
+        return f[0], nn.ModuleList([nn.Sequential(*f[s:e]) for s, e in zip(starts, ends, strict=True)]), chans
     if arch.startswith("convnext"):
         f = r.features
         return f[0], nn.ModuleList([f[1], nn.Sequential(f[2], f[3]), nn.Sequential(f[4], f[5]),

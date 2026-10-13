@@ -34,9 +34,11 @@ OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python scripts/train_numberin
 
 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python scripts/train_numbering.py \
   --name v7seq_1024 --arch mobilenet_v3_small --mode sequence \
-  --width 1024 --batch 2 --epochs 8 --workers 4
+  --width 1024 --batch 2 --epochs 8 --workers 4 --device cpu --threads 4
 ```
 
+The sequence run was moved to CPU (four threads, FP32) after its GPU attempt did not
+complete an epoch in ten minutes; the GPU attempt produced no checkpoint.
 The smaller backbone for subsequent variants limits contention with the existing v6
 jobs. This changes both width and backbone in the second variant; it is not an isolated
 width ablation. The ResNet run completed 10 of 12 planned epochs, then was stopped to release GPU memory
@@ -75,3 +77,18 @@ stage-1 weights, frozen config, and training/validation filenames plus labels.
 remain identical, but the homography is transformed back to source coordinates so stage 2
 sees original pixels instead of the 832-pixel letterbox. Both `gro.infer.FretboardTracker`
 and `eval_v2.py` support this path. The default keeps the letterbox-based reference path.
+
+
+## Current results and checks
+
+The per-frame results and headline table are in `eval/model_permissive.md` and
+`eval/v2/v7*.{json,md}`. Both classifiers were evaluated with GT fits, balanced synthetic
+GT offsets, and actual stage-1 fits. The separate geometry-only control passes the
+requested headline targets. The completed learned-offset combinations do not improve it.
+The combined MobileNet and sequence result retrieval is pending PC SSH availability.
+
+The full PC test suite passed 91 tests before the additional synthetic sequence-metric
+test; the final numbering-specific suite passed all 12 tests. Ruff passes for the touched
+implementation and tests. The sequence GPU attempt produced no checkpoint and was stopped;
+its replacement CPU run uses the same source data and architecture. Runtime/train details
+are recorded in the per-run argument and training files on the PC.

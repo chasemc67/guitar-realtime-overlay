@@ -219,8 +219,8 @@ checkpoint. Wire = eval v2 D13 mean / median px (macro).
 
 Implementation: `src/gro/fretnet/numbering.py`, `scripts/train_numbering.py`,
 `gro.infer.TwoStageBackend`, and `scripts/eval_v2.py --numbering CHECKPOINT`.
-Stage 1 is `v4q_r50_832/last.pt`. A torchvision ImageNet ResNet-18 classifies the
-absolute numbering correction in −3..+3 from the whole rectified RGB neck. Pooling retains
+Stage 1 is `v4q_r50_832/last.pt`. Torchvision ImageNet ResNet-18 and MobileNetV3 Small
+classifiers predict the numbering correction in −3..+3 from the whole rectified RGB neck. Pooling retains
 16 longitudinal bins, so the head can use the inlay sequence and both ends of the board.
 The strip covers fitted frets −2..26 and transverse coordinates −0.35..1.35.
 Only the numbering slots change; observed pixel coordinates are preserved. A fixed 0.8
@@ -230,10 +230,15 @@ Training uses all 5798 scale-v1aug train / 1498 val images. Filename guards reje
 configured eval_v2 clip ID and the 09-06 recording date, including augmented copies.
 GT homographies generate extended strips; random integer shifts, corner perturbations,
 colour changes, blur and occlusion provide augmentation. Validation tests all seven
-integer offsets. Checkpoints are selected by validation offset accuracy only (12 epochs,
-AdamW 2e-4, cosine decay, batch 4, bf16). The ResNet run completed 10/12 planned epochs
+integer offsets. Classifier checkpoints are selected by validation offset accuracy only
+(12 planned epochs, AdamW 2e-4, cosine decay, batch 4, bf16). The ResNet run completed 10/12 planned epochs
 then was stopped for GPU contention; epoch 9 was selected by validation (0.890139).
-The concurrent v6 training jobs are left running.
+MobileNet 1536 completed all 12 epochs; validation selected epoch 6 (0.918749).
+The sequence variant uses MobileNetV3, 25 fitted-wire tokens, two transformer layers and
+a 25-class absolute index at each token. It supervises labelled wires only and selects by
+validation per-wire accuracy. Its GPU attempt produced no checkpoint in ten minutes; it
+was restarted on CPU, four threads, FP32, batch 2, with eight epochs planned.
+The concurrent v6 training jobs were never signalled.
 
 **Limitation established before evaluating stage 2:** in the existing raw-832 reports,
 most errors are mixed local slips. Without dropping predictions, frames with a uniform
@@ -249,7 +254,10 @@ observation. Geometry-only is reported as a control.
 Stage-2 diagnostics are pooled, separate from the macro headline: GT-strip offset accuracy
 (target zero) and stage-1-strip accuracy against the dominant GT correction, with the
 always-zero baseline and uniform-offset feasibility alongside them. High dominant-offset
-accuracy does not imply every wire is correctly numbered.
+accuracy does not imply every wire is correctly numbered. Reports also contain a balanced
+GT-strip test across all seven offsets; sequence reports additionally score individual
+labelled wires. The always-zero baseline on predicted strips is 0.940, so synthetic-offset
+accuracy alone is insufficient evidence for a useful correction stage.
 
 | Variant | eval v2 D13 mean / median px | Numbering | Coverage / detection | 09-06 D13 px | 09-06 numbering | 09-06 coverage | GT / stage-1 offset accuracy |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -259,3 +267,29 @@ accuracy does not imply every wire is correctly numbered.
 | [R18 1024 offset + geometry/reject](v2/v7num_1024_reject.md) | 10.14 / 5.82 | 0.582 | 0.865 / 1.000 | 0.77 | 1.000 | 0.989 | 0.901 / 0.793 |
 | [R18 1024 source pixels + geometry/reject](v2/v7num_1024_source_reject.md) | 10.00 / 5.76 | 0.576 | 0.864 / 1.000 | 0.77 | 1.000 | 0.989 | 0.901 / 0.780 |
 | [MobileNet 1536 offset](v2/v7num_1536.md) | 8.44 / 2.74 | 0.522 | 0.910 / 1.000 | 0.78 | 0.933 | 0.990 | 0.884 / 0.797 |
+
+<!-- two-stage-results-end -->
+
+The completed geometry/reject control meets the brief's numerical targets: numbering
+0.665 exceeds v1's 0.601, D13 5.37 / 2.21 px improves on 8.44 / 5.80, and 09-06 is
+0.769 px / 1.000 numbering / 0.989 coverage. Coverage remains above v1 on both sets.
+`--wire-reject-ambiguous` drops points at least 0.45 fret from the nearest fitted wire.
+This rejection policy was introduced after inspecting the first control's one failing
+09-06 frame, so this is an evaluation-informed development result. No held-out frame was
+used for training or checkpoint selection.
+
+The completed learned offset classifiers do not improve the geometry control. ResNet
+scores 0.925 on balanced GT offsets but 0.793 on predicted strips, and makes 26 confident
+nonzero corrections; MobileNet scores 0.860 / 0.797 and makes 17. Using original image
+pixels with the **identical stage-1 fit** changes the ResNet predicted-strip score to
+0.780 and combined numbering to 0.576, so restoring image detail alone does not resolve
+the gap. These results support testing real stage-1 warps and natural correction frequencies
+in future training, with geometry-only retained as the comparison.
+
+Commands and artifact provenance: [reproduction](two_stage_reproduction.md),
+[environment and data hashes](v2/v7_environment.json),
+[ResNet training log](v2/v7num_1024_training.json),
+[MobileNet training log](v2/v7num_1536_training.json).
+At the last status check, retrieval of the MobileNet+geometry evaluation and sequence
+CPU run was pending because PC SSH became unreachable. No result is claimed for either
+until its report is recovered.

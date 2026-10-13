@@ -1,0 +1,7 @@
+{
+  "source": "../extended_640.mlpackage",
+  "kind": "int8",
+  "coremltools": "9.0",
+  "scope": "conv_linear",
+  "status": "exported"
+}

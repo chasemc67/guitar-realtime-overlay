@@ -45,5 +45,13 @@
   "extended_512_palette6",
   "extended_512_w8a8",
   "tracking:extended_512",
-  "torch:extended_640"
+  "torch:extended_640",
+  "extended_640",
+  "extended_640_int8",
+  "extended_640_palette4",
+  "extended_640_palette6",
+  "extended_640_w8a8",
+  "tracking:extended_512_w8a8",
+  "tracking:extended_640",
+  "tracking:extended_640_w8a8"
 ]

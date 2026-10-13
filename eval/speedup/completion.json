@@ -1,0 +1,15 @@
+{
+  "finished_utc": "2026-10-13T03:41+00:00",
+  "started_utc_approx": "2026-10-13T01:22:00+00:00",
+  "elapsed_hours": 2.325228901388889,
+  "coreml_variants": 36,
+  "tracking_variants": 7,
+  "target_met": false,
+  "recommendations": [
+    "**For a speed-first follow-up, retain `extended_512_w8a8` as the near miss:** 3.65 / 3.75 ms CPU_AND_NE, eval_v2 numbering 0.690892, and 09-06 14/15 (0.933333). Coverage is 0.852562 / 0.988636, but eval_v2 wire error is 6.083 / 2.646 px and 09-06 mean error is 1.317 px. It is not an accuracy-preserving replacement for the 832 reference; the missing 09-06 frame remains a failed requirement.",
+    "**For preserving both numbering requirements, `r832_w8a8` is the best measured speed option:** 20.12 / 20.28 ms, numbering 0.703234 / 1.000. That is about 25% lower model latency than the freshly measured 26.76 ms fp16 baseline, but still about 2.5 times the 8 ms target. The smaller changes in wire error and coverage are shown above.",
+    "**The 832 six-bit weights-only variant is an accuracy-oriented alternative:** 24.87 / 25.95 ms, numbering 0.735140 / 1.000, eval_v2 wire error 4.530 / 2.086 px and coverage 0.844244. Four-bit weights show why numbering alone is insufficient: numbering rises to 0.761368 while eval_v2 coverage falls to 0.735088 and 09-06 numbering falls to 0.866667.",
+    "**Tracking does not close the accuracy gap.** The 512 W8A8 alternating path costs 5.81 / 8.03 ms per frame on labelled adjacent pairs, but numbering is 0.627519 / 0.933333; direct inference on those exact targets scores 0.686479 / 0.933333. Actual contiguous-video medians are 4.17\u20135.96 ms per frame. The 640 W8A8 tracking variant also misses 09-06 perfection. The 832 tracking variant retains 1.000 on 09-06 but costs about 16.95 ms per frame with scaled flow. These are sparse-target accuracy proxies and measured video timings, not dense-video accuracy claims.",
+    "Keep the existing app/release unchanged. The experiment establishes useful speed/accuracy tradeoffs, not a model that satisfies the complete requested target. Short student training budgets and the observed difference between VAL and held-out rankings limit conclusions about the architectures themselves."
+  ]
+}

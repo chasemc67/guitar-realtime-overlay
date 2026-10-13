@@ -1,8 +1,8 @@
 # Speeding up v4q without losing numbering accuracy
 
-No Jam Dashboard app changes, release actions, or git commits. Experiments use the
+This session made no Jam Dashboard app changes, release actions, or git commits. Experiments use the
 PC RTX 4090 and the Mac Mini M4. Full protocol: [plan.json](speedup/plan.json).
-This report is regenerated as results land; missing candidates are still pending.
+Completed 2026-10-13T03:41+00:00; elapsed about 2.3 hours. All planned runs and the two declared continuations are collected.
 
 Targets: CPU_AND_NE median approximately 8 ms or less, eval_v2 numbering >0.601,
 and 09-06 numbering 1.000. Historical v1: 4.25 ms, numbering 0.601 / 1.000;
@@ -15,7 +15,7 @@ eval_v2 D13 5.2753 / 2.1632 px, coverage 0.846059;
 Initial default `r832_int8`, `r832_palette6`, and `r832_palette4` variants compressed
 all eligible constants. A graph audit found this included `gx`/`gy` coordinate grids
 and positional constants, not only learned weights. Those results are retained.
-The distinct `r832_weights_*` variants and subsequent student/fine-tune compression
+The distinct `r832_weights_*` variants and subsequent student compression
 restrict compression to convolution/linear weights, preserving geometric constants.
 This is an implementation correction based on the exported graph; thresholds and
 bit widths are not retuned against held-out scores. See
@@ -61,6 +61,11 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
 | extended_512_palette4 | 5.20 / 5.31 | 7.01 / 7.15 | 12.02 / 6.62 | 0.600822 | 0.828701 | 1.500 / 0.867 / 0.984375 |
 | extended_512_palette6 | 5.19 / 5.30 | 6.97 / 7.10 | 8.47 / 2.97 | 0.616862 | 0.832045 | 1.291 / 0.933 / 0.992898 |
 | extended_512_w8a8 | 3.65 / 3.75 | 3.66 / 3.79 | 6.08 / 2.65 | 0.690892 | 0.852562 | 1.317 / 0.933 / 0.988636 |
+| extended_640 | 8.88 / 9.19 | 11.15 / 11.32 | 11.04 / 6.52 | 0.623650 | 0.801705 | 1.217 / 0.933 / 0.982955 |
+| extended_640_int8 | 8.74 / 9.05 | 13.74 / 14.53 | 11.21 / 7.28 | 0.641591 | 0.794841 | 1.220 / 0.933 / 0.984375 |
+| extended_640_palette4 | 8.94 / 9.11 | 11.14 / 11.36 | 12.73 / 11.33 | 0.645450 | 0.781260 | 1.428 / 0.867 / 0.987216 |
+| extended_640_palette6 | 8.92 / 9.23 | 11.01 / 12.23 | 10.35 / 4.20 | 0.630420 | 0.801831 | 1.281 / 0.933 / 0.985795 |
+| extended_640_w8a8 | 6.48 / 6.73 | 6.50 / 6.76 | 9.92 / 4.37 | 0.668216 | 0.802753 | 1.256 / 0.933 / 0.984375 |
 | ft_416 | 5.53 / 5.61 | 8.21 / 8.52 | 9.85 / 5.56 | 0.375850 | 0.815923 | 2.606 / 0.733 / 0.965909 |
 | ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.01 / 3.58 | 0.526869 | 0.827605 | 1.905 / 0.800 / 0.984375 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.25 / 2.36 | 0.637908 | 0.834601 | 1.746 / 0.867 / 0.980114 |
@@ -78,9 +83,19 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
 
 ## Recommendations
 
-No collected CoreML candidate yet meets all three strict targets (≤8.00 ms, >0.601, 1.000).
+No collected CoreML candidate meets all three strict targets (≤8.00 ms, >0.601, 1.000).
 Fastest numbering-qualified candidate: **r832_w8a8**, 20.12 ms. No model is promoted by this experiment.
 Its eval_v2 wire error is 5.133 px mean / 2.177 px median with 0.842280 coverage; 09-06 error is 0.801 px with 0.984375 coverage. Numbering alone is not evidence that every accuracy metric improved.
+
+**For a speed-first follow-up, retain `extended_512_w8a8` as the near miss:** 3.65 / 3.75 ms CPU_AND_NE, eval_v2 numbering 0.690892, and 09-06 14/15 (0.933333). Coverage is 0.852562 / 0.988636, but eval_v2 wire error is 6.083 / 2.646 px and 09-06 mean error is 1.317 px. It is not an accuracy-preserving replacement for the 832 reference; the missing 09-06 frame remains a failed requirement.
+
+**For preserving both numbering requirements, `r832_w8a8` is the best measured speed option:** 20.12 / 20.28 ms, numbering 0.703234 / 1.000. That is about 25% lower model latency than the freshly measured 26.76 ms fp16 baseline, but still about 2.5 times the 8 ms target. The smaller changes in wire error and coverage are shown above.
+
+**The 832 six-bit weights-only variant is an accuracy-oriented alternative:** 24.87 / 25.95 ms, numbering 0.735140 / 1.000, eval_v2 wire error 4.530 / 2.086 px and coverage 0.844244. Four-bit weights show why numbering alone is insufficient: numbering rises to 0.761368 while eval_v2 coverage falls to 0.735088 and 09-06 numbering falls to 0.866667.
+
+**Tracking does not close the accuracy gap.** The 512 W8A8 alternating path costs 5.81 / 8.03 ms per frame on labelled adjacent pairs, but numbering is 0.627519 / 0.933333; direct inference on those exact targets scores 0.686479 / 0.933333. Actual contiguous-video medians are 4.17–5.96 ms per frame. The 640 W8A8 tracking variant also misses 09-06 perfection. The 832 tracking variant retains 1.000 on 09-06 but costs about 16.95 ms per frame with scaled flow. These are sparse-target accuracy proxies and measured video timings, not dense-video accuracy claims.
+
+Keep the existing app/release unchanged. The experiment establishes useful speed/accuracy tradeoffs, not a model that satisfies the complete requested target. Short student training budgets and the observed difference between VAL and held-out rankings limit conclusions about the architectures themselves.
 
 ## PyTorch held-out results
 
@@ -103,7 +118,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 
 ## VAL selection
 
-All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. Separate extended_512 and extended_640 continuations select the backbone using VAL numbering only, then each independently train 20 additional epochs from the same 640 student checkpoint, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).
+All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every newly trained checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. Separate extended_512 and extended_640 continuations select the backbone using VAL numbering only, then each independently train 20 additional epochs from the same 640 student checkpoint, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).
 
 | Candidate | Selected threshold | VAL numbering | VAL coverage | VAL D13 mean px |
 |---|---:|---:|---:|---:|
@@ -144,6 +159,9 @@ Each sparse labelled target is paired with its actual preceding decoded video fr
 |---|---:|---:|---:|---:|---:|---:|
 | distill_resnet18_640 | 7.512 / 9.493 | 3.108 / 6.186 | 12.513 / 7.240 | 0.482345 / 0.778377 | 2.082 / 0.733 / 0.961648 | 2 |
 | extended_512 | 6.354 / 8.468 | 3.002 / 5.935 | 10.732 / 3.289 | 0.590747 / 0.829216 | 1.265 / 0.933 / 0.990057 | 1 |
+| extended_512_w8a8 | 5.814 / 8.026 | 3.059 / 5.938 | 6.917 / 2.764 | 0.627519 / 0.853347 | 1.273 / 0.933 / 0.987216 | 1 |
+| extended_640 | 7.970 / 9.595 | 3.052 / 5.923 | 13.029 / 11.424 | 0.637012 / 0.797609 | 1.160 / 0.933 / 0.982955 | 2 |
+| extended_640_w8a8 | 7.170 / 8.949 | 3.082 / 5.885 | 12.256 / 8.870 | 0.603914 / 0.799377 | 1.200 / 0.933 / 0.981534 | 3 |
 | r832 | 21.971 / 24.648 | 13.518 / 14.784 | 5.152 / 2.064 | 0.732525 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 | r832_scaled | 16.947 / 18.906 | 3.036 / 5.860 | 5.404 / 2.187 | 0.726314 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 
@@ -157,6 +175,15 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | extended_512 / 2026-09-06_09-00-01 | 120 | 9.239 / 10.332 | 5.233 / 5.797 | 0 |
 | extended_512 / yt_nBpe2YQEzZo | 120 | 9.332 / 11.568 | 6.336 / 7.428 | 0 |
 | extended_512 / stan_head3s | 90 | 9.528 / 12.011 | 6.298 / 7.551 | 0 |
+| extended_512_w8a8 / 2026-09-06_09-00-01 | 120 | 6.937 / 8.721 | 4.172 / 5.047 | 0 |
+| extended_512_w8a8 / yt_nBpe2YQEzZo | 120 | 8.336 / 10.243 | 5.965 / 6.894 | 0 |
+| extended_512_w8a8 / stan_head3s | 90 | 8.089 / 11.095 | 5.625 / 7.112 | 0 |
+| extended_640 / 2026-09-06_09-00-01 | 120 | 11.695 / 13.221 | 6.546 / 7.318 | 0 |
+| extended_640 / yt_nBpe2YQEzZo | 120 | 13.389 / 15.037 | 8.525 / 9.534 | 0 |
+| extended_640 / stan_head3s | 90 | 12.747 / 15.051 | 7.906 / 9.069 | 0 |
+| extended_640_w8a8 / 2026-09-06_09-00-01 | 120 | 9.998 / 11.435 | 5.769 / 6.408 | 0 |
+| extended_640_w8a8 / yt_nBpe2YQEzZo | 120 | 10.983 / 12.755 | 7.293 / 8.231 | 0 |
+| extended_640_w8a8 / stan_head3s | 90 | 10.614 / 12.736 | 6.846 / 7.909 | 0 |
 | r832 / 2026-09-06_09-00-01 | 120 | 31.119 / 34.329 | 19.255 / 20.500 | 0 |
 | r832 / yt_nBpe2YQEzZo | 120 | 32.812 / 35.950 | 24.951 / 26.522 | 0 |
 | r832 / stan_head3s | 90 | 30.906 / 33.079 | 23.471 / 24.987 | 0 |
@@ -185,6 +212,11 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | extended_512_palette4 | 5.20 / 5.31 | 7.01 / 7.15 | 7.13 / 2.70 | 0.645051 | 0.848505 | 1.374 / 0.800 / 0.977273 |
 | extended_512_palette6 | 5.19 / 5.30 | 6.97 / 7.10 | 6.85 / 2.55 | 0.683599 | 0.855897 | 1.258 / 0.933 / 0.985795 |
 | extended_512_w8a8 | 3.65 / 3.75 | 3.66 / 3.79 | 6.08 / 2.65 | 0.690892 | 0.852562 | 1.317 / 0.933 / 0.988636 |
+| extended_640 | 8.88 / 9.19 | 11.15 / 11.32 | 11.48 / 8.70 | 0.634969 | 0.801342 | 1.227 / 0.933 / 0.984375 |
+| extended_640_int8 | 8.74 / 9.05 | 13.74 / 14.53 | 10.35 / 3.82 | 0.629814 | 0.795422 | 1.244 / 0.933 / 0.985795 |
+| extended_640_palette4 | 8.94 / 9.11 | 11.14 / 11.36 | 12.69 / 10.48 | 0.608802 | 0.776747 | 1.458 / 0.867 / 0.987216 |
+| extended_640_palette6 | 8.92 / 9.23 | 11.01 / 12.23 | 11.54 / 8.61 | 0.636340 | 0.799373 | 1.277 / 0.933 / 0.985795 |
+| extended_640_w8a8 | 6.48 / 6.73 | 6.50 / 6.76 | 9.92 / 4.37 | 0.668216 | 0.802753 | 1.256 / 0.933 / 0.984375 |
 | ft_416 | 5.53 / 5.61 | 8.21 / 8.52 | 9.72 / 5.52 | 0.445153 | 0.818751 | 2.612 / 0.733 / 0.965909 |
 | ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.11 / 3.51 | 0.523646 | 0.828343 | 1.859 / 0.867 / 0.985795 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.21 / 2.35 | 0.617925 | 0.832415 | 1.741 / 0.867 / 0.980114 |
@@ -253,6 +285,16 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 | extended_512_palette6 / ALL | 0.609 / 1.053 | 0.492 / 1.024 | 0.601 / 2.350 | 1.000 | 0 |
 | extended_512_w8a8 / CPU_AND_NE | 0.513 / 1.073 | 0.475 / 1.047 | 0.472 / 1.584 | 1.031 | 0 |
 | extended_512_w8a8 / ALL | 0.513 / 1.073 | 0.475 / 1.047 | 0.472 / 1.584 | 1.031 | 0 |
+| extended_640 / CPU_AND_NE | 0.400 / 0.864 | 0.398 / 0.859 | 0.348 / 1.016 | 0.312 | 0 |
+| extended_640 / ALL | 0.398 / 0.900 | 0.401 / 0.894 | 0.302 / 1.162 | 0.469 | 0 |
+| extended_640_int8 / CPU_AND_NE | 0.401 / 0.852 | 0.405 / 0.853 | 0.340 / 0.891 | 0.781 | 0 |
+| extended_640_int8 / ALL | 0.402 / 0.887 | 0.412 / 0.889 | 0.265 / 0.647 | 0.719 | 0 |
+| extended_640_palette4 / CPU_AND_NE | 1.124 / 2.641 | 1.041 / 2.451 | 0.649 / 1.449 | 2.656 | 0 |
+| extended_640_palette4 / ALL | 1.118 / 2.691 | 1.147 / 2.618 | 0.868 / 3.113 | 2.938 | 0 |
+| extended_640_palette6 / CPU_AND_NE | 0.513 / 1.044 | 0.509 / 1.011 | 0.322 / 1.114 | 0.969 | 0 |
+| extended_640_palette6 / ALL | 0.510 / 1.044 | 0.476 / 0.995 | 0.331 / 0.926 | 0.875 | 0 |
+| extended_640_w8a8 / CPU_AND_NE | 0.503 / 1.073 | 0.539 / 1.102 | 0.461 / 1.449 | 1.344 | 0 |
+| extended_640_w8a8 / ALL | 0.503 / 1.073 | 0.539 / 1.102 | 0.461 / 1.449 | 1.344 | 0 |
 | ft_416 / CPU_AND_NE | 0.444 / 0.887 | 1.859 / 1.112 | 4.941 / 28.681 | 2.375 | 0 |
 | ft_416 / ALL | 0.406 / 0.887 | 0.668 / 0.964 | 2.666 / 12.100 | 1.500 | 0 |
 | ft_512 / CPU_AND_NE | 1.254 / 2.643 | 1.267 / 2.408 | 2.670 / 6.313 | 3.594 | 0 |
@@ -289,5 +331,9 @@ Aggregated from saved direct CoreML predictions on exactly the 228 + 15 tracking
 | Tracking variant / direct reference | Direct eval_v2 D13 mean / median | Direct numbering / coverage | Direct 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|
 | distill_resnet18_640 / distill_resnet18_640 | 12.071 / 8.005 | 0.485812 / 0.772184 | 2.043 / 0.800 / 0.971591 |
+| extended_512 / extended_512 | 10.905 / 8.392 | 0.631820 / 0.828519 | 1.305 / 0.933 / 0.990057 |
+| extended_512_w8a8 / extended_512_w8a8 | 6.097 / 2.638 | 0.686479 / 0.853067 | 1.317 / 0.933 / 0.988636 |
+| extended_640 / extended_640 | 11.039 / 6.515 | 0.622601 / 0.802107 | 1.217 / 0.933 / 0.982955 |
+| extended_640_w8a8 / extended_640_w8a8 | 9.883 / 4.353 | 0.677551 / 0.803501 | 1.256 / 0.933 / 0.984375 |
 | r832 / r832_fp16 | 5.350 / 2.126 | 0.696476 / 0.844767 | 0.792 / 1.000 / 0.987216 |
 | r832_scaled / r832_fp16 | 5.350 / 2.126 | 0.696476 / 0.844767 | 0.792 / 1.000 / 0.987216 |

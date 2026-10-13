@@ -45,7 +45,7 @@ def main():
         records.append((p.stem.removeprefix("ml_held_"), rec))
     preamble = """# Speeding up v4q without losing numbering accuracy
 
-No Jam Dashboard app changes, release actions, or git commits. Experiments use the
+This session made no Jam Dashboard app changes, release actions, or git commits. Experiments use the
 PC RTX 4090 and the Mac Mini M4. Full protocol: [plan.json](speedup/plan.json).
 This report is regenerated as results land; missing candidates are still pending.
 
@@ -60,7 +60,7 @@ eval_v2 D13 5.2753 / 2.1632 px, coverage 0.846059;
 Initial default `r832_int8`, `r832_palette6`, and `r832_palette4` variants compressed
 all eligible constants. A graph audit found this included `gx`/`gy` coordinate grids
 and positional constants, not only learned weights. Those results are retained.
-The distinct `r832_weights_*` variants and subsequent student/fine-tune compression
+The distinct `r832_weights_*` variants and subsequent student compression
 restrict compression to convolution/linear weights, preserving geometric constants.
 This is an implementation correction based on the exported graph; thresholds and
 bit widths are not retuned against held-out scores. See
@@ -90,7 +90,7 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
     if completion:
         preamble = preamble.replace(
             "This report is regenerated as results land; missing candidates are still pending.",
-            f"Completed {completion['finished_utc']}; elapsed {completion['elapsed_hours']:.2f} hours. "
+            f"Completed {completion['finished_utc']}; elapsed about {completion['elapsed_hours']:.1f} hours. "
             "All planned runs and the two declared continuations are collected.",
         )
     lines = [preamble, table(records)]
@@ -125,7 +125,8 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
             f"{h['coverage']:.6f} coverage. Numbering alone is not evidence that every accuracy metric improved."
         )
     if completion and completion.get("recommendations"):
-        lines += ["", *completion["recommendations"]]
+        for paragraph in completion["recommendations"]:
+            lines += ["", paragraph]
     lines += [
         "",
         "## PyTorch held-out results",
@@ -148,7 +149,7 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
         "## VAL selection",
         "",
         "All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. "
-        "Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. "
+        "Every newly trained checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. "
         "640 was selected for distillation from the resize VAL sweep before held-out scoring. "
         "All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; "
         "fine-tunes use four epochs and GT losses. Separate extended_512 and extended_640 continuations select the backbone using VAL numbering only, then each independently train 20 additional epochs from the same 640 student checkpoint, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).",

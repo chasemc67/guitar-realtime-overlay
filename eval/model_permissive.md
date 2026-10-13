@@ -257,3 +257,5 @@ accuracy does not imply every wire is correctly numbered.
 | [Geometry + reject ambiguous](v2/v7_geometry_reject.md) | 5.37 / 2.21 | 0.665 | 0.870 / 1.000 | 0.77 | 1.000 | 0.989 | — |
 | [R18 1024 offset](v2/v7num_1024.md) | 11.74 / 6.30 | 0.450 | 0.909 / 1.000 | 0.78 | 0.933 | 0.990 | 0.901 / 0.793 |
 | [R18 1024 offset + geometry/reject](v2/v7num_1024_reject.md) | 10.14 / 5.82 | 0.582 | 0.865 / 1.000 | 0.77 | 1.000 | 0.989 | 0.901 / 0.793 |
+| [R18 1024 source pixels + geometry/reject](v2/v7num_1024_source_reject.md) | 10.00 / 5.76 | 0.576 | 0.864 / 1.000 | 0.77 | 1.000 | 0.989 | 0.901 / 0.780 |
+| [MobileNet 1536 offset](v2/v7num_1536.md) | 8.44 / 2.74 | 0.522 | 0.910 / 1.000 | 0.78 | 0.933 | 0.990 | 0.884 / 0.797 |

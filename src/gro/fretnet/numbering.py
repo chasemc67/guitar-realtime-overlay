@@ -183,7 +183,8 @@ class NumberingRefiner:
     def probabilities(self, strip):
         x = torch.from_numpy(np.ascontiguousarray(strip.transpose(2, 0, 1)[None])).to(self.device)
         with torch.inference_mode():
-            return self.net(x).softmax(-1)[0].cpu().numpy()
+            self.last_probabilities = self.net(x).softmax(-1)[0].cpu().numpy()
+            return self.last_probabilities
 
     def classify(self, strip):
         p = self.probabilities(strip)
@@ -198,6 +199,7 @@ class NumberingRefiner:
             strip = rectify(rgb, model, self.net.width)
         except (FitError, ValueError, np.linalg.LinAlgError):
             return k
+        self.fitted_model = model
         if getattr(self.net, "mode", "offset") == "sequence":
             p = self.probabilities(strip)
             offset, confidence = offset_summary(p)

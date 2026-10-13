@@ -116,18 +116,49 @@ def frame_row(model, image, gt, a, item, clip):
         else:
             row["stage2"]["target_offset"] = None
         row["stage2"]["baseline_numbering"] = baseline["numbering_ok"]
+        if "sequence" in row["stage2"]:
+            from gro.geometry import apply_h
+
+            fit_k = model.last_k.copy()
+            if getattr(model, "source_resolution", False):
+                fit_k[:, :2] = Letterbox.for_shape(image.shape, model.imgsz).to_frame(fit_k[:, :2], clip=False)
+            plane = apply_h(np.linalg.inv(model.refiner.fitted_model.H), fit_k[:, :2])
+            with np.errstate(invalid="ignore", divide="ignore"):
+                fitted_fret = -12 * np.log2(1 - plane[:, 0])
+            correct = compared = 0
+            for key, shift in zip(baseline["shift_keypoints"], shifts, strict=True):
+                slot = int(key[:-1])
+                index = 2 * slot + (key[-1] == "t")
+                value = fitted_fret[index]
+                if not np.isfinite(value):
+                    continue
+                column = int(round(value))
+                if 0 <= column < 25 and abs(value - column) < 0.45:
+                    correct += int(row["stage2"]["sequence"][column] == slot - shift)
+                    compared += 1
+            row["stage2"].update(sequence_correct=correct, sequence_compared=compared)
         # GT strip diagnosis is evaluation only; never influences the prediction above.
         try:
             fit = fit_fretboard(gt, ransac_iters=100)
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             predictions = []
+            gt_sequence_correct = gt_sequence_compared = 0
+            present = {g.fret for g in gt if g.vis > 0}
             for shift in range(-SHIFT, SHIFT + 1):
                 strip = rectify(rgb, fit, model.refiner.net.width, lo=LO + shift, hi=HI + shift)
                 offset, confidence = model.refiner.classify(strip)
                 predictions.append(offset)
+                if model.refiner.net.mode == "sequence":
+                    absolute = model.refiner.last_probabilities.argmax(-1)
+                    for column in range(25):
+                        if column + shift in present:
+                            gt_sequence_correct += int(absolute[column] == column + shift)
+                            gt_sequence_compared += 1
                 if shift == 0:
                     row["stage2"]["gt_offset"] = offset
                     row["stage2"]["gt_confidence"] = confidence
+            if model.refiner.net.mode == "sequence":
+                row["stage2"].update(gt_sequence_correct=gt_sequence_correct, gt_sequence_compared=gt_sequence_compared)
             row["stage2"]["gt_shift_predictions"] = predictions
             row["stage2"]["gt_balanced_accuracy"] = float(
                 np.mean([p == shift for p, shift in zip(predictions, range(-SHIFT, SHIFT + 1), strict=True)])
@@ -177,7 +208,15 @@ def numbering_diagnostics(rows):
     def mean(xs):
         return float(np.mean(xs)) if xs else None
 
+    seq_n = sum(d.get("sequence_compared", 0) for d in ds)
+    gt_seq_n = sum(d.get("gt_sequence_compared", 0) for d in ds)
     return {
+        "stage1_sequence_points": seq_n,
+        "stage1_sequence_accuracy": sum(d.get("sequence_correct", 0) for d in ds) / seq_n if seq_n else None,
+        "gt_balanced_sequence_points": gt_seq_n,
+        "gt_balanced_sequence_accuracy": (
+            sum(d.get("gt_sequence_correct", 0) for d in ds) / gt_seq_n if gt_seq_n else None
+        ),
         "frames": len(ds),
         "gt_fit_frames": len(gt),
         "stage1_fit_scored_frames": len(pred),

@@ -205,3 +205,49 @@ def test_source_resolution_preserves_fit_and_coordinates():
     assert score == pytest.approx(0.9)
     np.testing.assert_allclose(out, expected, atol=2e-5)
     np.testing.assert_array_equal(backend.last_k, k)
+
+
+def test_sequence_diagnostics_compare_source_gt_to_letterbox_fit():
+    import runpy
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    from gro.fretnet.numbering import anchors_from_k
+    from gro.infer import Backend
+
+    evaluator = runpy.run_path(str(Path(__file__).resolve().parents[1] / "scripts/eval_v2.py"))
+    fit = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    k = np.zeros((50, 3), np.float32)
+    for f in range(25):
+        k[2 * f : 2 * f + 2, :2] = fit.fret_line(f)
+    k[:, 2] = 0.9
+    gt = anchors_from_k(k)
+    k[:, 1] += 96  # 320x128 source letterboxed to 320x320
+    shifted_fit = FretboardModel(np.array([[1, 0, 0], [0, 1, 96], [0, 0, 1]]) @ fit.H, tau=fit.tau)
+
+    class SyntheticBackend(Backend):
+        imgsz = 320
+
+        def __init__(self):
+            self.last_k = k.copy()
+            self.refiner = SimpleNamespace(
+                net=SimpleNamespace(mode="sequence", width=128),
+                fitted_model=shifted_fit,
+                last={"offset": 0, "confidence": 1.0, "applied": True, "fit_ok": True, "sequence": list(range(25))},
+                last_probabilities=np.eye(25),
+                classify=lambda strip: (0, 1.0),
+            )
+
+        def __call__(self, rgb):
+            raw = np.zeros((155, 1), np.float32)
+            raw[4] = 0.9
+            raw[5:, 0] = k.ravel()
+            return raw
+
+    args = SimpleNamespace(stage1=None, numbering=True)
+    row = evaluator["frame_row"](
+        SyntheticBackend(), np.zeros((128, 320, 3), np.uint8), gt, args, "synthetic", "synthetic"
+    )
+    assert row["stage2"]["sequence_correct"] == row["stage2"]["sequence_compared"] == 50
+    assert row["stage2"]["gt_sequence_correct"] == 25
+    assert row["stage2"]["gt_sequence_compared"] == 163

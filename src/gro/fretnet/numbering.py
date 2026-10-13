@@ -83,7 +83,9 @@ def load_numbering(path, device="cpu"):
         raise ValueError("not a numbering checkpoint")
     net = NumberingNet(c["width"], mode=c.get("mode", "offset"), arch=c.get("arch", "resnet18"))
     net.load_state_dict(c["state_dict"])
-    net.metadata = {key: c.get(key) for key in ("epoch", "stats", "seed", "training_data", "selection")}
+    net.metadata = {
+        key: c.get(key) for key in ("epoch", "stats", "seed", "training_data", "selection", "device", "threads")
+    }
     net.metadata.update(arch=net.arch, mode=net.mode, width=net.width, offset_range=[-SHIFT, SHIFT])
     return net.to(device).eval()
 

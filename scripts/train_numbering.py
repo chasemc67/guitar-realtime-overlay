@@ -98,10 +98,14 @@ def main():
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--epochs", type=int, default=15)
     ap.add_argument("--batch", type=int, default=8)
+    ap.add_argument("--device", choices=["cuda", "cpu"], default="cuda")
+    ap.add_argument("--threads", type=int, default=2)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--cache-only", action="store_true")
     a = ap.parse_args()
-    torch.set_num_threads(2)
+    device = torch.device(a.device)
+    torch.set_num_threads(a.threads)
+    cv2.setNumThreads(1)
     torch.manual_seed(17)
     cfg = json.loads((ROOT / "configs/eval_v2.json").read_text())
     splits = {}
@@ -125,11 +129,11 @@ def main():
             batch_size=a.batch,
             shuffle=s == "train",
             num_workers=a.workers,
-            pin_memory=True,
+            pin_memory=device.type == "cuda",
         )
         for s, p in splits.items()
     }
-    net = NumberingNet(a.width, pretrained=True, mode=a.mode, arch=a.arch).cuda()
+    net = NumberingNet(a.width, pretrained=True, mode=a.mode, arch=a.arch).to(device)
     opt = torch.optim.AdamW(net.parameters(), lr=2e-4, weight_decay=1e-3)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, a.epochs)
     best = -1
@@ -141,9 +145,9 @@ def main():
             correct = count = total = 0
             with torch.set_grad_enabled(split == "train"):
                 for x, y, present in loader:
-                    x, y = x.cuda(non_blocking=True), y.cuda(non_blocking=True)
-                    present = present.cuda(non_blocking=True)
-                    with torch.autocast("cuda", dtype=torch.bfloat16):
+                    x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+                    present = present.to(device, non_blocking=True)
+                    with torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
                         logits = net(x)
                         if a.mode == "sequence":
                             target = torch.arange(25, device=y.device)[None] + y[:, None] - SHIFT
@@ -173,6 +177,8 @@ def main():
             "width": a.width,
             "mode": a.mode,
             "arch": a.arch,
+            "device": str(device),
+            "threads": a.threads,
             "epoch": epoch,
             "state_dict": net.state_dict(),
             "stats": stats,

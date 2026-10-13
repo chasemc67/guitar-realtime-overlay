@@ -1,0 +1,34 @@
+{
+  "model": "r832_palette6",
+  "scope": "all_constants",
+  "non_affine_constants": [
+    {
+      "name": "const_10_to_fp16_palettized",
+      "consumers": [
+        "add"
+      ]
+    },
+    {
+      "name": "input_337_to_fp16_palettized",
+      "consumers": [
+        "add"
+      ]
+    },
+    {
+      "name": "gx_promoted_to_fp16_palettized",
+      "consumers": [
+        "mul",
+        "sub",
+        "mul"
+      ]
+    },
+    {
+      "name": "gy_promoted_to_fp16_palettized",
+      "consumers": [
+        "mul",
+        "sub",
+        "mul"
+      ]
+    }
+  ]
+}

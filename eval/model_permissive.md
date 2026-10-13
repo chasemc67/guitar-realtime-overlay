@@ -393,6 +393,7 @@ CoreML output scoring is separately pending. All rows have detection 1.000.
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|---:|---:|
+| distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 10.93 / 7.00 | 0.525938 | 0.788797 | 2.456 / 0.600 / 0.907670 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
 | r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.38 / 2.14 | 0.692329 | 0.844557 | 0.792 / 1.000 / 0.987216 |
@@ -412,6 +413,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 
 | Candidate | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|
+| distill_mobilenet_v3_large_640 | 10.543 / 6.229 | 0.497645 | 0.787996 | 2.490 / 0.533 / 0.904830 |
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
 | resize_416 | 17.864 / 10.056 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |

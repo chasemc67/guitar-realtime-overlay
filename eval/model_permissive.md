@@ -359,3 +359,7 @@ its passing scores should not be described as a fresh independent test.
 [Training log, runtime, split and weight hashes](v2/v8_landmark_training.json).
 PC full suite: **100 passed**; local suite: 74 passed, three torch-dependent skips;
 Ruff passes. No existing v6 job was signalled and this session made no git commits.
+
+## v6d_rtdetr (RT-DETR R50vd, Apache-2.0, 30/30 epochs, best.pt, 640)
+
+eval_v2 macro D13 11.14/8.76 px, numbering 0.556, cov/det 0.911/1.000; 09-06 1.02 px, numbering 0.933, cov 0.993. Below v1 (0.601) and below v4q-832+refit@0.30 (0.714). Plain decode only; refit not applied. Full table: eval/v2/v6d_rtdetr.md.

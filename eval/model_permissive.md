@@ -438,11 +438,41 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
 | extended_512 | 7.347 / 2.690 | 0.687047 | 0.850871 | 1.238 / 0.933 / 0.982955 |
+| extended_640 | 10.926 / 4.233 | 0.644568 | 0.801697 | 1.243 / 0.933 / 0.984375 |
 | ft_416 | 10.137 / 5.815 | 0.434524 | 0.824281 | 2.618 / 0.800 / 0.965909 |
 | ft_512 | 6.645 / 3.445 | 0.504644 | 0.830226 | 1.857 / 0.867 / 0.985795 |
 | ft_640 | 6.159 / 2.276 | 0.625314 | 0.836450 | 1.744 / 0.867 / 0.980114 |
 | resize_416 | 17.864 / 10.056 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
 | resize_512 | 9.024 / 4.993 | 0.363095 | 0.758734 | 3.889 / 0.000 / 0.954545 |
 | resize_640 | 6.151 / 2.656 | 0.598889 | 0.829694 | 1.464 / 0.800 / 0.975852 |
+
+
+## Tracking
+
+Each sparse labelled target is paired with its actual preceding decoded video frame. Inference/refit on that predecessor is propagated by LK optical flow and a RANSAC homography. This reports **skipped-frame-only accuracy**, not accuracy of a densely labelled full video. Effective adjacent-pair time is (inference + preprocess + Python refit + tracking) / 2, excluding decode. It includes Python postprocessing overhead and is not a native app FPS claim. Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Four eval_v2 targets at frame zero have no predecessor and are excluded, leaving 228 eval_v2 and all 15 09-06 targets (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.
+
+| Candidate | Effective pair median / p95 ms per frame | Flow median / p95 ms | eval_v2 D13 mean / median px | Numbering / coverage | 09-06 D13 / numbering / coverage | Flow failures |
+|---|---:|---:|---:|---:|---:|---:|
+| distill_resnet18_640 | 7.512 / 9.493 | 3.108 / 6.186 | 12.513 / 7.240 | 0.482345 / 0.778377 | 2.082 / 0.733 / 0.961648 | 2 |
+| extended_512 | 6.354 / 8.468 | 3.002 / 5.935 | 10.732 / 3.289 | 0.590747 / 0.829216 | 1.265 / 0.933 / 0.990057 | 1 |
+| r832 | 21.971 / 24.648 | 13.518 / 14.784 | 5.152 / 2.064 | 0.732525 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
+| r832_scaled | 16.947 / 18.906 | 3.036 / 5.860 | 5.404 / 2.187 | 0.726314 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
+
+Contiguous-video replay uses alternating inference/flow on up to 120 frames each from 09-06, nBpe2 and Stan. There is no dense ground truth; model-to-model agreement in the raw reports is **not** an accuracy measurement. The inference-frame column measures preprocessing + inference + Python refit on the even frames of that same replay; both columns exclude decoding.
+
+| Candidate / clip | Frames | Inference-frame median / p95 ms | Actual alternating pair median / p95 ms per frame | Flow failures |
+|---|---:|---:|---:|---:|
+| distill_resnet18_640 / 2026-09-06_09-00-01 | 120 | 12.311 / 15.410 | 6.822 / 8.436 | 0 |
+| distill_resnet18_640 / yt_nBpe2YQEzZo | 120 | 11.464 / 13.759 | 7.438 / 8.607 | 0 |
+| distill_resnet18_640 / stan_head3s | 90 | 11.458 / 14.438 | 7.288 / 8.779 | 0 |
+| extended_512 / 2026-09-06_09-00-01 | 120 | 9.239 / 10.332 | 5.233 / 5.797 | 0 |
+| extended_512 / yt_nBpe2YQEzZo | 120 | 9.332 / 11.568 | 6.336 / 7.428 | 0 |
+| extended_512 / stan_head3s | 90 | 9.528 / 12.011 | 6.298 / 7.551 | 0 |
+| r832 / 2026-09-06_09-00-01 | 120 | 31.119 / 34.329 | 19.255 / 20.500 | 0 |
+| r832 / yt_nBpe2YQEzZo | 120 | 32.812 / 35.950 | 24.951 / 26.522 | 0 |
+| r832 / stan_head3s | 90 | 30.906 / 33.079 | 23.471 / 24.987 | 0 |
+| r832_scaled / 2026-09-06_09-00-01 | 120 | 30.769 / 33.683 | 16.130 / 17.503 | 0 |
+| r832_scaled / yt_nBpe2YQEzZo | 120 | 31.638 / 35.095 | 17.633 / 19.324 | 0 |
+| r832_scaled / stan_head3s | 90 | 30.349 / 32.314 | 16.867 / 17.837 | 0 |
 
 <!-- speedup-results-end -->

@@ -1,0 +1,73 @@
+{
+  "new_experiment_scripts_ruff": "passed",
+  "python_compile": "passed",
+  "collection_shell_syntax": "passed",
+  "full_pc_tests": "104 passed",
+  "shared_model_lint": {
+    "preexisting_commit": "7220634",
+    "count": 12,
+    "unchanged": true,
+    "diagnostics": [
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            bad = (((f - expect).abs() > tol) | (span <= 1e-3)).to(t.dtype)"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            f = (t - lo_t) / torch.where(span.abs() < 1e-3, torch.ones_like(span), span)"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            lo_t, hi_t = torch.cat([z, t[:, : n - k]], 1), torch.cat([t[:, k:], z], 1)"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            lo_t, hi_t = torch.cat([z, t[:, : n - k]], 1), torch.cat([t[:, k:], z], 1)"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            n = t.shape[1]"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `t`",
+        "            z = torch.zeros_like(t[:, :k])"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `v`",
+        "            have = lo_v * hi_v * v"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `v`",
+        "            lo_v, hi_v = torch.cat([z, v[:, : n - k]], 1), torch.cat([v[:, k:], z], 1)"
+      ],
+      [
+        "B023",
+        "Function definition does not bind loop variable `v`",
+        "            lo_v, hi_v = torch.cat([z, v[:, : n - k]], 1), torch.cat([v[:, k:], z], 1)"
+      ],
+      [
+        "E501",
+        "Line too long (121 > 120)",
+        "        self.prior_sigma = 8.0  # px, head=\"queryreg\": Gaussian prior around the regressed keypoint, added to the heatmap"
+      ],
+      [
+        "E501",
+        "Line too long (123 > 120)",
+        "    return nn.Sequential(r.conv1, r.bn1, r.relu, r.maxpool), nn.ModuleList([r.layer1, r.layer2, r.layer3, r.layer4]), chans"
+      ],
+      [
+        "E501",
+        "Line too long (130 > 120)",
+        "                \"prior_sigma\": getattr(net, \"prior_sigma\", 0.0), \"state_dict\": net.state_dict(), \"meta\": meta}, path)  # fmt: skip"
+      ]
+    ]
+  }
+}

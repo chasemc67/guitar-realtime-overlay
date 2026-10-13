@@ -37,8 +37,9 @@ including the average of clip medians; they are not pooled frame statistics.
 as in the unchanged eval_v2 implementation; coverage must be considered alongside it.
 `ft_*` denotes a four-epoch ResNet-50 fine-tune; `distill_*` denotes an eight-epoch
 student run. `extended_512` and `extended_640` are the independently continued,
-VAL-selected ResNet-34 student. `int8` quantizes weights only; `palette6/4` uses
-6/4-bit weight palettes; `w8a8` quantizes weights and activations.
+VAL-selected ResNet-34 student. Except for the initial all-constant controls noted
+above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palettes;
+`w8a8` quantizes weights and activations.
 
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
@@ -92,6 +93,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
 | extended_512 | 7.347 / 2.690 | 0.687047 | 0.850871 | 1.238 / 0.933 / 0.982955 |
+| extended_640 | 10.926 / 4.233 | 0.644568 | 0.801697 | 1.243 / 0.933 / 0.984375 |
 | ft_416 | 10.137 / 5.815 | 0.434524 | 0.824281 | 2.618 / 0.800 / 0.965909 |
 | ft_512 | 6.645 / 3.445 | 0.504644 | 0.830226 | 1.857 / 0.867 / 0.985795 |
 | ft_640 | 6.159 / 2.276 | 0.625314 | 0.836450 | 1.744 / 0.867 / 0.980114 |
@@ -113,6 +115,7 @@ All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numberi
 | distill_resnet18_640 | 0.30 | 0.693591 | 0.879366 | 3.452 |
 | distill_resnet34_640 | 0.30 | 0.826435 | 0.843082 | 2.500 |
 | extended_512 | 0.30 | 0.769025 | 0.885358 | 2.805 |
+| extended_640 | 0.30 | 0.841121 | 0.887684 | 2.504 |
 | ft_416 | 0.30 | 0.390521 | 0.860654 | 5.727 |
 | ft_512 | 0.30 | 0.608812 | 0.839836 | 3.916 |
 | ft_640 | 0.30 | 0.776368 | 0.862246 | 2.780 |
@@ -128,6 +131,7 @@ Each continuation starts from the original student's best checkpoint, not the ot
 | distill_resnet18_640 | 8 | 4 | 3.375 / 1.275 / 11.757 |
 | distill_resnet34_640 | 8 | 6 | 2.667 / 1.065 / 8.109 |
 | extended_512 | 20 | 4 | 2.242 / 1.070 / 6.076 |
+| extended_640 | 20 | 12 | 2.590 / 0.976 / 7.927 |
 | ft_416 | 4 | 3 | 2.591 / 1.268 / 8.188 |
 | ft_512 | 4 | 4 | 2.797 / 1.117 / 8.996 |
 | ft_640 | 4 | 1 | 3.077 / 1.054 / 10.337 |
@@ -202,7 +206,7 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 - PC weights: `~/gro/repo/runs/fretnet/speedup_*/best.pt`; Mini exports: `~/gro-coreml/speedup/`. Per-checkpoint protocols/logs and selection hashes are under `eval/speedup/`; raw images and large checkpoints stay on the machines.
 - CoreML compression uses coremltools 9.0: symmetric int8 linear weights, k-means palettes, and activation calibration using 32 deterministic VAL-only frames. [Apple documentation](https://apple.github.io/coremltools/docs-guides/source/opt-overview.html) explains why compression speedups must be measured on the target hardware.
 - All new backbones/weights are torchvision BSD-3-Clause with the existing ImageNet caveat; see `LICENSES.md`. No Ultralytics code/weights enter this work.
-- PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.
+- PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`. A broader shared-model lint check reports 12 pre-existing violations, verified unchanged against pre-experiment commit `7220634`; see [static checks](speedup/static_checks.json).
 - [Artifact audit](speedup/audit.json) verifies manifest identities, prediction shapes/finiteness, frame and parity counts, timings, and VAL threshold choices without rerunning inference. Run `.venv/bin/python scripts/speedup_audit.py --complete` after collecting all results.
 - Short training budgets are not convergence claims. Validation uses pipeline labels; eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.
 - [PC environment and pretrained-weight hashes](speedup/pc_environment.json), [Mini environment](speedup/mini_environment.txt), [held-out manifest](speedup/bundle_manifest.json), and [VAL calibration manifest](speedup/calibration_manifest.json) identify this run. Training augmentation is not bitwise reproducible; checkpoint hashes identify the frozen evaluated models.

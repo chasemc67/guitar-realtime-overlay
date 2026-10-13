@@ -246,7 +246,9 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
         "- All new backbones/weights are torchvision BSD-3-Clause with the existing ImageNet caveat; "
         "see `LICENSES.md`. No Ultralytics code/weights enter this work.",
         "- PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). "
-        "New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.",
+        "New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`. "
+        "A broader shared-model lint check reports 12 pre-existing violations, verified unchanged against "
+        "pre-experiment commit `7220634`; see [static checks](speedup/static_checks.json).",
         "- [Artifact audit](speedup/audit.json) verifies manifest identities, prediction shapes/finiteness, "
         "frame and parity counts, timings, and VAL threshold choices without rerunning inference. "
         "Run `.venv/bin/python scripts/speedup_audit.py --complete` after collecting all results.",
@@ -307,7 +309,9 @@ above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palett
         + "\n\nAccuracy from CPU_AND_NE CoreML outputs; "
     )
     block += "[full protocol, ALL accuracy, tracking and recommendations](speedup.md).\n\n"
-    block += "\n".join(lines[lines.index("## PyTorch held-out results") : lines.index("## VAL selection")]) + "\n" + END
+    block += "\n".join(lines[lines.index("## PyTorch held-out results") : lines.index("## VAL selection")])
+    block += "\n\n" + "\n".join(lines[lines.index("## Tracking") : lines.index("## ALL compute-mode accuracy")])
+    block += "\n" + END
     if START in text:
         text = text[: text.index(START)] + block + text[text.index(END) + len(END) :]
     else:

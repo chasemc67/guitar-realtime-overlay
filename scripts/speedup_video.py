@@ -31,7 +31,8 @@ def main():
     cv2.setNumThreads(1)
     backend = load_backend(a.model, compute_units="CPU_AND_NE")
     threshold = json.loads(a.selection.read_text())["chosen_threshold"]
-    window = json.loads(a.tracking_selection.read_text())["window"]
+    tracking = json.loads(a.tracking_selection.read_text())
+    window, flow_size = tracking["window"], tracking.get("flow_size", 0)
     backend.warmup(20)
     report = dict(
         model=str(a.model),
@@ -63,7 +64,7 @@ def main():
             if i % 2 == 0:
                 k, _ = predict(backend, image, threshold)
             else:
-                k, ok = propagate(frames[i - 1], image, k, window)
+                k, ok = propagate(frames[i - 1], image, k, window, flow_size)
                 failures += int(not ok)
             elapsed.append((time.perf_counter() - t) * 1000)
             predictions.append(k.copy())

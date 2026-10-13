@@ -23,20 +23,25 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--bundle", type=Path)
     ap.add_argument("--kind", choices=["int8", "palette6", "palette4", "w8a8"], required=True)
+    ap.add_argument("--scope", choices=["all_constants", "conv_linear"], default="conv_linear")
     a = ap.parse_args()
     if a.out.exists():
         ap.error("Refusing to overwrite model")
-    report = dict(source=str(a.model), kind=a.kind, coremltools=ct.__version__)
+    report = dict(source=str(a.model), kind=a.kind, coremltools=ct.__version__, scope=a.scope)
+
+    def configuration(op_config):
+        # Export constants include coordinate grids and sine positions, not just parameters.
+        # Preserve those exactly; only learned convolution/linear weights are candidates.
+        if a.scope == "all_constants":
+            return opt.OptimizationConfig(global_config=op_config)
+        return opt.OptimizationConfig(op_type_configs={"conv": op_config, "linear": op_config})
+
     try:
         model = ct.models.MLModel(str(a.model), compute_units=ct.ComputeUnit.CPU_AND_NE)
         if a.kind == "int8":
-            result = opt.linear_quantize_weights(
-                model, opt.OptimizationConfig(global_config=opt.OpLinearQuantizerConfig(dtype="int8"))
-            )
+            result = opt.linear_quantize_weights(model, configuration(opt.OpLinearQuantizerConfig(dtype="int8")))
         elif a.kind.startswith("palette"):
-            result = opt.palettize_weights(
-                model, opt.OptimizationConfig(global_config=opt.OpPalettizerConfig(nbits=int(a.kind[-1])))
-            )
+            result = opt.palettize_weights(model, configuration(opt.OpPalettizerConfig(nbits=int(a.kind[-1]))))
         else:
             assert a.bundle is not None
             desc = model.get_spec().description.input[0]
@@ -46,7 +51,7 @@ def main():
                 image = cv2.imread(str(a.bundle / row["image"]))
                 rgb = cv2.cvtColor(Letterbox.for_shape(image.shape, size).apply(image), cv2.COLOR_BGR2RGB)
                 data.append({desc.name: Image.fromarray(rgb)})
-            config = opt.OptimizationConfig(global_config=opt.OpLinearQuantizerConfig(dtype="int8"))
+            config = configuration(opt.OpLinearQuantizerConfig(dtype="int8"))
             result = opt.linear_quantize_activations(model, config, sample_data=data, calibration_op_group_size=32)
             result = opt.linear_quantize_weights(result, config)
         result.save(str(a.out))

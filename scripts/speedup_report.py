@@ -52,6 +52,18 @@ v4q-832 + 0.30 refit: 28.05 / 28.69 ms, numbering 0.714223 / 1.000,
 eval_v2 D13 5.2753 / 2.1632 px, coverage 0.846059;
 09-06 D13 0.7621 px, coverage 0.987216. These are prior measurements.
 
+## Compression correctness finding
+
+Initial default `r832_int8`, `r832_palette6`, and `r832_palette4` variants compressed
+all eligible constants. A graph audit found this included `gx`/`gy` coordinate grids
+and positional constants, not only learned weights. Those results are retained.
+The distinct `r832_weights_*` variants and subsequent student/fine-tune compression
+restrict compression to convolution/linear weights, preserving geometric constants.
+This is an implementation correction based on the exported graph; thresholds and
+bit widths are not retuned against held-out scores. See
+[graph audit](speedup/coordinate_compression_audit.json). Later runs perform VAL
+parity before held-out scoring. Compression reports record the exact scope.
+
 ## Measured CoreML results
 
 **Accuracy below comes from actual Mini CoreML CPU_AND_NE outputs**, including
@@ -133,7 +145,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "This reports **skipped-frame-only accuracy**, not accuracy of a densely labelled full video. "
         "Effective adjacent-pair time is (inference + preprocess + Python refit + tracking) / 2, excluding decode. "
         "It includes Python postprocessing overhead and is not a native app FPS claim. "
-        "Window 21/31 is selected on VAL synthetic translations before held-out frames.",
+        "Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Targets at frame zero have no predecessor and are excluded (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.",
         "",
         "| Candidate | Effective pair median / p95 ms per frame | Flow median / p95 ms | eval_v2 D13 mean / median px | Numbering / coverage | 09-06 D13 / numbering / coverage | Flow failures |",
         "|---|---:|---:|---:|---:|---:|---:|",
@@ -185,7 +197,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "explains why compression speedups must be measured on the target hardware.",
         "- All new backbones/weights are torchvision BSD-3-Clause with the existing ImageNet caveat; "
         "see `LICENSES.md`. No Ultralytics code/weights enter this work.",
-        "- PC full test suite: 103 passed (including backbone checkpoint/export and synthetic homography tests). "
+        "- PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). "
         "New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.",
         "- Short training budgets are not convergence claims. Validation uses pipeline labels; "
         "eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.",
@@ -219,7 +231,8 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         + table(records)
         + "\n\nAccuracy from CPU_AND_NE CoreML outputs; "
     )
-    block += "[full protocol, ALL accuracy, tracking and recommendations](speedup.md).\n\n" + END
+    block += "[full protocol, ALL accuracy, tracking and recommendations](speedup.md).\n\n"
+    block += "\n".join(lines[lines.index("## PyTorch held-out results") : lines.index("## VAL selection")]) + "\n" + END
     if START in text:
         text = text[: text.index(START)] + block + text[text.index(END) + len(END) :]
     else:
@@ -240,6 +253,20 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         line += f"numbering {f(m['numbering'], 6)}, coverage {f(m['coverage'], 6)}; 09-06 {f(h['d13_mean_px'])}/{f(h['numbering'])}/{f(h['coverage'], 6)}.\n"
         with STATUS.open("a") as dest:
             dest.write(line)
+        seen.append(name)
+    for path in sorted(OUT.glob("held_*.json")):
+        name = "torch:" + path.stem.removeprefix("held_")
+        if name in seen:
+            continue
+        result = json.loads(path.read_text())
+        m, h = result["macro"], result["honest_0906"]
+        line = f"{datetime.now(timezone.utc).isoformat(timespec='minutes')} speedup {name}: "
+        line += f"eval_v2 D13 {f(m['d13_mean_px'])}/{f(m['d13_median_px'])}, numbering {f(m['numbering'], 6)}, "
+        line += (
+            f"coverage {f(m['coverage'], 6)}; 09-06 {f(h['d13_mean_px'])}/{f(h['numbering'])}/{f(h['coverage'], 6)}.\n"
+        )
+        with STATUS.open("a") as destination:
+            destination.write(line)
         seen.append(name)
     seenpath.write_text(json.dumps(seen, indent=2))
 

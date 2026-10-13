@@ -26,7 +26,8 @@ def test_light_backbone_query_checkpoint(arch, tmp_path):
         torch.testing.assert_close(actual, expected)
 
 
-def test_tracking_homography_preserves_slots_and_confidence():
+@pytest.mark.parametrize("flow_size", [0, 160])
+def test_tracking_homography_preserves_slots_and_confidence(flow_size):
     import sys
     from pathlib import Path
 
@@ -41,7 +42,7 @@ def test_tracking_homography_preserves_slots_and_confidence():
     transform = np.float32([[1, 0, 3], [0, 1, -2]])
     current = cv2.warpAffine(previous, transform, (320, 160))
     k = np.array([[20 + 10 * (i // 2), 60 + 40 * (i % 2), 0.9] for i in range(50)], dtype=np.float32)
-    actual, ok = propagate(previous, current, k, 21)
+    actual, ok = propagate(previous, current, k, 21, flow_size)
     assert ok
     np.testing.assert_allclose(actual[:, :2], k[:, :2] + [3, -2], atol=0.5)
     np.testing.assert_array_equal(actual[:, 2], k[:, 2])

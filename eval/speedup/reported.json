@@ -2,5 +2,16 @@
   "resize_512",
   "resize_640",
   "resize_416",
-  "r832_int8"
+  "r832_int8",
+  "r832_palette4",
+  "r832_palette6",
+  "torch:distill_resnet18_640",
+  "torch:distill_resnet34_640",
+  "torch:resize_416",
+  "torch:resize_512",
+  "torch:resize_640",
+  "r832_w8a8",
+  "distill_resnet18_640",
+  "r832_fp16",
+  "distill_resnet34_640"
 ]

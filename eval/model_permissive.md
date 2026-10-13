@@ -393,11 +393,29 @@ CoreML output scoring is separately pending. All rows have detection 1.000.
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|---:|---:|
+| distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
+| distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
+| r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.38 / 2.14 | 0.692329 | 0.844557 | 0.792 / 1.000 / 0.987216 |
 | r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 6.40 / 2.92 | 0.665034 | 0.807718 | 1.705 / 0.933 / 0.947443 |
+| r832_palette4 | 24.82 / 24.99 | 28.66 / 29.10 | 98.48 / 61.53 | 0.022529 | 0.152562 | 140.285 / 0.000 / 0.161932 |
+| r832_palette6 | 24.85 / 25.09 | 28.69 / 28.99 | 16.55 / 7.65 | 0.198906 | 0.600604 | 12.795 / 0.067 / 0.615057 |
+| r832_w8a8 | 20.12 / 20.28 | 20.16 / 20.39 | 5.13 / 2.18 | 0.703234 | 0.842280 | 0.801 / 1.000 / 0.984375 |
 | resize_416 | 5.49 / 5.58 | 8.32 / 8.56 | 19.66 / 10.04 | 0.116071 | 0.646193 | 9.217 / 0.000 / 0.839489 |
 | resize_512 | 8.09 / 8.23 | 10.08 / 10.56 | 9.21 / 5.17 | 0.381345 | 0.771110 | 3.923 / 0.000 / 0.940341 |
 | resize_640 | 14.03 / 14.13 | 17.08 / 17.54 | 6.24 / 2.75 | 0.614311 | 0.830186 | 1.465 / 0.867 / 0.977273 |
 
 Accuracy from CPU_AND_NE CoreML outputs; [full protocol, ALL accuracy, tracking and recommendations](speedup.md).
+
+## PyTorch held-out results
+
+These are separate runtime variants, scored once after VAL selection. Do not treat their accuracy as CoreML accuracy.
+
+| Candidate | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
+|---|---:|---:|---:|---:|
+| distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
+| distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
+| resize_416 | 17.864 / 10.056 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
+| resize_512 | 9.024 / 4.993 | 0.363095 | 0.758734 | 3.889 / 0.000 / 0.954545 |
+| resize_640 | 6.151 / 2.656 | 0.598889 | 0.829694 | 1.464 / 0.800 / 0.975852 |
 
 <!-- speedup-results-end -->

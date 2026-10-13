@@ -1,7 +1,16 @@
 {
   "teacher_sha256": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031",
-  "sizes": [640, 512, 416],
-  "students": ["resnet18", "resnet34", "mobilenet_v3_large", "efficientnet_b0"],
+  "sizes": [
+    640,
+    512,
+    416
+  ],
+  "students": [
+    "resnet18",
+    "resnet34",
+    "mobilenet_v3_large",
+    "efficientnet_b0"
+  ],
   "student_size": 640,
   "size_selection": "640 has highest VAL numbering among inference-only resized models; selected before their held-out scoring",
   "student_epochs": 8,
@@ -10,9 +19,16 @@
   "refit_selection": "maximum VAL numbering, then coverage, then minimum D13 mean",
   "compressed_candidate_selection": "832 reference plus highest VAL-numbering trained candidate and highest VAL-numbering trained candidate with CPU_AND_NE median <=10 ms; if no candidate <=10 ms, fastest trained candidate. Deduplicate. Uses no held-out scores.",
   "fast_tracking_candidate": "same <=10 ms VAL-selected candidate (fallback fastest)",
-  "compression": ["int8", "palette6", "palette4", "w8a8"],
+  "compression": [
+    "int8",
+    "palette6",
+    "palette4",
+    "w8a8"
+  ],
   "activation_calibration": "32 deterministic scale-v1aug VAL images (sorted filenames, step 47); no held-out frames",
   "tracking_window_selection": "21 or 31 pixels, minimum mean tracking error on VAL synthetic translations (2,1),(-4,2),(8,-3)",
   "tracking_evaluation": "actual predecessor-to-labelled-target adjacent pairs plus continuous alternating-inference timing on 09-06, nBpe2 and Stan clips",
-  "app_release_changes": false
+  "app_release_changes": false,
+  "compression_scope_correction": "Graph audit found default compression altered gx/gy coordinate grids and position constants. Preserve non-affine constants, compress conv/linear weights only. Retain original all-constant baseline results; add distinct r832_weights variants. Subsequent candidate compression uses conv_linear scope; no held-out threshold or bit-width tuning.",
+  "tracking_resolution_followup": "Measured native-image flow cost prompted a separate speed variant: windows 21/31 x long edges 320/640/native, chosen on VAL synthetic motions by minimum mean flow cost among configurations with <=1 source-pixel mean error. No held-out tracking result selects these settings. Preserve the original native-resolution 832 control."
 }

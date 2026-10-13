@@ -65,6 +65,22 @@ def main():
         if not a.timing_only:
             assert backend.imgsz == selection["imgsz"]
             threshold = selection["chosen_threshold"]
+            if a.pt:
+                pt = load_backend(a.pt, device="cpu", imgsz=backend.imgsz)
+                parity = {"raw": [], "refit": []}
+                for row in json.loads((a.bundle / "calibration.json").read_text()):
+                    image = cv2.imread(str(a.bundle / row["image"]))
+                    lb = Letterbox.for_shape(image.shape, backend.imgsz)
+                    rgb = cv2.cvtColor(lb.apply(image), cv2.COLOR_BGR2RGB)
+                    p, m = pt(rgb), backend(rgb)
+                    for name, pp, mm in [("raw", p, m), ("refit", refit(p, threshold), refit(m, threshold))]:
+                        pk, mk = decode(pp)[0], decode(mm)[0]
+                        pk[:, :2] = lb.to_frame(pk[:, :2])
+                        mk[:, :2] = lb.to_frame(mk[:, :2])
+                        parity[name].append(compare(mk, pk, 24))
+                report["parity"][units] = {k: summarize(v) for k, v in parity.items()}
+                del pt
+            a.out.write_text(json.dumps(report, indent=1))
             model = RefitBackend(backend, threshold)
             rows = defaultdict(list)
             raw_predictions = []
@@ -84,21 +100,6 @@ def main():
                 honest_0906=ev.agg(rows["honest_0906"]),
                 frames=rows,
             )
-            if a.pt:
-                pt = load_backend(a.pt, device="cpu", imgsz=backend.imgsz)
-                parity = {"raw": [], "refit": []}
-                for row in json.loads((a.bundle / "calibration.json").read_text()):
-                    image = cv2.imread(str(a.bundle / row["image"]))
-                    lb = Letterbox.for_shape(image.shape, backend.imgsz)
-                    rgb = cv2.cvtColor(lb.apply(image), cv2.COLOR_BGR2RGB)
-                    p, m = pt(rgb), backend(rgb)
-                    for name, pp, mm in [("raw", p, m), ("refit", refit(p, threshold), refit(m, threshold))]:
-                        pk, mk = decode(pp)[0], decode(mm)[0]
-                        pk[:, :2] = lb.to_frame(pk[:, :2])
-                        mk[:, :2] = lb.to_frame(mk[:, :2])
-                        parity[name].append(compare(mk, pk, 24))
-                report["parity"][units] = {k: summarize(v) for k, v in parity.items()}
-                del pt
         a.out.write_text(json.dumps(report, indent=1))
         del backend
 

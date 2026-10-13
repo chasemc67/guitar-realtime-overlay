@@ -1,0 +1,9 @@
+{
+  "window": 21,
+  "val_mean_px": {
+    "21": 0.00014018447877865283,
+    "31": 0.00015514431078842052
+  },
+  "method": "VAL-only synthetic translations; all other OpenCV settings fixed",
+  "fallback": "reuse last observations if homography unavailable"
+}

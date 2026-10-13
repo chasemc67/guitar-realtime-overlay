@@ -158,20 +158,34 @@ class TwoStageBackend(Backend):
     def __init__(
         self,
         stage1,
-        numbering,
+        numbering=None,
         device=None,
         threshold=0.8,
         wire_reassign=False,
         reject_ambiguous=False,
         source_resolution=False,
+        landmark=None,
     ):
         from gro.fretnet.numbering import NumberingRefiner
 
         self.source_resolution = source_resolution
         self.stage1 = FretNetBackend(stage1, device=device)
-        self.refiner = NumberingRefiner(
-            numbering, self.stage1.device, threshold, reassign=wire_reassign, reject_ambiguous=reject_ambiguous
-        )
+        if landmark is not None:
+            from gro.fretnet.landmark import LandmarkRefiner
+
+            self.refiner = LandmarkRefiner(
+                landmark,
+                self.stage1.device,
+                threshold,
+                reassign=wire_reassign,
+                reject_ambiguous=reject_ambiguous,
+                numbering=numbering,
+            )
+            self.name = "landmark"
+        else:
+            self.refiner = NumberingRefiner(
+                numbering, self.stage1.device, threshold, reassign=wire_reassign, reject_ambiguous=reject_ambiguous
+            )
         self.imgsz = self.stage1.imgsz
 
     def __call__(self, rgb):
@@ -226,8 +240,9 @@ def load_backend(path, **kw) -> Backend:
     """By suffix: .mlpackage / .mlmodel -> CoreML (kw compute_units), .onnx -> ONNX (providers), .pt -> torch
     (FretNet checkpoint or ultralytics weights). CoreML / ONNX exports of either model share the raw layout."""
     numbering = kw.pop("numbering", None)
-    if numbering is not None:
-        return TwoStageBackend(path, numbering, **kw)
+    landmark = kw.pop("landmark", None)
+    if numbering is not None or landmark is not None:
+        return TwoStageBackend(path, numbering, landmark=landmark, **kw)
     if kw.pop("wire_reassign", False):
         return GeometryBackend(path, **kw)
     suffix = Path(path).suffix.lower()

@@ -95,7 +95,11 @@ def frame_row(model, image, gt, a, item, clip):
     m["wire_perp_pct"] = [100 * e / sp for e in m["wire_perp_px"]] if sp else []
     m["nearest_wire_px"] = nearest_wire_px(gt, pred)
     row = {"item": item, "clip": clip, **{k: v for k, v in m.items() if k != "per_keypoint_px"}}
-    if getattr(a, "numbering", None):
+    if getattr(a, "landmark", None):
+        from landmark_eval import frame_diagnostics
+
+        row["landmark"] = frame_diagnostics(model, image, gt)
+    if getattr(a, "numbering", None) and not getattr(a, "landmark", None):
         from gro.fretnet.numbering import HI, LO, SHIFT, rectify
         from gro.geometry import FitError, fit_fretboard
 
@@ -257,6 +261,7 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
     ap.add_argument("--stage1", type=Path, help="FretNet neck-box checkpoint for RTMPose --weights (no GT boxes)")
     ap.add_argument("--numbering", type=Path, help="Whole-neck stage-2 numbering checkpoint")
+    ap.add_argument("--landmark", type=Path, help="Landmark checkpoint; optional --numbering adds an offset vote")
     ap.add_argument(
         "--numbering-source-resolution",
         action="store_true",
@@ -266,21 +271,22 @@ def main() -> None:
     ap.add_argument("--wire-reject-ambiguous", action="store_true", help="Drop points between fitted wires")
     ap.add_argument("--numbering-confidence", type=float, default=0.8)
     a = ap.parse_args()
-    if a.numbering_source_resolution and not a.numbering:
-        ap.error("--numbering-source-resolution requires --numbering")
+    if a.numbering_source_resolution and not (a.numbering or a.landmark):
+        ap.error("--numbering-source-resolution requires --numbering or --landmark")
     if a.wire_reject_ambiguous and not a.wire_reassign:
         ap.error("--wire-reject-ambiguous requires --wire-reassign")
-    if a.stage1 and (a.numbering or a.wire_reassign):
+    if a.stage1 and (a.numbering or a.landmark or a.wire_reassign):
         ap.error("--stage1 (RTMPose) cannot be combined with numbering or wire reassignment")
     if a.stage1 is not None:
         from gro.fretnet.rtmpose import TopDown
 
         model = TopDown(a.stage1, a.weights, device=a.device or "cuda")
         a.imgsz = model.imgsz
-    elif a.numbering:
+    elif a.numbering or a.landmark:
         model = load_backend(
             a.weights,
             numbering=a.numbering,
+            landmark=a.landmark,
             device=a.device,
             threshold=a.numbering_confidence,
             wire_reassign=a.wire_reassign,
@@ -326,6 +332,8 @@ def main() -> None:
         by[r["clip"]].append(r)
     per_clip = {c: agg(rs) for c, rs in by.items()}
     hand_rows = [r for r in rows if r["source"] == "hand"]
+    from landmark_eval import aggregate_diagnostics
+
     report = {
         "weights": str(a.weights),
         "weights_sha256": hashlib.sha256(a.weights.read_bytes()).hexdigest() if a.weights.is_file() else None,
@@ -334,7 +342,16 @@ def main() -> None:
         "numbering_source_resolution": a.numbering_source_resolution,
         "numbering_weights": str(a.numbering) if a.numbering else None,
         "numbering_sha256": hashlib.sha256(a.numbering.read_bytes()).hexdigest() if a.numbering else None,
-        "numbering_model": model.refiner.net.metadata if a.numbering else None,
+        "numbering_model": (model.refiner.offset_model.net.metadata if a.landmark else model.refiner.net.metadata)
+        if a.numbering
+        else None,
+        "landmark_weights": str(a.landmark) if a.landmark else None,
+        "landmark_sha256": hashlib.sha256(a.landmark.read_bytes()).hexdigest() if a.landmark else None,
+        "landmark_model": model.refiner.net.metadata if a.landmark else None,
+        "landmark_confidence": a.numbering_confidence if a.landmark else None,
+        "landmark_diagnostics": {"eval_v2": aggregate_diagnostics(rows), "honest_0906": aggregate_diagnostics(honest)}
+        if a.landmark
+        else None,
         "numbering_confidence": a.numbering_confidence if a.numbering else None,
         "stage1": str(a.stage1) if a.stage1 else None,
         "imgsz": a.imgsz,
@@ -344,7 +361,7 @@ def main() -> None:
         "hand_corrected_frames": agg(hand_rows) if hand_rows else None,
         "honest_0906": agg(honest) if honest else None,
         "stage2_diagnostics": {"eval_v2": numbering_diagnostics(rows), "honest_0906": numbering_diagnostics(honest)}
-        if a.numbering
+        if a.numbering and not a.landmark
         else None,
         "per_clip": per_clip,
         "guitar": guitar,
@@ -367,7 +384,7 @@ def main() -> None:
         lines.append(row_md("eval v2 hand-corrected frames only", report["hand_corrected_frames"]))
     if honest:
         lines.append(row_md("09-06 hand GT (honest)", report["honest_0906"]))
-    if a.numbering:
+    if a.numbering and not a.landmark:
         lines += [
             "",
             f"Stage-2 checkpoint: `{a.numbering}`, confidence threshold {a.numbering_confidence}.",
@@ -375,6 +392,16 @@ def main() -> None:
             "",
             "```json",
             json.dumps(report["stage2_diagnostics"], indent=2),
+            "```",
+        ]
+    if a.landmark:
+        lines += [
+            "",
+            f"Landmark checkpoint: `{a.landmark}`; threshold {a.numbering_confidence}.",
+            "Per-landmark detection diagnostics (pooled, localization tolerance 0.5 fret):",
+            "",
+            "```json",
+            json.dumps(report["landmark_diagnostics"], indent=2),
             "```",
         ]
     lines += ["", "## Per clip", "", *HEADER]

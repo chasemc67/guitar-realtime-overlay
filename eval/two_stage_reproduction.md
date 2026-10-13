@@ -92,3 +92,16 @@ test; the final numbering-specific suite passed all 12 tests. Ruff passes for th
 implementation and tests. The sequence GPU attempt produced no checkpoint and was stopped;
 its replacement CPU run uses the same source data and architecture. Runtime/train details
 are recorded in the per-run argument and training files on the PC.
+
+
+Pending PC artifacts to recover after SSH returns:
+
+- `eval/v2/v7num_1536_source_reject.{json,md}`: wider classifier with original pixels and geometry fallback.
+- `runs/fretnet/v7seq_1024/{args.json,log.jsonl,best.pt}`: CPU sequence run, eight epochs planned.
+- `eval/v2/v7seq_1024_source_reject.{json,md}`: sequence evaluation queued after that run.
+
+PC SSH timed out over both Tailscale IPv4 and IPv6 despite successful Tailscale pings.
+The last observed sequence state was startup on CPU; completion or continued execution
+cannot be verified while SSH is unavailable. The completed local suite has 74 passes
+and two torch-dependent skips; the PC previously passed its full 91-test suite and the
+expanded 12-test numbering suite. No existing v6 process was signalled.

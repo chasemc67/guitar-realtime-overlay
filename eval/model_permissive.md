@@ -293,3 +293,7 @@ Commands and artifact provenance: [reproduction](two_stage_reproduction.md),
 At the last status check, retrieval of the MobileNet+geometry evaluation and sequence
 CPU run was pending because PC SSH became unreachable. No result is claimed for either
 until its report is recovered.
+
+A separate validation-only refit threshold-selection follow-up is recorded in
+[refit_validation.md](refit_validation.md); it reports 0.714 eval_v2 numbering and is
+separate from the learned-stage-2 comparisons above.

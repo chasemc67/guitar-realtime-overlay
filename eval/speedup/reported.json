@@ -1,0 +1,6 @@
+[
+  "resize_512",
+  "resize_640",
+  "resize_416",
+  "r832_int8"
+]

@@ -1,0 +1,15 @@
+{
+  "arch": "resnet34",
+  "imgsz": "640",
+  "name": "speedup_resnet34_640",
+  "epochs": "8",
+  "batch": "8",
+  "finetune": "False",
+  "teacher": "/home/chase/gro/repo/runs/fretnet/v4q_r50_832/last.pt",
+  "teacher_sha256": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031",
+  "train_sha256": "d0da5ded1abc06dc3745f3060ed24d833246255720aa9a1cbd948f0e5e3169b1",
+  "val_sha256": "3ea9279b6dea504527e3294c6a786986593333fe1ddef2bc326c18f3d02f6c9e",
+  "selection": "minimum VAL mean keypoint error",
+  "loss": "GT CE + 0.5 L1 + BCE; teacher 0.5 spatial CE + 0.1 keypoint L1 + 0.2 query MSE + 0.2 confidence BCE",
+  "transferred_tensors": 109
+}

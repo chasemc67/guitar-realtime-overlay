@@ -1,5 +1,6 @@
 """Render collected speed experiments and append newly landed results to the status log."""
 
+# ruff: noqa: E501 -- rendered Markdown table rows
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -190,6 +191,25 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.",
         "",
     ]
+    lines += [
+        "",
+        "## CoreML parity against matching PyTorch checkpoints (VAL, 32 frames)",
+        "",
+        "Coordinates are source-image pixels. Fit disagreement counts either runtime lacking a fit; "
+        "it is not necessarily a fit lost by CoreML. Raw and refitted predictions are compared separately.",
+        "",
+        "| Candidate / units | Raw keypoint mean / p95 px | Refit keypoint mean / p95 px | Refit wire mean / p95 px | Refit anchor flips/frame | Fit disagreements |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for name, record in records:
+        for units, parity in record.get("parity", {}).items():
+            raw, refined = parity["raw"], parity["refit"]
+            lines.append(
+                f"| {name} / {units} | {f(raw['kpt_px_mean'])} / {f(raw['kpt_px_p95'])} | "
+                f"{f(refined['kpt_px_mean'])} / {f(refined['kpt_px_p95'])} | "
+                f"{f(refined['wire_px_mean'])} / {f(refined['wire_px_p95'])} | "
+                f"{f(refined['anchor_flips_per_frame'])} | {refined['fit_lost_frames']} |"
+            )
     (ROOT / "eval/speedup.md").write_text("\n".join(lines))
     model = ROOT / "eval/model_permissive.md"
     text = model.read_text()

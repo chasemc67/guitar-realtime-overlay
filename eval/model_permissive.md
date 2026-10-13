@@ -381,3 +381,23 @@ all independently select the 0.30-fret refit threshold. Held-out accuracy pendin
 
 Model latency excludes refit. PyTorch accuracy and Mini model timing are different runtimes;
 CoreML output scoring is separately pending. All rows have detection 1.000.
+
+| Distilled candidate (PyTorch, VAL-picked checkpoint/refit) | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
+|---|---:|---:|---:|---:|
+| ResNet-18, 640, 8 epochs, threshold 0.30 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
+
+
+<!-- speedup-results-start -->
+
+### Measured speedup CoreML rows
+
+| Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
+|---|---:|---:|---:|---:|---:|---:|
+| r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 6.40 / 2.92 | 0.665034 | 0.807718 | 1.705 / 0.933 / 0.947443 |
+| resize_416 | 5.49 / 5.58 | 8.32 / 8.56 | 19.66 / 10.04 | 0.116071 | 0.646193 | 9.217 / 0.000 / 0.839489 |
+| resize_512 | 8.09 / 8.23 | 10.08 / 10.56 | 9.21 / 5.17 | 0.381345 | 0.771110 | 3.923 / 0.000 / 0.940341 |
+| resize_640 | 14.03 / 14.13 | 17.08 / 17.54 | 6.24 / 2.75 | 0.614311 | 0.830186 | 1.465 / 0.867 / 0.977273 |
+
+Accuracy from CPU_AND_NE CoreML outputs; [full protocol, ALL accuracy, tracking and recommendations](speedup.md).
+
+<!-- speedup-results-end -->

@@ -1,0 +1,34 @@
+{
+  "macro": {
+    "clips": 14,
+    "frames": 228,
+    "d13_mean_px": 5.349595983149899,
+    "d13_median_px": 2.1261685329519335,
+    "d13_mean_pct_fret": 23.478360274771074,
+    "nearest_wire_mean_px": 3.3633986114420074,
+    "numbering": 0.6964763497372193,
+    "coverage": 0.8447666209193108,
+    "detection": 1.0
+  },
+  "honest_0906": {
+    "frames": 15,
+    "d13_mean_px": 0.7922661709917941,
+    "d13_median_px": 0.5499506861366679,
+    "d13_p95_px": 2.2294857368107017,
+    "d13_mean_pct_fret": 3.2320333572234308,
+    "nearest_wire_mean_px": 0.7922661709917941,
+    "numbering": 1.0,
+    "numbering_frames": 15,
+    "coverage": 0.9872159090909091,
+    "detection": 1.0
+  },
+  "reference": "r832_fp16",
+  "tracking": "r832_scaled",
+  "source": "cached direct predictions; no new inference or selection",
+  "excluded": [
+    "yt_9oJLRxucpNI#0",
+    "yt_FbEe_5tGOFM#0",
+    "yt_eM8DB4FT-jM#0",
+    "yt_yIYrqh7ulSk#0"
+  ]
+}

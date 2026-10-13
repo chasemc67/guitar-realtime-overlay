@@ -26,5 +26,16 @@
   "distill_resnet34_640_int8",
   "ft_416",
   "distill_resnet34_640_palette4",
-  "distill_resnet34_640_palette6"
+  "distill_resnet34_640_palette6",
+  "distill_resnet18_640_int8",
+  "distill_resnet18_640_palette4",
+  "distill_resnet18_640_palette6",
+  "distill_resnet18_640_w8a8",
+  "distill_resnet34_640_w8a8",
+  "tracking:distill_resnet18_640",
+  "tracking:r832",
+  "r832_weights_int8",
+  "r832_weights_palette4",
+  "r832_weights_palette6",
+  "tracking:r832_scaled"
 ]

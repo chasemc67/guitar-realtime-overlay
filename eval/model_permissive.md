@@ -366,10 +366,10 @@ eval_v2 macro D13 11.14/8.76 px, numbering 0.556, cov/det 0.911/1.000; 09-06 1.0
 
 ## Speed experiments (2026-10-13 UTC, in progress)
 
-See [speedup protocol and results](speedup.md). Inference-only resizing has Mini
+See [speedup protocol and results](speedup.md). The preliminary timing-only sweep measured Mini
 CPU_AND_NE median/p95 14.110/14.732 ms at 640, 8.103/8.260 at 512, and
 5.493/5.571 at 416. Corresponding VAL numbering is 0.750334, 0.456914, 0.357143;
-all independently select the 0.30-fret refit threshold. Held-out accuracy pending.
+all independently select the 0.30-fret refit threshold. Actual CoreML held-out results and their accompanying timing runs are tabulated below.
 
 ## Frozen held-out results
 
@@ -380,7 +380,7 @@ all independently select the 0.30-fret refit threshold. Held-out accuracy pendin
 | Resize 416, PyTorch accuracy | 5.49 / 5.57 | 17.86 / 10.06 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
 
 Model latency excludes refit. PyTorch accuracy and Mini model timing are different runtimes;
-CoreML output scoring is separately pending. All rows have detection 1.000.
+CoreML output scoring is recorded separately below. All three resize rows have detection 1.000.
 
 | Distilled candidate (PyTorch, VAL-picked checkpoint/refit) | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|
@@ -396,10 +396,15 @@ CoreML output scoring is separately pending. All rows have detection 1.000.
 | distill_efficientnet_b0_640 | 8.13 / 8.22 | 10.25 / 10.54 | 10.43 / 5.85 | 0.410848 | 0.791198 | 1.967 / 0.867 / 0.964489 |
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 10.93 / 7.00 | 0.525938 | 0.788797 | 2.456 / 0.600 / 0.907670 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
+| distill_resnet18_640_int8 | 6.91 / 7.13 | 11.80 / 12.80 | 13.08 / 7.66 | 0.436424 | 0.769688 | 2.214 / 0.800 / 0.958807 |
+| distill_resnet18_640_palette4 | 6.89 / 7.16 | 9.30 / 10.83 | 15.94 / 10.26 | 0.503342 | 0.743564 | 2.443 / 0.467 / 0.982955 |
+| distill_resnet18_640_palette6 | 6.89 / 7.27 | 9.14 / 10.13 | 11.70 / 7.14 | 0.518841 | 0.777463 | 2.015 / 0.733 / 0.970170 |
+| distill_resnet18_640_w8a8 | 5.53 / 5.71 | 5.58 / 5.92 | 12.11 / 7.80 | 0.514572 | 0.775614 | 2.189 / 0.733 / 0.968750 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
 | distill_resnet34_640_int8 | 8.73 / 8.81 | 13.61 / 14.04 | 10.31 / 3.62 | 0.646030 | 0.783967 | 1.309 / 0.933 / 0.968750 |
 | distill_resnet34_640_palette4 | 8.86 / 8.96 | 10.89 / 11.36 | 8.11 / 2.53 | 0.624875 | 0.809278 | 1.824 / 0.467 / 0.901989 |
 | distill_resnet34_640_palette6 | 8.79 / 8.88 | 10.80 / 11.29 | 13.69 / 9.23 | 0.623451 | 0.785420 | 1.247 / 0.867 / 0.974432 |
+| distill_resnet34_640_w8a8 | 6.51 / 6.88 | 6.50 / 6.89 | 9.37 / 2.70 | 0.637957 | 0.788574 | 1.381 / 0.867 / 0.974432 |
 | ft_416 | 5.53 / 5.61 | 8.21 / 8.52 | 9.85 / 5.56 | 0.375850 | 0.815923 | 2.606 / 0.733 / 0.965909 |
 | ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.01 / 3.58 | 0.526869 | 0.827605 | 1.905 / 0.800 / 0.984375 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.25 / 2.36 | 0.637908 | 0.834601 | 1.746 / 0.867 / 0.980114 |
@@ -408,6 +413,9 @@ CoreML output scoring is separately pending. All rows have detection 1.000.
 | r832_palette4 | 24.82 / 24.99 | 28.66 / 29.10 | 98.48 / 61.53 | 0.022529 | 0.152562 | 140.285 / 0.000 / 0.161932 |
 | r832_palette6 | 24.85 / 25.09 | 28.69 / 28.99 | 16.55 / 7.65 | 0.198906 | 0.600604 | 12.795 / 0.067 / 0.615057 |
 | r832_w8a8 | 20.12 / 20.28 | 20.16 / 20.39 | 5.13 / 2.18 | 0.703234 | 0.842280 | 0.801 / 1.000 / 0.984375 |
+| r832_weights_int8 | 27.89 / 28.67 | 37.46 / 38.96 | 4.65 / 2.08 | 0.722823 | 0.854262 | 0.785 / 1.000 / 0.985795 |
+| r832_weights_palette4 | 24.89 / 25.06 | 28.64 / 28.85 | 5.98 / 2.70 | 0.761368 | 0.735088 | 2.813 / 0.867 / 0.723011 |
+| r832_weights_palette6 | 24.87 / 25.95 | 28.68 / 29.51 | 4.53 / 2.09 | 0.735140 | 0.844244 | 0.823 / 1.000 / 0.982955 |
 | resize_416 | 5.49 / 5.58 | 8.32 / 8.56 | 19.66 / 10.04 | 0.116071 | 0.646193 | 9.217 / 0.000 / 0.839489 |
 | resize_512 | 8.09 / 8.23 | 10.08 / 10.56 | 9.21 / 5.17 | 0.381345 | 0.771110 | 3.923 / 0.000 / 0.940341 |
 | resize_640 | 14.03 / 14.13 | 17.08 / 17.54 | 6.24 / 2.75 | 0.614311 | 0.830186 | 1.465 / 0.867 / 0.977273 |

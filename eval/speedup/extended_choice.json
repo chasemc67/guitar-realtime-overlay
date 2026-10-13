@@ -1,0 +1,82 @@
+{
+  "selected": {
+    "arch": "resnet34",
+    "val": {
+      "frames": 1498,
+      "d13_mean_px": 2.5000542846621183,
+      "d13_median_px": 1.0219516297890667,
+      "d13_p95_px": 6.055079875483067,
+      "d13_mean_pct_fret": 8.011710411930446,
+      "nearest_wire_mean_px": 2.3610378597350214,
+      "numbering": 0.8264352469959947,
+      "numbering_frames": 1498,
+      "coverage": 0.8430818689721902,
+      "detection": 1.0
+    }
+  },
+  "records": [
+    {
+      "arch": "resnet18",
+      "val": {
+        "frames": 1498,
+        "d13_mean_px": 3.452390571841153,
+        "d13_median_px": 1.1794802550477934,
+        "d13_p95_px": 10.338286640796447,
+        "d13_mean_pct_fret": 11.358112983721233,
+        "nearest_wire_mean_px": 2.8485251394976077,
+        "numbering": 0.6935914552736983,
+        "numbering_frames": 1498,
+        "coverage": 0.8793657729641999,
+        "detection": 1.0
+      }
+    },
+    {
+      "arch": "resnet34",
+      "val": {
+        "frames": 1498,
+        "d13_mean_px": 2.5000542846621183,
+        "d13_median_px": 1.0219516297890667,
+        "d13_p95_px": 6.055079875483067,
+        "d13_mean_pct_fret": 8.011710411930446,
+        "nearest_wire_mean_px": 2.3610378597350214,
+        "numbering": 0.8264352469959947,
+        "numbering_frames": 1498,
+        "coverage": 0.8430818689721902,
+        "detection": 1.0
+      }
+    },
+    {
+      "arch": "mobilenet_v3_large",
+      "val": {
+        "frames": 1498,
+        "d13_mean_px": 3.6393758504803526,
+        "d13_median_px": 1.3597498120449227,
+        "d13_p95_px": 12.78899742403705,
+        "d13_mean_pct_fret": 12.137885593915366,
+        "nearest_wire_mean_px": 2.642179225168946,
+        "numbering": 0.6355140186915887,
+        "numbering_frames": 1498,
+        "coverage": 0.848263054402447,
+        "detection": 1.0
+      }
+    },
+    {
+      "arch": "efficientnet_b0",
+      "val": {
+        "frames": 1498,
+        "d13_mean_px": 4.115628196119441,
+        "d13_median_px": 1.3630709518902373,
+        "d13_p95_px": 14.246928324500661,
+        "d13_mean_pct_fret": 13.881333039445378,
+        "nearest_wire_mean_px": 2.8481576546301994,
+        "numbering": 0.6181575433911882,
+        "numbering_frames": 1498,
+        "coverage": 0.8331876775180249,
+        "detection": 1.0
+      }
+    }
+  ],
+  "decision": "VAL numbering only; no held-out score read",
+  "imgsz": 512,
+  "additional_epochs": 20
+}

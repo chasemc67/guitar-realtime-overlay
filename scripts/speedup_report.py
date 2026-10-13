@@ -36,6 +36,8 @@ def table(records, mode="CPU_AND_NE"):
 
 
 def main():
+    completion_path = OUT / "completion.json"
+    completion = json.loads(completion_path.read_text()) if completion_path.exists() else None
     records = []
     for p in sorted(OUT.glob("ml_held_*.json")):
         rec = json.loads(p.read_text())
@@ -75,6 +77,12 @@ per-frame JSON reports; parity uses 32 VAL calibration images, never held-out se
 Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the reports.
 
 """
+    if completion:
+        preamble = preamble.replace(
+            "This report is regenerated as results land; missing candidates are still pending.",
+            f"Completed {completion['finished_utc']}; elapsed {completion['elapsed_hours']:.2f} hours. "
+            "All planned runs and the two declared continuations are collected.",
+        )
     lines = [preamble, table(records)]
     passed = []
     for name, r in records:
@@ -92,13 +100,22 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
             f"eval_v2 numbering {r['held']['CPU_AND_NE']['macro']['numbering']:.6f}; 09-06 1.000."
         )
     else:
-        lines.append("No collected CoreML candidate yet meets all three strict targets (≤8.00 ms, >0.601, 1.000).")
+        qualifier = "" if completion else "yet "
+        lines.append(f"No collected CoreML candidate {qualifier}meets all three strict targets (≤8.00 ms, >0.601, 1.000).")
     if passed:
         name, r = min(passed, key=lambda v: v[1]["latency"]["CPU_AND_NE"]["median_ms"])
         lines.append(
-            f"Fastest numbering-qualified candidate so far: **{name}**, "
+            f"Fastest numbering-qualified candidate: **{name}**, "
             f"{r['latency']['CPU_AND_NE']['median_ms']:.2f} ms. No model is promoted by this experiment."
         )
+        m, h = r["held"]["CPU_AND_NE"]["macro"], r["held"]["CPU_AND_NE"]["honest_0906"]
+        lines.append(
+            f"Its eval_v2 wire error is {m['d13_mean_px']:.3f} px mean / {m['d13_median_px']:.3f} px median "
+            f"with {m['coverage']:.6f} coverage; 09-06 error is {h['d13_mean_px']:.3f} px with "
+            f"{h['coverage']:.6f} coverage. Numbering alone is not evidence that every accuracy metric improved."
+        )
+    if completion and completion.get("recommendations"):
+        lines += ["", *completion["recommendations"]]
     lines += [
         "",
         "## PyTorch held-out results",
@@ -135,6 +152,23 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         v = s["val"][str(s["chosen_threshold"])]
         lines.append(
             f"| {p.stem.removeprefix('selection_')} | {s['chosen_threshold']:.2f} | {f(v['numbering'], 6)} | {f(v['coverage'], 6)} | {f(v['d13_mean_px'])} |"
+        )
+    lines += [
+        "",
+        "### Training checkpoint selection",
+        "",
+        "Each continuation starts from the original student's best checkpoint, not the other continuation. "
+        "Errors here are validation keypoint errors in network-input pixels, not held-out wire errors.",
+        "",
+        "| Candidate | Completed epochs | Selected epoch | VAL mean / median / p95 keypoint error px |",
+        "|---|---:|---:|---:|",
+    ]
+    for path in sorted(OUT.glob("train_*.jsonl")):
+        epochs = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        chosen = min(epochs, key=lambda row: row["err_mean_px"])
+        lines.append(
+            f"| {path.stem.removeprefix('train_')} | {len(epochs)} | {chosen['epoch']} | "
+            f"{chosen['err_mean_px']:.3f} / {chosen['err_median_px']:.3f} / {chosen['err_p95_px']:.3f} |"
         )
     lines += [
         "",
@@ -201,6 +235,13 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.",
         "- Short training budgets are not convergence claims. Validation uses pipeline labels; "
         "eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.",
+        "- [PC environment and pretrained-weight hashes](speedup/pc_environment.json), "
+        "[Mini environment](speedup/mini_environment.txt), "
+        "[held-out manifest](speedup/bundle_manifest.json), and "
+        "[VAL calibration manifest](speedup/calibration_manifest.json) identify this run. "
+        "Training augmentation is not bitwise reproducible; checkpoint hashes identify the frozen evaluated models.",
+        "- The 09-06 result covers only 15 labelled frames. All conclusions are specific to these test sets and this Mini. "
+        "A failed dense-video flow update reuses the previous fit; failure counts are reported, not hidden.",
         "",
     ]
     lines += [
@@ -282,6 +323,21 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         line += (
             f"coverage {f(m['coverage'], 6)}; 09-06 {f(h['d13_mean_px'])}/{f(h['numbering'])}/{f(h['coverage'], 6)}.\n"
         )
+        with STATUS.open("a") as destination:
+            destination.write(line)
+        seen.append(name)
+    for path in sorted(OUT.glob("ml_tracking_*.json")):
+        if ".selection." in path.name:
+            continue
+        name = "tracking:" + path.stem.removeprefix("ml_tracking_")
+        if name in seen:
+            continue
+        result = json.loads(path.read_text())
+        m, h, t = result["macro"], result["honest_0906"], result["effective_pair_per_frame_ms"]
+        line = f"{datetime.now(timezone.utc).isoformat(timespec='minutes')} speedup {name}: "
+        line += f"adjacent-pair effective median/p95 {t['median']:.2f}/{t['p95']:.2f} ms/frame; "
+        line += f"skipped-target numbering {m['numbering']:.6f}/{h['numbering']:.6f}, "
+        line += f"coverage {m['coverage']:.6f}/{h['coverage']:.6f}; not dense-video accuracy.\n"
         with STATUS.open("a") as destination:
             destination.write(line)
         seen.append(name)

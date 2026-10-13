@@ -29,8 +29,11 @@ def main():
     ap.add_argument("--epochs", type=int, default=8)
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--finetune", action="store_true")
+    ap.add_argument("--init", type=Path, help="Continue a VAL-selected student; teacher remains v4q-832")
     ap.add_argument("--teacher", type=Path, default=ROOT / "runs/fretnet/v4q_r50_832/last.pt")
     a = ap.parse_args()
+    if a.finetune and a.init:
+        ap.error("--init is only for student continuation")
     torch.set_num_threads(4)
     torch.manual_seed(832)
     torch.backends.cudnn.benchmark = True
@@ -51,14 +54,24 @@ def main():
         selection="minimum VAL mean keypoint error",
         loss="GT CE + 0.5 L1 + BCE; teacher 0.5 spatial CE + 0.1 keypoint L1 + 0.2 query MSE + 0.2 confidence BCE",
     )
+    if a.finetune:
+        provenance["loss"] = "GT CE + 0.5 L1 + BCE; no distillation term"
+    if a.init:
+        provenance["init_sha256"] = hashlib.sha256(a.init.read_bytes()).hexdigest()
     (out / "protocol.json").write_text(json.dumps(provenance, indent=2))
     tl = DataLoader(train, a.batch, shuffle=True, num_workers=8, pin_memory=True, persistent_workers=True)
     vl = DataLoader(val, 16, num_workers=4, pin_memory=True, persistent_workers=True)
     teacher = load(a.teacher, "cuda").requires_grad_(False)
-    net = load(a.teacher, "cuda") if a.finetune else build(a.arch, "query", pretrained=True, imgsz=a.imgsz).cuda()
+    if a.finetune:
+        net = load(a.teacher, "cuda")
+    elif a.init:
+        net = load(a.init, "cuda")
+        assert net.arch == a.arch
+    else:
+        net = build(a.arch, "query", pretrained=True, imgsz=a.imgsz).cuda()
     net.imgsz = a.imgsz
     # Transfer compatible neck/query heads; channel-changing backbone projections stay freshly initialized.
-    if not a.finetune:
+    if not a.finetune and a.init is None:
         state = net.state_dict()
         copied = {
             k: v

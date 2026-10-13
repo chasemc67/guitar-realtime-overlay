@@ -35,6 +35,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|---:|---:|
+| distill_efficientnet_b0_640 | 8.13 / 8.22 | 10.25 / 10.54 | 10.43 / 5.85 | 0.410848 | 0.791198 | 1.967 / 0.867 / 0.964489 |
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 10.93 / 7.00 | 0.525938 | 0.788797 | 2.456 / 0.600 / 0.907670 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
@@ -58,6 +59,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 
 | Candidate | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|
+| distill_efficientnet_b0_640 | 11.459 / 6.056 | 0.406448 | 0.790906 | 2.000 / 0.867 / 0.965909 |
 | distill_mobilenet_v3_large_640 | 10.543 / 6.229 | 0.497645 | 0.787996 | 2.490 / 0.533 / 0.904830 |
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
@@ -67,13 +69,14 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 
 ## VAL selection
 
-All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. Compression candidates use VAL numbering plus latency only (see plan).
+All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. A separate extended_512 continuation selects its backbone from the four students using VAL numbering only, then trains 20 additional epochs at 512, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).
 
 | Candidate | Selected threshold | VAL numbering | VAL coverage | VAL D13 mean px |
 |---|---:|---:|---:|---:|
 | resize_416 | 0.30 | 0.357143 | 0.753285 | 8.659 |
 | resize_512 | 0.30 | 0.456914 | 0.799323 | 5.600 |
 | resize_640 | 0.30 | 0.750334 | 0.838868 | 3.091 |
+| distill_efficientnet_b0_640 | 0.30 | 0.618158 | 0.833188 | 4.116 |
 | distill_mobilenet_v3_large_640 | 0.30 | 0.635514 | 0.848263 | 3.639 |
 | distill_resnet18_640 | 0.30 | 0.693591 | 0.879366 | 3.452 |
 | distill_resnet34_640 | 0.30 | 0.826435 | 0.843082 | 2.500 |
@@ -95,6 +98,7 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
 |---|---:|---:|---:|---:|---:|---:|
+| distill_efficientnet_b0_640 | 8.13 / 8.22 | 10.25 / 10.54 | 10.22 / 6.14 | 0.502227 | 0.793883 | 1.953 / 0.867 / 0.965909 |
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 11.16 / 6.73 | 0.424123 | 0.790070 | 2.496 / 0.600 / 0.899148 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.95 / 7.39 | 0.428280 | 0.764584 | 2.010 / 0.733 / 0.967330 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 9.74 / 2.51 | 0.635143 | 0.785971 | 1.331 / 0.867 / 0.971591 |
@@ -123,6 +127,8 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 
 | Candidate / units | Raw keypoint mean / p95 px | Refit keypoint mean / p95 px | Refit wire mean / p95 px | Refit anchor flips/frame | Fit disagreements |
 |---|---:|---:|---:|---:|---:|
+| distill_efficientnet_b0_640 / CPU_AND_NE | 0.496 / 1.046 | 1.216 / 1.389 | 2.272 / 11.585 | 3.156 | 0 |
+| distill_efficientnet_b0_640 / ALL | 0.494 / 1.047 | 1.201 / 1.421 | 3.111 / 15.256 | 4.531 | 0 |
 | distill_mobilenet_v3_large_640 / CPU_AND_NE | 0.401 / 0.853 | 0.637 / 0.971 | 1.349 / 7.385 | 1.844 | 0 |
 | distill_mobilenet_v3_large_640 / ALL | 0.396 / 0.848 | 0.587 / 0.890 | 1.554 / 7.288 | 1.719 | 0 |
 | distill_resnet18_640 / CPU_AND_NE | 0.417 / 0.852 | 0.408 / 0.853 | 0.477 / 1.780 | 0.875 | 0 |

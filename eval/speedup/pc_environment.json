@@ -1,0 +1,37 @@
+{
+  "python": "3.12.15",
+  "torch": "2.11.0+cu128",
+  "torchvision": "0.26.0+cu128",
+  "numpy": "2.5.4",
+  "opencv": "5.0.0",
+  "cuda": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "pretrained_weights": {
+    "ResNet18_Weights": {
+      "enum": "ResNet18_Weights.IMAGENET1K_V1",
+      "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+      "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    },
+    "ResNet34_Weights": {
+      "enum": "ResNet34_Weights.IMAGENET1K_V1",
+      "url": "https://download.pytorch.org/models/resnet34-b627a593.pth",
+      "sha256": "b627a593bcbe140c234610266fe4f8ae95ea42fc881d091c9b6052e6b1d0590f"
+    },
+    "MobileNet_V3_Large_Weights": {
+      "enum": "MobileNet_V3_Large_Weights.IMAGENET1K_V2",
+      "url": "https://download.pytorch.org/models/mobilenet_v3_large-5c1a4163.pth",
+      "sha256": "5c1a416349c4cf298f2a6a5e2600ed0ee55e604713578f5e74e6bc8bcaef7997"
+    },
+    "EfficientNet_B0_Weights": {
+      "enum": "EfficientNet_B0_Weights.IMAGENET1K_V1",
+      "url": "https://download.pytorch.org/models/efficientnet_b0_rwightman-7f5810bc.pth",
+      "sha256": "7f5810bc96def8f7552d5b7e68d53c4786f81167d28291b21c0d90e1fca14934"
+    }
+  },
+  "source_hashes_at_collection": {
+    "scripts/speedup_train.py": "d72b999c514ba419060def0b8111dc7c41eed38f739f98f24cbd289393cd7514",
+    "scripts/speedup_eval.py": "b60e8b1e05d1930cb9bf9c53189193179b83f9ba0c3f81a2364a2f93041f1e13",
+    "src/gro/fretnet/model.py": "1ff3dc3252191efac2bb4e23510d044ebcd1bbf251f0b5f92367e89a14855114"
+  },
+  "reproducibility": "Torch initialization/shuffling seed 832; PoseDataset augmentation uses entropy-seeded NumPy generators, so training is not bitwise reproducible. Frozen checkpoints and manifests identify evaluated runs."
+}

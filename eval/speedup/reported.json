@@ -15,5 +15,7 @@
   "r832_fp16",
   "distill_resnet34_640",
   "torch:distill_mobilenet_v3_large_640",
-  "distill_mobilenet_v3_large_640"
+  "distill_mobilenet_v3_large_640",
+  "torch:distill_efficientnet_b0_640",
+  "distill_efficientnet_b0_640"
 ]

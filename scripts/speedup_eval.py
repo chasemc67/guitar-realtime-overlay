@@ -41,7 +41,8 @@ class RefitBackend(Backend):
         self.backend, self.threshold, self.imgsz = backend, threshold, backend.imgsz
 
     def __call__(self, rgb):
-        return refit(self.backend(rgb), self.threshold)
+        self.last_raw = self.backend(rgb).copy()
+        return refit(self.last_raw, self.threshold)
 
 
 def main():

@@ -38,7 +38,20 @@ def main():
         ap.error("Already evaluated or attempted; refuse overwrite")
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.with_suffix(".started").write_text("Evaluation started\n")
-    report = dict(model=str(a.model), latency={}, held={}, parity={}, warmups=20, calls=200)
+    package_hash = hashlib.sha256()
+    for path in sorted(a.model.rglob("*")):
+        if path.is_file():
+            package_hash.update(str(path.relative_to(a.model)).encode())
+            package_hash.update(path.read_bytes())
+    report = dict(
+        model=str(a.model),
+        package_sha256=package_hash.hexdigest(),
+        latency={},
+        held={},
+        parity={},
+        warmups=20,
+        calls=200,
+    )
     selection = json.loads(a.selection.read_text()) if a.selection else None
     if not a.timing_only:
         assert selection is not None and a.bundle is not None
@@ -54,12 +67,15 @@ def main():
             threshold = selection["chosen_threshold"]
             model = RefitBackend(backend, threshold)
             rows = defaultdict(list)
+            raw_predictions = []
             for row in json.loads((a.bundle / "manifest.json").read_text()):
                 image = cv2.imread(str(a.bundle / row["image"]))
                 gt = [Anchor(**g) for g in row["gt"]]
                 rows[row["group"]].append(
                     ev.frame_row(model, image, gt, SimpleNamespace(stage1=None), row["item"], row["clip"])
                 )
+                raw_predictions.append(model.last_raw.copy())
+            np.savez_compressed(a.out.with_suffix(f".{units}.npz"), raw=np.stack(raw_predictions))
             perclip = defaultdict(list)
             for row in rows["eval_v2"]:
                 perclip[row["clip"]].append(row)

@@ -370,3 +370,14 @@ See [speedup protocol and results](speedup.md). Inference-only resizing has Mini
 CPU_AND_NE median/p95 14.110/14.732 ms at 640, 8.103/8.260 at 512, and
 5.493/5.571 at 416. Corresponding VAL numbering is 0.750334, 0.456914, 0.357143;
 all independently select the 0.30-fret refit threshold. Held-out accuracy pending.
+
+## Frozen held-out results
+
+| Candidate | Mini CPU_AND_NE median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
+|---|---:|---:|---:|---:|---:|
+| Resize 640, PyTorch accuracy | 14.11 / 14.73 | 6.15 / 2.66 | 0.598889 | 0.829694 | 1.464 / 0.800 / 0.975852 |
+| Resize 512, PyTorch accuracy | 8.10 / 8.26 | 9.02 / 4.99 | 0.363095 | 0.758734 | 3.889 / 0.000 / 0.954545 |
+| Resize 416, PyTorch accuracy | 5.49 / 5.57 | 17.86 / 10.06 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
+
+Model latency excludes refit. PyTorch accuracy and Mini model timing are different runtimes;
+CoreML output scoring is separately pending. All rows have detection 1.000.

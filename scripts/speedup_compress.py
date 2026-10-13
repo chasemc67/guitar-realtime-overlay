@@ -47,7 +47,7 @@ def main():
                 rgb = cv2.cvtColor(Letterbox.for_shape(image.shape, size).apply(image), cv2.COLOR_BGR2RGB)
                 data.append({desc.name: Image.fromarray(rgb)})
             config = opt.OptimizationConfig(global_config=opt.OpLinearQuantizerConfig(dtype="int8"))
-            result = opt.linear_quantize_activations(model, config, sample_data=data)
+            result = opt.linear_quantize_activations(model, config, sample_data=data, calibration_op_group_size=32)
             result = opt.linear_quantize_weights(result, config)
         result.save(str(a.out))
         report["status"] = "exported"

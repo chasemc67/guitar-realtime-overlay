@@ -1,0 +1,7 @@
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+Mac16,10
+25769803776
+Apple M4
+torch 2.7.0 torchvision 0.22.0 coremltools 9.0 numpy 2.2.6 opencv 5.0.0

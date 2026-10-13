@@ -1,0 +1,18 @@
+{
+  "teacher_sha256": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031",
+  "sizes": [640, 512, 416],
+  "students": ["resnet18", "resnet34", "mobilenet_v3_large", "efficientnet_b0"],
+  "student_size": 640,
+  "size_selection": "640 has highest VAL numbering among inference-only resized models; selected before their held-out scoring",
+  "student_epochs": 8,
+  "finetune_epochs": 4,
+  "checkpoint_selection": "minimum VAL mean keypoint error",
+  "refit_selection": "maximum VAL numbering, then coverage, then minimum D13 mean",
+  "compressed_candidate_selection": "832 reference plus highest VAL-numbering trained candidate and highest VAL-numbering trained candidate with CPU_AND_NE median <=10 ms; if no candidate <=10 ms, fastest trained candidate. Deduplicate. Uses no held-out scores.",
+  "fast_tracking_candidate": "same <=10 ms VAL-selected candidate (fallback fastest)",
+  "compression": ["int8", "palette6", "palette4", "w8a8"],
+  "activation_calibration": "32 deterministic scale-v1aug VAL images (sorted filenames, step 47); no held-out frames",
+  "tracking_window_selection": "21 or 31 pixels, minimum mean tracking error on VAL synthetic translations (2,1),(-4,2),(8,-3)",
+  "tracking_evaluation": "actual predecessor-to-labelled-target adjacent pairs plus continuous alternating-inference timing on 09-06, nBpe2 and Stan clips",
+  "app_release_changes": false
+}

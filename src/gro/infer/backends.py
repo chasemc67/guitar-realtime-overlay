@@ -155,9 +155,19 @@ class TwoStageBackend(Backend):
 
     name = "two_stage"
 
-    def __init__(self, stage1, numbering, device=None, threshold=0.8, wire_reassign=False, reject_ambiguous=False):
+    def __init__(
+        self,
+        stage1,
+        numbering,
+        device=None,
+        threshold=0.8,
+        wire_reassign=False,
+        reject_ambiguous=False,
+        source_resolution=False,
+    ):
         from gro.fretnet.numbering import NumberingRefiner
 
+        self.source_resolution = source_resolution
         self.stage1 = FretNetBackend(stage1, device=device)
         self.refiner = NumberingRefiner(
             numbering, self.stage1.device, threshold, reassign=wire_reassign, reject_ambiguous=reject_ambiguous
@@ -175,6 +185,41 @@ class TwoStageBackend(Backend):
         else:
             self.refiner.last = {"offset": 0, "confidence": 0.0, "applied": False, "fit_ok": False}
         return raw
+
+    def predict_frame(self, bgr, box_thr=0.25, clip=True):
+        """Rectify the original image while preserving the exact stage-1 letterbox fit."""
+        import cv2
+
+        from gro.fretnet.numbering import anchors_from_k
+        from gro.geometry import FitError, FretboardModel, fit_fretboard
+        from gro.infer.preprocess import Letterbox, decode
+
+        lb = Letterbox.for_shape(bgr.shape, self.imgsz)
+        rgb = cv2.cvtColor(lb.apply(bgr), cv2.COLOR_BGR2RGB)
+        k, score, _ = decode(self.stage1(rgb), box_thr)
+        self.last_k = k.copy()
+        self.refiner.last = {"offset": 0, "confidence": 0.0, "applied": False, "fit_ok": False}
+        if not np.isfinite(k).all():
+            return k, score
+        try:
+            fit = fit_fretboard(anchors_from_k(k), ransac_iters=100)
+            transform = np.array(
+                [
+                    [lb.w / lb.new_w, 0, -lb.left * lb.w / lb.new_w],
+                    [0, lb.h / lb.new_h, -lb.top * lb.h / lb.new_h],
+                    [0, 0, 1],
+                ]
+            )
+            fit = FretboardModel(transform @ fit.H, tau=fit.tau, n_frets=fit.n_frets)
+        except (FitError, ValueError, np.linalg.LinAlgError):
+            fit = None
+        k[:, :2] = lb.to_frame(k[:, :2], clip=False)
+        if fit is not None:
+            k = self.refiner(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB), k, fit_model=fit)
+        if clip:
+            k[:, 0] = k[:, 0].clip(0, lb.w)
+            k[:, 1] = k[:, 1].clip(0, lb.h)
+        return k, score
 
 
 def load_backend(path, **kw) -> Backend:

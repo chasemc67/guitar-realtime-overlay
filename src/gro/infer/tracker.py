@@ -133,6 +133,11 @@ class FretboardTracker:
 
     def infer(self, canon_bgr: np.ndarray) -> tuple[np.ndarray, float]:
         """Canonical BGR frame -> ((50, 3) keypoints in canonical frame px, board score)."""
+        if getattr(self.backend, "source_resolution", False):
+            start = time.perf_counter()
+            k, score = self.backend.predict_frame(canon_bgr, self.box_thr, self.clip_kpts)
+            self.infer_ms = {"letterbox": 0.0, "model": (time.perf_counter() - start) * 1e3}
+            return k, score
         lb = self._letterbox
         if lb is None or (lb.h, lb.w) != canon_bgr.shape[:2] or lb.size != self.backend.imgsz:
             lb = self._letterbox = Letterbox.for_shape(canon_bgr.shape, self.backend.imgsz)

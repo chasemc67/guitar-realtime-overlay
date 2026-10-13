@@ -43,11 +43,15 @@ from gro.infer.backends import Backend  # noqa: E402
 
 def predict_backend(backend: Backend, image: np.ndarray) -> tuple[list[A.Anchor], bool]:
     """gro.infer path: same letterbox, best-board decode (score >= 0.25) and clipping as the tracker."""
-    lb = Letterbox.for_shape(image.shape, backend.imgsz)
-    k, _, _ = decode(backend(cv2.cvtColor(lb.apply(image), cv2.COLOR_BGR2RGB)), 0.25)
+    if getattr(backend, "source_resolution", False):
+        k, _ = backend.predict_frame(image)
+    else:
+        lb = Letterbox.for_shape(image.shape, backend.imgsz)
+        k, _, _ = decode(backend(cv2.cvtColor(lb.apply(image), cv2.COLOR_BGR2RGB)), 0.25)
+        if np.isfinite(k[:, 0]).all():
+            k[:, :2] = lb.to_frame(k[:, :2])
     if not np.isfinite(k[:, 0]).all():
         return [], False
-    k[:, :2] = lb.to_frame(k[:, :2])
     anchors = [
         A.Anchor(i // 2, ("bass", "treble")[i % 2], float(x), float(y), conf=float(c))
         for i, (x, y, c) in enumerate(k)
@@ -214,10 +218,17 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=ROOT / "eval" / "v2")
     ap.add_argument("--stage1", type=Path, help="FretNet neck-box checkpoint for RTMPose --weights (no GT boxes)")
     ap.add_argument("--numbering", type=Path, help="Whole-neck stage-2 numbering checkpoint")
+    ap.add_argument(
+        "--numbering-source-resolution",
+        action="store_true",
+        help="Rectify original pixels with the stage-1 fit, preserving full-resolution inlay cues",
+    )
     ap.add_argument("--wire-reassign", action="store_true", help="Assign points to robust-fit wires")
     ap.add_argument("--wire-reject-ambiguous", action="store_true", help="Drop points between fitted wires")
     ap.add_argument("--numbering-confidence", type=float, default=0.8)
     a = ap.parse_args()
+    if a.numbering_source_resolution and not a.numbering:
+        ap.error("--numbering-source-resolution requires --numbering")
     if a.wire_reject_ambiguous and not a.wire_reassign:
         ap.error("--wire-reject-ambiguous requires --wire-reassign")
     if a.stage1 and (a.numbering or a.wire_reassign):
@@ -235,6 +246,7 @@ def main() -> None:
             threshold=a.numbering_confidence,
             wire_reassign=a.wire_reassign,
             reject_ambiguous=a.wire_reject_ambiguous,
+            source_resolution=a.numbering_source_resolution,
         )
         a.imgsz = model.imgsz
     elif a.wire_reassign:
@@ -280,6 +292,7 @@ def main() -> None:
         "weights_sha256": hashlib.sha256(a.weights.read_bytes()).hexdigest() if a.weights.is_file() else None,
         "wire_reassign": a.wire_reassign,
         "wire_reject_ambiguous": a.wire_reject_ambiguous,
+        "numbering_source_resolution": a.numbering_source_resolution,
         "numbering_weights": str(a.numbering) if a.numbering else None,
         "numbering_sha256": hashlib.sha256(a.numbering.read_bytes()).hexdigest() if a.numbering else None,
         "numbering_model": model.refiner.net.metadata if a.numbering else None,

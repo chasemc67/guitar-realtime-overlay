@@ -109,6 +109,9 @@ def test_sequence_head_and_per_wire_fallback():
     np.testing.assert_array_equal(sequence_renumber(k, model, p, 0.8)[12], k[10])
     p[6] = 1 / 25
     np.testing.assert_array_equal(sequence_renumber(k, model, p, 0.8)[10], k[10])
+    np.testing.assert_array_equal(sequence_renumber(k, model, p, 0.8, reassign=True)[12], k[10])
+    k[10, :2] = model.fret_line(5.49)[0]
+    assert not sequence_renumber(k, model, p, 0.8, reject_ambiguous=True)[:, 2].any()
 
 
 def test_reject_ambiguous_only_drops_between_wire_points():
@@ -132,8 +135,16 @@ def test_mobile_checkpoint_roundtrip(mode, tmp_path):
 
     net = NumberingNet(width=128, mode=mode, arch="mobilenet_v3_small").eval()
     checkpoint = tmp_path / "numbering.pt"
-    torch.save({"kind": "gro_numbering", "width": 128, "mode": mode,
-                "arch": "mobilenet_v3_small", "state_dict": net.state_dict()}, checkpoint)
+    torch.save(
+        {
+            "kind": "gro_numbering",
+            "width": 128,
+            "mode": mode,
+            "arch": "mobilenet_v3_small",
+            "state_dict": net.state_dict(),
+        },
+        checkpoint,
+    )
     loaded = load_numbering(checkpoint)
     x = torch.zeros(1, 3, 128, 128)
     with torch.inference_mode():
@@ -159,3 +170,38 @@ def test_sequence_dataset_exposes_only_labelled_wires(tmp_path):
     x, shift, present = data[3]
     assert x.shape == (3, 128, 128) and shift == 3
     assert np.flatnonzero(present).tolist() == [3, 7]
+
+
+def test_source_resolution_preserves_fit_and_coordinates():
+    from gro.infer import FretboardTracker, Letterbox, TwoStageBackend
+
+    image = np.full((128, 320, 3), (10, 20, 30), np.uint8)
+    model = FretboardModel(np.array([[250, 0, 40], [0, 60, 60], [0, 0, 1.0]]), tau=0.3)
+    expected = np.zeros((50, 3), np.float32)
+    for f in range(25):
+        expected[2 * f : 2 * f + 2, :2] = model.fret_line(f)
+    expected[:, 2] = 0.9
+    lb = Letterbox.for_shape(image.shape, 128)
+    k = expected.copy()
+    k[:, 0] = k[:, 0] * lb.new_w / lb.w + lb.left
+    k[:, 1] = k[:, 1] * lb.new_h / lb.h + lb.top
+    raw = np.zeros((155, 1), np.float32)
+    raw[4] = 0.9
+    raw[5:, 0] = k.ravel()
+
+    class Refiner:
+        def __call__(self, rgb, points, fit_model=None):
+            assert rgb.shape == image.shape
+            np.testing.assert_array_equal(rgb[0, 0], [30, 20, 10])
+            np.testing.assert_allclose(fit_model.fret_line(12), model.fret_line(12), atol=1e-3)
+            return points
+
+    backend = object.__new__(TwoStageBackend)
+    backend.source_resolution, backend.imgsz = True, 128
+    backend.stage1 = lambda rgb: raw.copy()
+    backend.refiner = Refiner()
+    tracker = FretboardTracker(backend, smooth=False)
+    out, score = tracker.infer(image)
+    assert score == pytest.approx(0.9)
+    np.testing.assert_allclose(out, expected, atol=2e-5)
+    np.testing.assert_array_equal(backend.last_k, k)

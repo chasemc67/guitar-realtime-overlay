@@ -139,7 +139,7 @@ def offset_summary(p):
     return offset, confidence
 
 
-def sequence_renumber(k, model, probabilities, threshold):
+def sequence_renumber(k, model, probabilities, threshold, reassign=False, reject_ambiguous=False):
     """Per-point confidence fallback; sequence columns are indexed by fitted wire position."""
     from gro.geometry import apply_h
 
@@ -151,12 +151,19 @@ def sequence_renumber(k, model, probabilities, threshold):
         if not np.isfinite(point).all() or point[2] <= 0:
             continue
         target = i // 2
-        if np.isfinite(fret[i]):
-            column = int(round(fret[i]))
-            if 0 <= column < 25 and abs(fret[i] - column) < 0.45:
+        column = int(round(fret[i])) if np.isfinite(fret[i]) else target
+        reliable = np.isfinite(fret[i]) and abs(fret[i] - column) < 0.45
+        if not reliable and reject_ambiguous:
+            continue
+        if reliable:
+            if reassign:
+                target = column
+            if 0 <= column < 25:
                 p = probabilities[column]
                 if p.max() >= threshold:
                     target = int(p.argmax())
+        if not 0 <= target < 25:
+            continue
         j = 2 * target + i % 2
         if point[2] > out[j, 2]:
             out[j] = point
@@ -168,8 +175,6 @@ class NumberingRefiner:
         if not 0 <= threshold <= 1:
             raise ValueError("numbering confidence must be in [0, 1]")
         self.net = load_numbering(path, device)
-        if self.net.mode == "sequence" and reassign:
-            raise ValueError("sequence models perform their own per-wire assignment; omit wire_reassign")
         self.device, self.threshold = device, threshold
         self.reassign = reassign
         self.reject_ambiguous = reject_ambiguous
@@ -184,12 +189,12 @@ class NumberingRefiner:
         p = self.probabilities(strip)
         return offset_summary(p)
 
-    def __call__(self, rgb, k):
+    def __call__(self, rgb, k, fit_model=None):
         from gro.geometry import FitError
 
         self.last = {"offset": 0, "confidence": 0.0, "applied": False, "fit_ok": False}
         try:
-            model = fit_fretboard(anchors_from_k(k), ransac_iters=100)
+            model = fit_model if fit_model is not None else fit_fretboard(anchors_from_k(k), ransac_iters=100)
             strip = rectify(rgb, model, self.net.width)
         except (FitError, ValueError, np.linalg.LinAlgError):
             return k
@@ -204,7 +209,9 @@ class NumberingRefiner:
                 "fit_ok": True,
                 "sequence": p.argmax(-1).tolist(),
             }
-            return sequence_renumber(k, model, p, self.threshold)
+            return sequence_renumber(
+                k, model, p, self.threshold, reassign=self.reassign, reject_ambiguous=self.reject_ambiguous
+            )
         offset, confidence = self.classify(strip)
         applied = confidence >= self.threshold
         self.last = {"offset": offset, "confidence": confidence, "applied": applied, "fit_ok": True}

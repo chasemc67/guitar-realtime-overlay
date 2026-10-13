@@ -61,8 +61,7 @@ OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python scripts/eval_v2.py \
 
 Substitute the other numbering checkpoint paths to evaluate them. Add `--wire-reassign`
 to make geometric slot reassignment the stage-1 fallback and apply confident classifier offsets on top, and
-`--wire-reject-ambiguous` for the explicit rejection policy. Those two optional flags
-apply to offset models; the sequence model has its own per-wire assignment and fallback.
+`--wire-reject-ambiguous` for the explicit rejection policy. Those optional flags also provide the fallback for low-confidence sequence decisions.
 All runs use the same frozen `configs/eval_v2.json` and report GT-strip and predicted-strip
 offset accuracy separately from the all-wires-correct numbering metric.
 
@@ -71,3 +70,8 @@ becomes unassessable for numbering under the frozen nearest-wire criterion; coun
 as a failure leaves both macro numbering values unchanged. All 15 honest frames remain
 assessable. `eval/v2/v7_environment.json` records runtime versions and hashes of the
 stage-1 weights, frozen config, and training/validation filenames plus labels.
+
+`--numbering-source-resolution` adds an image-resolution control: stage 1 and its fit
+remain identical, but the homography is transformed back to source coordinates so stage 2
+sees original pixels instead of the 832-pixel letterbox. Both `gro.infer.FretboardTracker`
+and `eval_v2.py` support this path. The default keeps the letterbox-based reference path.

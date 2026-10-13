@@ -36,7 +36,10 @@ def main():
     best = max(records, key=key)
     fast_enough = [r for r in records if r["median_ms"] <= 10]
     fast = max(fast_enough, key=key) if fast_enough else min(records, key=lambda r: r["median_ms"])
-    chosen = list(dict.fromkeys([best["name"], fast["name"]]))
+    near_target = [row for row in records if row["median_ms"] <= 8.5]
+    near = max(near_target, key=key) if near_target else fast
+    chosen = list(dict.fromkeys([best["name"], fast["name"], near["name"]]))
+    fast = near  # Track the strongest VAL candidate already near the user's ~8 ms target.
     (OUT / "compressed_candidates.json").write_text(
         json.dumps(
             dict(

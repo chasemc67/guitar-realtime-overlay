@@ -17,5 +17,7 @@
   "torch:distill_mobilenet_v3_large_640",
   "distill_mobilenet_v3_large_640",
   "torch:distill_efficientnet_b0_640",
-  "distill_efficientnet_b0_640"
+  "distill_efficientnet_b0_640",
+  "torch:ft_640",
+  "ft_640"
 ]

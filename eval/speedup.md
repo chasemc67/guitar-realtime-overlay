@@ -39,6 +39,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 10.93 / 7.00 | 0.525938 | 0.788797 | 2.456 / 0.600 / 0.907670 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
+| ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.25 / 2.36 | 0.637908 | 0.834601 | 1.746 / 0.867 / 0.980114 |
 | r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.38 / 2.14 | 0.692329 | 0.844557 | 0.792 / 1.000 / 0.987216 |
 | r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 6.40 / 2.92 | 0.665034 | 0.807718 | 1.705 / 0.933 / 0.947443 |
 | r832_palette4 | 24.82 / 24.99 | 28.66 / 29.10 | 98.48 / 61.53 | 0.022529 | 0.152562 | 140.285 / 0.000 / 0.161932 |
@@ -63,6 +64,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 | distill_mobilenet_v3_large_640 | 10.543 / 6.229 | 0.497645 | 0.787996 | 2.490 / 0.533 / 0.904830 |
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
+| ft_640 | 6.159 / 2.276 | 0.625314 | 0.836450 | 1.744 / 0.867 / 0.980114 |
 | resize_416 | 17.864 / 10.056 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
 | resize_512 | 9.024 / 4.993 | 0.363095 | 0.758734 | 3.889 / 0.000 / 0.954545 |
 | resize_640 | 6.151 / 2.656 | 0.598889 | 0.829694 | 1.464 / 0.800 / 0.975852 |
@@ -80,10 +82,11 @@ All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numberi
 | distill_mobilenet_v3_large_640 | 0.30 | 0.635514 | 0.848263 | 3.639 |
 | distill_resnet18_640 | 0.30 | 0.693591 | 0.879366 | 3.452 |
 | distill_resnet34_640 | 0.30 | 0.826435 | 0.843082 | 2.500 |
+| ft_640 | 0.30 | 0.776368 | 0.862246 | 2.780 |
 
 ## Tracking
 
-Each sparse labelled target is paired with its actual preceding decoded video frame. Inference/refit on that predecessor is propagated by LK optical flow and a RANSAC homography. This reports **skipped-frame-only accuracy**, not accuracy of a densely labelled full video. Effective adjacent-pair time is (inference + preprocess + Python refit + tracking) / 2, excluding decode. It includes Python postprocessing overhead and is not a native app FPS claim. Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Targets at frame zero have no predecessor and are excluded (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.
+Each sparse labelled target is paired with its actual preceding decoded video frame. Inference/refit on that predecessor is propagated by LK optical flow and a RANSAC homography. This reports **skipped-frame-only accuracy**, not accuracy of a densely labelled full video. Effective adjacent-pair time is (inference + preprocess + Python refit + tracking) / 2, excluding decode. It includes Python postprocessing overhead and is not a native app FPS claim. Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Four eval_v2 targets at frame zero have no predecessor and are excluded, leaving 228 eval_v2 and all 15 09-06 targets (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.
 
 | Candidate | Effective pair median / p95 ms per frame | Flow median / p95 ms | eval_v2 D13 mean / median px | Numbering / coverage | 09-06 D13 / numbering / coverage | Flow failures |
 |---|---:|---:|---:|---:|---:|---:|
@@ -102,6 +105,7 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 11.16 / 6.73 | 0.424123 | 0.790070 | 2.496 / 0.600 / 0.899148 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.95 / 7.39 | 0.428280 | 0.764584 | 2.010 / 0.733 / 0.967330 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 9.74 / 2.51 | 0.635143 | 0.785971 | 1.331 / 0.867 / 0.971591 |
+| ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.21 / 2.35 | 0.617925 | 0.832415 | 1.741 / 0.867 / 0.980114 |
 | r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.39 / 2.12 | 0.727668 | 0.840123 | 0.784 / 1.000 / 0.987216 |
 | r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 5.95 / 2.85 | 0.637708 | 0.808190 | 1.715 / 0.933 / 0.953125 |
 | r832_palette4 | 24.82 / 24.99 | 28.66 / 29.10 | 105.01 / 67.91 | 0.025626 | 0.148298 | 125.499 / 0.000 / 0.140625 |
@@ -135,6 +139,8 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 | distill_resnet18_640 / ALL | 0.421 / 0.860 | 0.414 / 0.862 | 0.652 / 2.531 | 0.500 | 0 |
 | distill_resnet34_640 / CPU_AND_NE | 0.375 / 0.839 | 0.413 / 0.837 | 0.590 / 2.513 | 0.938 | 0 |
 | distill_resnet34_640 / ALL | 0.383 / 0.830 | 0.378 / 0.824 | 0.487 / 1.862 | 0.562 | 0 |
+| ft_640 / CPU_AND_NE | 0.381 / 0.836 | 0.474 / 0.856 | 0.556 / 2.927 | 1.812 | 0 |
+| ft_640 / ALL | 0.370 / 0.816 | 0.451 / 0.833 | 0.577 / 2.254 | 1.031 | 0 |
 | r832_fp16 / CPU_AND_NE | 0.384 / 0.843 | 1.168 / 0.970 | 2.812 / 9.987 | 1.406 | 0 |
 | r832_fp16 / ALL | 0.676 / 1.503 | 0.747 / 1.512 | 0.736 / 3.336 | 2.094 | 0 |
 | r832_int8 / CPU_AND_NE | 2.772 / 6.043 | 3.067 / 6.406 | 2.511 / 10.247 | 4.656 | 0 |
@@ -151,3 +157,11 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 | resize_512 / ALL | 0.385 / 0.860 | 0.938 / 0.972 | 3.698 / 16.062 | 2.844 | 0 |
 | resize_640 / CPU_AND_NE | 0.399 / 0.813 | 0.473 / 0.850 | 0.632 / 3.201 | 1.781 | 0 |
 | resize_640 / ALL | 0.403 / 0.831 | 0.442 / 0.838 | 0.651 / 3.497 | 1.531 | 0 |
+
+## Direct-inference controls on the same tracking targets
+
+Aggregated from saved direct CoreML predictions on exactly the 228 + 15 tracking targets. No additional model evaluation or tuning is performed.
+
+| Tracking variant / direct reference | Direct eval_v2 D13 mean / median | Direct numbering / coverage | Direct 09-06 D13 / numbering / coverage |
+|---|---:|---:|---:|
+| r832 / r832_fp16 | 5.350 / 2.126 | 0.696476 / 0.844767 | 0.792 / 1.000 / 0.987216 |

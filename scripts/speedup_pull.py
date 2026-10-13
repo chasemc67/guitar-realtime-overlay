@@ -21,6 +21,7 @@ for p in root.glob('*.json'):
  valid=(p.name.startswith('held_') and 'ALL' in s.get('held',{}))
  valid |= p.name.startswith('tracking_') and 'macro' in s
  valid |= p.name.startswith('video_') and len(s.get('clips',[]))==3
+ valid |= p.name.startswith('control_') and 'macro' in s
  valid |= p.name.endswith('.compression.json') or p.name=='compressed_candidates.json'
  if valid:
   files.append(p.name)

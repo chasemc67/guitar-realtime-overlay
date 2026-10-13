@@ -145,7 +145,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "This reports **skipped-frame-only accuracy**, not accuracy of a densely labelled full video. "
         "Effective adjacent-pair time is (inference + preprocess + Python refit + tracking) / 2, excluding decode. "
         "It includes Python postprocessing overhead and is not a native app FPS claim. "
-        "Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Targets at frame zero have no predecessor and are excluded (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.",
+        "Window 21/31 is selected on VAL synthetic translations before held-out frames. The original 832 control uses native-image flow; subsequent optimized variants also select long edge 320/640/native, choosing the fastest VAL configuration within a fixed 1-source-pixel mean-error budget. Four eval_v2 targets at frame zero have no predecessor and are excluded, leaving 228 eval_v2 and all 15 09-06 targets (explicit IDs in JSON). The first baseline attempt stopped at the first such target before scoring any held-out frame; the corrected run reused its frozen VAL selection.",
         "",
         "| Candidate | Effective pair median / p95 ms per frame | Flow median / p95 ms | eval_v2 D13 mean / median px | Numbering / coverage | 09-06 D13 / numbering / coverage | Flow failures |",
         "|---|---:|---:|---:|---:|---:|---:|",
@@ -222,6 +222,23 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
                 f"{f(refined['wire_px_mean'])} / {f(refined['wire_px_p95'])} | "
                 f"{f(refined['anchor_flips_per_frame'])} | {refined['fit_lost_frames']} |"
             )
+    lines += [
+        "",
+        "## Direct-inference controls on the same tracking targets",
+        "",
+        "Aggregated from saved direct CoreML predictions on exactly the 228 + 15 tracking targets. "
+        "No additional model evaluation or tuning is performed.",
+        "",
+        "| Tracking variant / direct reference | Direct eval_v2 D13 mean / median | Direct numbering / coverage | Direct 09-06 D13 / numbering / coverage |",
+        "|---|---:|---:|---:|",
+    ]
+    for path in sorted(OUT.glob("ml_control_*.json")):
+        control = json.loads(path.read_text())
+        m, h = control["macro"], control["honest_0906"]
+        lines.append(
+            f"| {control['tracking']} / {control['reference']} | {f(m['d13_mean_px'])} / {f(m['d13_median_px'])} | "
+            f"{f(m['numbering'], 6)} / {f(m['coverage'], 6)} | {f(h['d13_mean_px'])} / {f(h['numbering'])} / {f(h['coverage'], 6)} |"
+        )
     (ROOT / "eval/speedup.md").write_text("\n".join(lines))
     model = ROOT / "eval/model_permissive.md"
     text = model.read_text()

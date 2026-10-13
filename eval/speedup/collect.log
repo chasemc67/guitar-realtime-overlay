@@ -6,3 +6,6 @@ Collecting distill_mobilenet_v3_large_640 (selection frozen)
 Transferred distill_mobilenet_v3_large_640
 Collecting distill_efficientnet_b0_640 (selection frozen)
 Transferred distill_efficientnet_b0_640
+Collecting ft_640 (selection frozen)
+Transferred ft_640
+Collecting ft_512 (selection frozen)

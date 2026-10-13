@@ -1,0 +1,112 @@
+{
+  "args": {
+    "data": "/home/chase/gro/repo/data/datasets/scale-v1aug",
+    "cache": "/home/chase/gro/repo/data/datasets/numbering-strips",
+    "name": "v7num_1024",
+    "width": 1024,
+    "epochs": 12,
+    "batch": 4,
+    "workers": 4,
+    "cache_only": false
+  },
+  "arch": "resnet18",
+  "mode": "offset",
+  "selected": {
+    "epoch": 9,
+    "train_accuracy": 0.9899965505346672,
+    "train_loss": 0.05054772831563828,
+    "val_accuracy": 0.8901392332633988,
+    "val_loss": 0.8811985562599367,
+    "seconds": 103.54298806190491
+  },
+  "log": [
+    {
+      "epoch": 1,
+      "train_accuracy": 0.8585719213521904,
+      "train_loss": 0.5926640624833872,
+      "val_accuracy": 0.8365439633797445,
+      "val_loss": 1.232852214112119,
+      "seconds": 92.64819550514221
+    },
+    {
+      "epoch": 2,
+      "train_accuracy": 0.9408416695412211,
+      "train_loss": 0.31725202800488217,
+      "val_accuracy": 0.8102231546824337,
+      "val_loss": 1.0207340606700912,
+      "seconds": 99.91600847244263
+    },
+    {
+      "epoch": 3,
+      "train_accuracy": 0.9532597447395653,
+      "train_loss": 0.2524885299823415,
+      "val_accuracy": 0.866965477779897,
+      "val_loss": 1.0393583861876143,
+      "seconds": 306.2615120410919
+    },
+    {
+      "epoch": 4,
+      "train_accuracy": 0.965505346671266,
+      "train_loss": 0.20665969536936912,
+      "val_accuracy": 0.7349799732977303,
+      "val_loss": 3.5319189240680995,
+      "seconds": 324.1027452945709
+    },
+    {
+      "epoch": 5,
+      "train_accuracy": 0.968609865470852,
+      "train_loss": 0.17349753490025605,
+      "val_accuracy": 0.8167079916078581,
+      "val_loss": 1.1877119267984995,
+      "seconds": 117.76393032073975
+    },
+    {
+      "epoch": 6,
+      "train_accuracy": 0.9772335288030355,
+      "train_loss": 0.11038586788236704,
+      "val_accuracy": 0.8162311653633416,
+      "val_loss": 1.6430807443786482,
+      "seconds": 123.72142481803894
+    },
+    {
+      "epoch": 7,
+      "train_accuracy": 0.9817178337357709,
+      "train_loss": 0.07972881634838214,
+      "val_accuracy": 0.7963951935914553,
+      "val_loss": 1.958295408128305,
+      "seconds": 117.28173494338989
+    },
+    {
+      "epoch": 8,
+      "train_accuracy": 0.9868920317350811,
+      "train_loss": 0.056650517109387004,
+      "val_accuracy": 0.8897577722677856,
+      "val_loss": 0.9839954559593376,
+      "seconds": 106.5255959033966
+    },
+    {
+      "epoch": 9,
+      "train_accuracy": 0.9899965505346672,
+      "train_loss": 0.05054772831563828,
+      "val_accuracy": 0.8901392332633988,
+      "val_loss": 0.8811985562599367,
+      "seconds": 103.54298806190491
+    },
+    {
+      "epoch": 10,
+      "train_accuracy": 0.9924111762676785,
+      "train_loss": 0.02668903777828789,
+      "val_accuracy": 0.8663932862864772,
+      "val_loss": 1.0443558065395149,
+      "seconds": 102.31603574752808
+    }
+  ],
+  "stop": {
+    "reason": "GPU contention: >10 min without epoch completion; release ResNet memory for smaller MobileNet variants",
+    "completed_epochs": 10,
+    "planned_epochs": 12,
+    "selection": "highest completed validation accuracy; epoch 9",
+    "other_training_jobs": "not signalled"
+  },
+  "best_sha256": "72f8dbdd69e1b4587c1ae2459a64ab2a836bb69f9760e68d850139b9f1f72f81"
+}

@@ -1,0 +1,17 @@
+{
+  "weights_sha256": "259313d18a20f1d9506ff1b2bd7dfb6f95e8a80c4eb24057af73e427931ea031",
+  "val_manifest_sha256": "3ea9279b6dea504527e3294c6a786986593333fe1ddef2bc326c18f3d02f6c9e",
+  "thresholds": [
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6
+  ],
+  "ransac_iters": 100,
+  "seed": 0,
+  "selection": "pooled VAL numbering descending, coverage descending, D13 mean ascending",
+  "gt": "scale-v1aug pipeline labels; absolute numbering from label slots"
+}

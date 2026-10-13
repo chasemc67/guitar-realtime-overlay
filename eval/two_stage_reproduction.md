@@ -39,7 +39,10 @@ OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 .venv/bin/python scripts/train_numberin
 
 The smaller backbone for subsequent variants limits contention with the existing v6
 jobs. This changes both width and backbone in the second variant; it is not an isolated
-width ablation. The first run started before the `--arch` option was introduced and uses
+width ablation. The ResNet run completed 10 of 12 planned epochs, then was stopped to release GPU memory
+after more than ten minutes without another completed epoch. Its validation-selected
+checkpoint is epoch 9 (accuracy 0.890139); no held-out scores were used for this choice.
+The first run started before the `--arch` option was introduced and uses
 ResNet-18; the checkpoint loader defaults legacy v7 checkpoints to ResNet-18.
 The `seed=17` checkpoint field is the torch initialisation seed; augmentation uses fresh
 NumPy generators and is not bitwise reproducible. Reports contain all per-frame metrics.

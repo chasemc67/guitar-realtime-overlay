@@ -231,7 +231,9 @@ configured eval_v2 clip ID and the 09-06 recording date, including augmented cop
 GT homographies generate extended strips; random integer shifts, corner perturbations,
 colour changes, blur and occlusion provide augmentation. Validation tests all seven
 integer offsets. Checkpoints are selected by validation offset accuracy only (12 epochs,
-AdamW 2e-4, cosine decay, batch 4, bf16). The concurrent v6 training jobs are left running.
+AdamW 2e-4, cosine decay, batch 4, bf16). The ResNet run completed 10/12 planned epochs
+then was stopped for GPU contention; epoch 9 was selected by validation (0.890139).
+The concurrent v6 training jobs are left running.
 
 **Limitation established before evaluating stage 2:** in the existing raw-832 reports,
 most errors are mixed local slips. Without dropping predictions, frames with a uniform
@@ -253,3 +255,5 @@ accuracy does not imply every wire is correctly numbered.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | [Geometry-only control](v2/v7_geometry_control.md) | 5.56 / 2.24 | 0.620 | 0.879 / 1.000 | 0.78 | 0.933 | 0.990 | — |
 | [Geometry + reject ambiguous](v2/v7_geometry_reject.md) | 5.37 / 2.21 | 0.665 | 0.870 / 1.000 | 0.77 | 1.000 | 0.989 | — |
+| [R18 1024 offset](v2/v7num_1024.md) | 11.74 / 6.30 | 0.450 | 0.909 / 1.000 | 0.78 | 0.933 | 0.990 | 0.901 / 0.793 |
+| [R18 1024 offset + geometry/reject](v2/v7num_1024_reject.md) | 10.14 / 5.82 | 0.582 | 0.865 / 1.000 | 0.77 | 1.000 | 0.989 | 0.901 / 0.793 |

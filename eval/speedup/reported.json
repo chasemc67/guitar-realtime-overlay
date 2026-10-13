@@ -19,5 +19,8 @@
   "torch:distill_efficientnet_b0_640",
   "distill_efficientnet_b0_640",
   "torch:ft_640",
-  "ft_640"
+  "ft_640",
+  "torch:ft_512",
+  "ft_512",
+  "torch:ft_416"
 ]

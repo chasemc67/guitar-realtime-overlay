@@ -96,7 +96,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
     if passed:
         name, r = min(passed, key=lambda v: v[1]["latency"]["CPU_AND_NE"]["median_ms"])
         lines.append(
-            f"Fastest accuracy-qualified candidate so far: **{name}**, "
+            f"Fastest numbering-qualified candidate so far: **{name}**, "
             f"{r['latency']['CPU_AND_NE']['median_ms']:.2f} ms. No model is promoted by this experiment."
         )
     lines += [
@@ -124,7 +124,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
         "Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. "
         "640 was selected for distillation from the resize VAL sweep before held-out scoring. "
         "All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; "
-        "fine-tunes use four epochs and GT losses. A separate extended_512 continuation selects its backbone from the four students using VAL numbering only, then trains 20 additional epochs at 512, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).",
+        "fine-tunes use four epochs and GT losses. Separate extended_512 and extended_640 continuations select the backbone using VAL numbering only, then each independently train 20 additional epochs from the same 640 student checkpoint, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).",
         "",
         "| Candidate | Selected threshold | VAL numbering | VAL coverage | VAL D13 mean px |",
         "|---|---:|---:|---:|---:|",

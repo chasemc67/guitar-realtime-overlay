@@ -39,6 +39,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 10.93 / 7.00 | 0.525938 | 0.788797 | 2.456 / 0.600 / 0.907670 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.06 / 8.04 | 0.486329 | 0.771012 | 2.043 / 0.800 / 0.971591 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 10.10 / 2.47 | 0.613685 | 0.787168 | 1.332 / 0.867 / 0.971591 |
+| ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.01 / 3.58 | 0.526869 | 0.827605 | 1.905 / 0.800 / 0.984375 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.25 / 2.36 | 0.637908 | 0.834601 | 1.746 / 0.867 / 0.980114 |
 | r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.38 / 2.14 | 0.692329 | 0.844557 | 0.792 / 1.000 / 0.987216 |
 | r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 6.40 / 2.92 | 0.665034 | 0.807718 | 1.705 / 0.933 / 0.947443 |
@@ -52,7 +53,7 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
 ## Recommendations
 
 No collected CoreML candidate yet meets all three strict targets (≤8.00 ms, >0.601, 1.000).
-Fastest accuracy-qualified candidate so far: **r832_w8a8**, 20.12 ms. No model is promoted by this experiment.
+Fastest numbering-qualified candidate so far: **r832_w8a8**, 20.12 ms. No model is promoted by this experiment.
 
 ## PyTorch held-out results
 
@@ -64,6 +65,8 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 | distill_mobilenet_v3_large_640 | 10.543 / 6.229 | 0.497645 | 0.787996 | 2.490 / 0.533 / 0.904830 |
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
+| ft_416 | 10.137 / 5.815 | 0.434524 | 0.824281 | 2.618 / 0.800 / 0.965909 |
+| ft_512 | 6.645 / 3.445 | 0.504644 | 0.830226 | 1.857 / 0.867 / 0.985795 |
 | ft_640 | 6.159 / 2.276 | 0.625314 | 0.836450 | 1.744 / 0.867 / 0.980114 |
 | resize_416 | 17.864 / 10.056 | 0.116071 | 0.643467 | 9.009 / 0.000 / 0.825284 |
 | resize_512 | 9.024 / 4.993 | 0.363095 | 0.758734 | 3.889 / 0.000 / 0.954545 |
@@ -71,7 +74,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 
 ## VAL selection
 
-All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. A separate extended_512 continuation selects its backbone from the four students using VAL numbering only, then trains 20 additional epochs at 512, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).
+All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numbering, then coverage, then lower D13. Every checkpoint is selected on VAL mean keypoint error. Filename guards exclude eval_v2 IDs and 09-06 from train/VAL. 640 was selected for distillation from the resize VAL sweep before held-out scoring. All four students use eight epochs, GT + teacher heatmap/keypoint/query-kernel/confidence losses; fine-tunes use four epochs and GT losses. Separate extended_512 and extended_640 continuations select the backbone using VAL numbering only, then each independently train 20 additional epochs from the same 640 student checkpoint, with the same 832 teacher. Compression candidates use VAL numbering plus latency only (see plan).
 
 | Candidate | Selected threshold | VAL numbering | VAL coverage | VAL D13 mean px |
 |---|---:|---:|---:|---:|
@@ -82,6 +85,8 @@ All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numberi
 | distill_mobilenet_v3_large_640 | 0.30 | 0.635514 | 0.848263 | 3.639 |
 | distill_resnet18_640 | 0.30 | 0.693591 | 0.879366 | 3.452 |
 | distill_resnet34_640 | 0.30 | 0.826435 | 0.843082 | 2.500 |
+| ft_416 | 0.30 | 0.390521 | 0.860654 | 5.727 |
+| ft_512 | 0.30 | 0.608812 | 0.839836 | 3.916 |
 | ft_640 | 0.30 | 0.776368 | 0.862246 | 2.780 |
 
 ## Tracking
@@ -105,6 +110,7 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | distill_mobilenet_v3_large_640 | 6.48 / 6.70 | 8.57 / 8.88 | 11.16 / 6.73 | 0.424123 | 0.790070 | 2.496 / 0.600 / 0.899148 |
 | distill_resnet18_640 | 6.83 / 6.91 | 8.78 / 9.34 | 12.95 / 7.39 | 0.428280 | 0.764584 | 2.010 / 0.733 / 0.967330 |
 | distill_resnet34_640 | 9.00 / 9.69 | 10.83 / 11.36 | 9.74 / 2.51 | 0.635143 | 0.785971 | 1.331 / 0.867 / 0.971591 |
+| ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.11 / 3.51 | 0.523646 | 0.828343 | 1.859 / 0.867 / 0.985795 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.21 / 2.35 | 0.617925 | 0.832415 | 1.741 / 0.867 / 0.980114 |
 | r832_fp16 | 26.76 / 26.90 | 30.80 / 31.18 | 5.39 / 2.12 | 0.727668 | 0.840123 | 0.784 / 1.000 / 0.987216 |
 | r832_int8 | 27.02 / 27.30 | 37.06 / 38.60 | 5.95 / 2.85 | 0.637708 | 0.808190 | 1.715 / 0.933 / 0.953125 |
@@ -139,6 +145,8 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 | distill_resnet18_640 / ALL | 0.421 / 0.860 | 0.414 / 0.862 | 0.652 / 2.531 | 0.500 | 0 |
 | distill_resnet34_640 / CPU_AND_NE | 0.375 / 0.839 | 0.413 / 0.837 | 0.590 / 2.513 | 0.938 | 0 |
 | distill_resnet34_640 / ALL | 0.383 / 0.830 | 0.378 / 0.824 | 0.487 / 1.862 | 0.562 | 0 |
+| ft_512 / CPU_AND_NE | 1.254 / 2.643 | 1.267 / 2.408 | 2.670 / 6.313 | 3.594 | 0 |
+| ft_512 / ALL | 0.402 / 0.890 | 0.624 / 0.939 | 1.199 / 5.398 | 2.094 | 0 |
 | ft_640 / CPU_AND_NE | 0.381 / 0.836 | 0.474 / 0.856 | 0.556 / 2.927 | 1.812 | 0 |
 | ft_640 / ALL | 0.370 / 0.816 | 0.451 / 0.833 | 0.577 / 2.254 | 1.031 | 0 |
 | r832_fp16 / CPU_AND_NE | 0.384 / 0.843 | 1.168 / 0.970 | 2.812 / 9.987 | 1.406 | 0 |

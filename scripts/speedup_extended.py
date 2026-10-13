@@ -1,5 +1,6 @@
-"""Choose a continuation backbone using only VAL, then train one 512 student longer."""
+"""Choose a continuation backbone using only VAL, then train a 512/640 student longer."""
 
+import argparse
 import json
 import subprocess
 import sys
@@ -11,6 +12,15 @@ OUT = ROOT / "eval/speedup"
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--size", type=int, choices=[512, 640], default=512)
+    size = parser.parse_args().size
+    name = f"extended_{size}"
+    choice_name = "extended_choice" if size == 512 else name + "_choice"
+    done_name = "extended.done" if size == 512 else name + ".done"
+    if size == 640:
+        while not (OUT / "extended.done").exists():
+            time.sleep(10)
     while not (OUT / "ft_416/selection.json").exists():
         time.sleep(10)
     records = []
@@ -20,13 +30,13 @@ def main():
         records.append(dict(arch=arch, val=val))
     selected = max(records, key=lambda r: (r["val"]["numbering"], r["val"]["coverage"], -r["val"]["d13_mean_px"]))
     init = ROOT / f"runs/fretnet/speedup_{selected['arch']}_640/best.pt"
-    (OUT / "extended_choice.json").write_text(
+    (OUT / f"{choice_name}.json").write_text(
         json.dumps(
             dict(
                 selected=selected,
                 records=records,
                 decision="VAL numbering only; no held-out score read",
-                imgsz=512,
+                imgsz=size,
                 additional_epochs=20,
             ),
             indent=2,
@@ -38,36 +48,36 @@ def main():
             "--arch",
             selected["arch"],
             "--imgsz",
-            "512",
+            str(size),
             "--epochs",
             "20",
             "--name",
-            "speedup_extended_512",
+            f"speedup_{name}",
             "--init",
             str(init),
         ],
         [
             "speedup_eval.py",
             "--weights",
-            "runs/fretnet/speedup_extended_512/best.pt",
+            f"runs/fretnet/speedup_{name}/best.pt",
             "--imgsz",
-            "512",
+            str(size),
             "--out",
-            "eval/speedup/extended_512",
+            f"eval/speedup/{name}",
         ],
         [
             "speedup_eval.py",
             "--weights",
-            "runs/fretnet/speedup_extended_512/best.pt",
+            f"runs/fretnet/speedup_{name}/best.pt",
             "--imgsz",
-            "512",
+            str(size),
             "--out",
-            "eval/speedup/extended_512",
+            f"eval/speedup/{name}",
             "--held-only",
         ],
     ]
     for index, command in enumerate(commands):
-        with (OUT / f"extended_stage_{index}.log").open("w") as output:
+        with (OUT / f"{name}_stage_{index}.log").open("w") as output:
             subprocess.run(
                 [sys.executable, str(ROOT / "scripts" / command[0]), *command[1:]],
                 cwd=ROOT,
@@ -75,7 +85,7 @@ def main():
                 stderr=subprocess.STDOUT,
                 check=True,
             )
-    (OUT / "extended.done").write_text("Completed frozen extended student experiment.\n")
+    (OUT / done_name).write_text("Completed frozen extended student experiment.\n")
 
 
 if __name__ == "__main__":

@@ -9,3 +9,6 @@ Transferred distill_efficientnet_b0_640
 Collecting ft_640 (selection frozen)
 Transferred ft_640
 Collecting ft_512 (selection frozen)
+Transferred ft_512
+Collecting ft_416 (selection frozen)
+Transferred ft_416

@@ -1,0 +1,7 @@
+{
+  "source": "/Users/chase-mini/gro-coreml/speedup/distill_resnet34_640.mlpackage",
+  "kind": "w8a8",
+  "coremltools": "9.0",
+  "scope": "conv_linear",
+  "status": "exported"
+}

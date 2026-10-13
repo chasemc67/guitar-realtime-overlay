@@ -22,5 +22,9 @@
   "ft_640",
   "torch:ft_512",
   "ft_512",
-  "torch:ft_416"
+  "torch:ft_416",
+  "distill_resnet34_640_int8",
+  "ft_416",
+  "distill_resnet34_640_palette4",
+  "distill_resnet34_640_palette6"
 ]

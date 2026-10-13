@@ -35,6 +35,10 @@ eval_v2 values are equal-weight averages of the 14 clip metrics (232 frames tota
 including the average of clip medians; they are not pooled frame statistics.
 09-06 uses 15 labelled frames. Numbering excludes frames with no evaluable numbering,
 as in the unchanged eval_v2 implementation; coverage must be considered alongside it.
+`ft_*` denotes a four-epoch ResNet-50 fine-tune; `distill_*` denotes an eight-epoch
+student run. `extended_512` and `extended_640` are the independently continued,
+VAL-selected ResNet-34 student. `int8` quantizes weights only; `palette6/4` uses
+6/4-bit weight palettes; `w8a8` quantizes weights and activations.
 
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
@@ -139,22 +143,22 @@ Each sparse labelled target is paired with its actual preceding decoded video fr
 | r832 | 21.971 / 24.648 | 13.518 / 14.784 | 5.152 / 2.064 | 0.732525 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 | r832_scaled | 16.947 / 18.906 | 3.036 / 5.860 | 5.404 / 2.187 | 0.726314 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 
-Contiguous-video replay uses alternating inference/flow on up to 120 frames each from 09-06, nBpe2 and Stan. There is no dense ground truth; model-to-model agreement in the raw reports is **not** an accuracy measurement.
+Contiguous-video replay uses alternating inference/flow on up to 120 frames each from 09-06, nBpe2 and Stan. There is no dense ground truth; model-to-model agreement in the raw reports is **not** an accuracy measurement. The inference-frame column measures preprocessing + inference + Python refit on the even frames of that same replay; both columns exclude decoding.
 
-| Candidate / clip | Frames | Actual alternating pair median / p95 ms per frame | Flow failures |
-|---|---:|---:|---:|
-| distill_resnet18_640 / 2026-09-06_09-00-01 | 120 | 6.822 / 8.436 | 0 |
-| distill_resnet18_640 / yt_nBpe2YQEzZo | 120 | 7.438 / 8.607 | 0 |
-| distill_resnet18_640 / stan_head3s | 90 | 7.288 / 8.779 | 0 |
-| extended_512 / 2026-09-06_09-00-01 | 120 | 5.233 / 5.797 | 0 |
-| extended_512 / yt_nBpe2YQEzZo | 120 | 6.336 / 7.428 | 0 |
-| extended_512 / stan_head3s | 90 | 6.298 / 7.551 | 0 |
-| r832 / 2026-09-06_09-00-01 | 120 | 19.255 / 20.500 | 0 |
-| r832 / yt_nBpe2YQEzZo | 120 | 24.951 / 26.522 | 0 |
-| r832 / stan_head3s | 90 | 23.471 / 24.987 | 0 |
-| r832_scaled / 2026-09-06_09-00-01 | 120 | 16.130 / 17.503 | 0 |
-| r832_scaled / yt_nBpe2YQEzZo | 120 | 17.633 / 19.324 | 0 |
-| r832_scaled / stan_head3s | 90 | 16.867 / 17.837 | 0 |
+| Candidate / clip | Frames | Inference-frame median / p95 ms | Actual alternating pair median / p95 ms per frame | Flow failures |
+|---|---:|---:|---:|---:|
+| distill_resnet18_640 / 2026-09-06_09-00-01 | 120 | 12.311 / 15.410 | 6.822 / 8.436 | 0 |
+| distill_resnet18_640 / yt_nBpe2YQEzZo | 120 | 11.464 / 13.759 | 7.438 / 8.607 | 0 |
+| distill_resnet18_640 / stan_head3s | 90 | 11.458 / 14.438 | 7.288 / 8.779 | 0 |
+| extended_512 / 2026-09-06_09-00-01 | 120 | 9.239 / 10.332 | 5.233 / 5.797 | 0 |
+| extended_512 / yt_nBpe2YQEzZo | 120 | 9.332 / 11.568 | 6.336 / 7.428 | 0 |
+| extended_512 / stan_head3s | 90 | 9.528 / 12.011 | 6.298 / 7.551 | 0 |
+| r832 / 2026-09-06_09-00-01 | 120 | 31.119 / 34.329 | 19.255 / 20.500 | 0 |
+| r832 / yt_nBpe2YQEzZo | 120 | 32.812 / 35.950 | 24.951 / 26.522 | 0 |
+| r832 / stan_head3s | 90 | 30.906 / 33.079 | 23.471 / 24.987 | 0 |
+| r832_scaled / 2026-09-06_09-00-01 | 120 | 30.769 / 33.683 | 16.130 / 17.503 | 0 |
+| r832_scaled / yt_nBpe2YQEzZo | 120 | 31.638 / 35.095 | 17.633 / 19.324 | 0 |
+| r832_scaled / stan_head3s | 90 | 30.349 / 32.314 | 16.867 / 17.837 | 0 |
 
 ## ALL compute-mode accuracy
 
@@ -199,6 +203,7 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 - CoreML compression uses coremltools 9.0: symmetric int8 linear weights, k-means palettes, and activation calibration using 32 deterministic VAL-only frames. [Apple documentation](https://apple.github.io/coremltools/docs-guides/source/opt-overview.html) explains why compression speedups must be measured on the target hardware.
 - All new backbones/weights are torchvision BSD-3-Clause with the existing ImageNet caveat; see `LICENSES.md`. No Ultralytics code/weights enter this work.
 - PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.
+- [Artifact audit](speedup/audit.json) verifies manifest identities, prediction shapes/finiteness, frame and parity counts, timings, and VAL threshold choices without rerunning inference. Run `.venv/bin/python scripts/speedup_audit.py --complete` after collecting all results.
 - Short training budgets are not convergence claims. Validation uses pipeline labels; eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.
 - [PC environment and pretrained-weight hashes](speedup/pc_environment.json), [Mini environment](speedup/mini_environment.txt), [held-out manifest](speedup/bundle_manifest.json), and [VAL calibration manifest](speedup/calibration_manifest.json) identify this run. Training augmentation is not bitwise reproducible; checkpoint hashes identify the frozen evaluated models.
 - The 09-06 result covers only 15 labelled frames. All conclusions are specific to these test sets and this Mini. A failed dense-video flow update reuses the previous fit; failure counts are reported, not hidden.

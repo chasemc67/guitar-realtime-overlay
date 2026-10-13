@@ -4,6 +4,7 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from statistics import median, quantiles
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "eval/speedup"
@@ -79,6 +80,11 @@ eval_v2 values are equal-weight averages of the 14 clip metrics (232 frames tota
 including the average of clip medians; they are not pooled frame statistics.
 09-06 uses 15 labelled frames. Numbering excludes frames with no evaluable numbering,
 as in the unchanged eval_v2 implementation; coverage must be considered alongside it.
+`ft_*` denotes a four-epoch ResNet-50 fine-tune; `distill_*` denotes an eight-epoch
+student run. `extended_512` and `extended_640` are the independently continued,
+VAL-selected ResNet-34 student. Except for the initial all-constant controls noted
+above, `int8` quantizes weights only and `palette6/4` uses 6/4-bit weight palettes;
+`w8a8` quantizes weights and activations.
 
 """
     if completion:
@@ -205,16 +211,20 @@ as in the unchanged eval_v2 implementation; coverage must be considered alongsid
         "",
         "Contiguous-video replay uses alternating inference/flow on up to 120 frames each "
         "from 09-06, nBpe2 and Stan. There is no dense ground truth; model-to-model agreement in "
-        "the raw reports is **not** an accuracy measurement.",
+        "the raw reports is **not** an accuracy measurement. The inference-frame column measures "
+        "preprocessing + inference + Python refit on the even frames of that same replay; "
+        "both columns exclude decoding.",
         "",
-        "| Candidate / clip | Frames | Actual alternating pair median / p95 ms per frame | Flow failures |",
-        "|---|---:|---:|---:|",
+        "| Candidate / clip | Frames | Inference-frame median / p95 ms | Actual alternating pair median / p95 ms per frame | Flow failures |",
+        "|---|---:|---:|---:|---:|",
     ]
     for p in sorted(OUT.glob("ml_video_*.json")):
         r = json.loads(p.read_text())
         for c in r["clips"]:
+            inference_times = c["frame_ms"][::2]
             lines.append(
                 f"| {p.stem.removeprefix('ml_video_')} / {Path(c['path']).stem} | {c['frames']} | "
+                f"{median(inference_times):.3f} / {quantiles(inference_times, n=100, method='inclusive')[94]:.3f} | "
                 f"{f(c['pair_median_ms'])} / {f(c['pair_p95_ms'])} | {c['flow_failures']} |"
             )
     lines += [
@@ -237,6 +247,9 @@ as in the unchanged eval_v2 implementation; coverage must be considered alongsid
         "see `LICENSES.md`. No Ultralytics code/weights enter this work.",
         "- PC full test suite: 104 passed (including backbone checkpoint/export and synthetic homography tests). "
         "New Python scripts pass Ruff and compile checks; collection shell passes `bash -n`.",
+        "- [Artifact audit](speedup/audit.json) verifies manifest identities, prediction shapes/finiteness, "
+        "frame and parity counts, timings, and VAL threshold choices without rerunning inference. "
+        "Run `.venv/bin/python scripts/speedup_audit.py --complete` after collecting all results.",
         "- Short training budgets are not convergence claims. Validation uses pipeline labels; "
         "eval_v2 contains pseudo-GT plus hand corrections, while 09-06 uses hand GT.",
         "- [PC environment and pretrained-weight hashes](speedup/pc_environment.json), "

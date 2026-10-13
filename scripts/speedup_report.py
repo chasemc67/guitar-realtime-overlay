@@ -75,6 +75,10 @@ modes: 20 warmups / 200 calls, batch 1, the existing Python CoreML backend
 experiment is timed on the Mini. Detection and numbering denominators are in the
 per-frame JSON reports; parity uses 32 VAL calibration images, never held-out selection.
 Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the reports.
+eval_v2 values are equal-weight averages of the 14 clip metrics (232 frames total),
+including the average of clip medians; they are not pooled frame statistics.
+09-06 uses 15 labelled frames. Numbering excludes frames with no evaluable numbering,
+as in the unchanged eval_v2 implementation; coverage must be considered alongside it.
 
 """
     if completion:

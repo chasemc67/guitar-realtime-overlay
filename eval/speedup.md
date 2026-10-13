@@ -31,6 +31,10 @@ modes: 20 warmups / 200 calls, batch 1, the existing Python CoreML backend
 experiment is timed on the Mini. Detection and numbering denominators are in the
 per-frame JSON reports; parity uses 32 VAL calibration images, never held-out selection.
 Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the reports.
+eval_v2 values are equal-weight averages of the 14 clip metrics (232 frames total),
+including the average of clip medians; they are not pooled frame statistics.
+09-06 uses 15 labelled frames. Numbering excludes frames with no evaluable numbering,
+as in the unchanged eval_v2 implementation; coverage must be considered alongside it.
 
 
 | Candidate | CPU_AND_NE median / p95 ms | ALL median / p95 ms | eval_v2 D13 mean / median px | Numbering | Coverage | 09-06 D13 / numbering / coverage |
@@ -47,6 +51,11 @@ Raw CoreML outputs are retained as `.CPU_AND_NE.npz` and `.ALL.npz` beside the r
 | distill_resnet34_640_palette4 | 8.86 / 8.96 | 10.89 / 11.36 | 8.11 / 2.53 | 0.624875 | 0.809278 | 1.824 / 0.467 / 0.901989 |
 | distill_resnet34_640_palette6 | 8.79 / 8.88 | 10.80 / 11.29 | 13.69 / 9.23 | 0.623451 | 0.785420 | 1.247 / 0.867 / 0.974432 |
 | distill_resnet34_640_w8a8 | 6.51 / 6.88 | 6.50 / 6.89 | 9.37 / 2.70 | 0.637957 | 0.788574 | 1.381 / 0.867 / 0.974432 |
+| extended_512 | 5.27 / 5.38 | 6.92 / 7.11 | 10.87 / 8.39 | 0.633263 | 0.828736 | 1.305 / 0.933 / 0.990057 |
+| extended_512_int8 | 5.13 / 5.24 | 8.09 / 8.22 | 9.93 / 3.65 | 0.622190 | 0.831436 | 1.265 / 0.933 / 0.990057 |
+| extended_512_palette4 | 5.20 / 5.31 | 7.01 / 7.15 | 12.02 / 6.62 | 0.600822 | 0.828701 | 1.500 / 0.867 / 0.984375 |
+| extended_512_palette6 | 5.19 / 5.30 | 6.97 / 7.10 | 8.47 / 2.97 | 0.616862 | 0.832045 | 1.291 / 0.933 / 0.992898 |
+| extended_512_w8a8 | 3.65 / 3.75 | 3.66 / 3.79 | 6.08 / 2.65 | 0.690892 | 0.852562 | 1.317 / 0.933 / 0.988636 |
 | ft_416 | 5.53 / 5.61 | 8.21 / 8.52 | 9.85 / 5.56 | 0.375850 | 0.815923 | 2.606 / 0.733 / 0.965909 |
 | ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.01 / 3.58 | 0.526869 | 0.827605 | 1.905 / 0.800 / 0.984375 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.25 / 2.36 | 0.637908 | 0.834601 | 1.746 / 0.867 / 0.980114 |
@@ -78,6 +87,7 @@ These are separate runtime variants, scored once after VAL selection. Do not tre
 | distill_mobilenet_v3_large_640 | 10.543 / 6.229 | 0.497645 | 0.787996 | 2.490 / 0.533 / 0.904830 |
 | distill_resnet18_640 | 12.239 / 7.865 | 0.511465 | 0.775591 | 2.107 / 0.800 / 0.970170 |
 | distill_resnet34_640 | 9.956 / 4.213 | 0.646410 | 0.791918 | 1.334 / 0.867 / 0.971591 |
+| extended_512 | 7.347 / 2.690 | 0.687047 | 0.850871 | 1.238 / 0.933 / 0.982955 |
 | ft_416 | 10.137 / 5.815 | 0.434524 | 0.824281 | 2.618 / 0.800 / 0.965909 |
 | ft_512 | 6.645 / 3.445 | 0.504644 | 0.830226 | 1.857 / 0.867 / 0.985795 |
 | ft_640 | 6.159 / 2.276 | 0.625314 | 0.836450 | 1.744 / 0.867 / 0.980114 |
@@ -98,6 +108,7 @@ All refit sweeps use 1,498 VAL images and thresholds 0.30–0.60; choose numberi
 | distill_mobilenet_v3_large_640 | 0.30 | 0.635514 | 0.848263 | 3.639 |
 | distill_resnet18_640 | 0.30 | 0.693591 | 0.879366 | 3.452 |
 | distill_resnet34_640 | 0.30 | 0.826435 | 0.843082 | 2.500 |
+| extended_512 | 0.30 | 0.769025 | 0.885358 | 2.805 |
 | ft_416 | 0.30 | 0.390521 | 0.860654 | 5.727 |
 | ft_512 | 0.30 | 0.608812 | 0.839836 | 3.916 |
 | ft_640 | 0.30 | 0.776368 | 0.862246 | 2.780 |
@@ -112,6 +123,7 @@ Each continuation starts from the original student's best checkpoint, not the ot
 | distill_mobilenet_v3_large_640 | 8 | 8 | 3.624 / 1.427 / 11.304 |
 | distill_resnet18_640 | 8 | 4 | 3.375 / 1.275 / 11.757 |
 | distill_resnet34_640 | 8 | 6 | 2.667 / 1.065 / 8.109 |
+| extended_512 | 20 | 4 | 2.242 / 1.070 / 6.076 |
 | ft_416 | 4 | 3 | 2.591 / 1.268 / 8.188 |
 | ft_512 | 4 | 4 | 2.797 / 1.117 / 8.996 |
 | ft_640 | 4 | 1 | 3.077 / 1.054 / 10.337 |
@@ -123,6 +135,7 @@ Each sparse labelled target is paired with its actual preceding decoded video fr
 | Candidate | Effective pair median / p95 ms per frame | Flow median / p95 ms | eval_v2 D13 mean / median px | Numbering / coverage | 09-06 D13 / numbering / coverage | Flow failures |
 |---|---:|---:|---:|---:|---:|---:|
 | distill_resnet18_640 | 7.512 / 9.493 | 3.108 / 6.186 | 12.513 / 7.240 | 0.482345 / 0.778377 | 2.082 / 0.733 / 0.961648 | 2 |
+| extended_512 | 6.354 / 8.468 | 3.002 / 5.935 | 10.732 / 3.289 | 0.590747 / 0.829216 | 1.265 / 0.933 / 0.990057 | 1 |
 | r832 | 21.971 / 24.648 | 13.518 / 14.784 | 5.152 / 2.064 | 0.732525 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 | r832_scaled | 16.947 / 18.906 | 3.036 / 5.860 | 5.404 / 2.187 | 0.726314 / 0.837441 | 0.797 / 1.000 / 0.988636 | 0 |
 
@@ -133,6 +146,9 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | distill_resnet18_640 / 2026-09-06_09-00-01 | 120 | 6.822 / 8.436 | 0 |
 | distill_resnet18_640 / yt_nBpe2YQEzZo | 120 | 7.438 / 8.607 | 0 |
 | distill_resnet18_640 / stan_head3s | 90 | 7.288 / 8.779 | 0 |
+| extended_512 / 2026-09-06_09-00-01 | 120 | 5.233 / 5.797 | 0 |
+| extended_512 / yt_nBpe2YQEzZo | 120 | 6.336 / 7.428 | 0 |
+| extended_512 / stan_head3s | 90 | 6.298 / 7.551 | 0 |
 | r832 / 2026-09-06_09-00-01 | 120 | 19.255 / 20.500 | 0 |
 | r832 / yt_nBpe2YQEzZo | 120 | 24.951 / 26.522 | 0 |
 | r832 / stan_head3s | 90 | 23.471 / 24.987 | 0 |
@@ -156,6 +172,11 @@ Contiguous-video replay uses alternating inference/flow on up to 120 frames each
 | distill_resnet34_640_palette4 | 8.86 / 8.96 | 10.89 / 11.36 | 8.03 / 2.71 | 0.635885 | 0.813567 | 1.848 / 0.467 / 0.901989 |
 | distill_resnet34_640_palette6 | 8.79 / 8.88 | 10.80 / 11.29 | 11.70 / 8.32 | 0.640392 | 0.791079 | 1.253 / 0.933 / 0.973011 |
 | distill_resnet34_640_w8a8 | 6.51 / 6.88 | 6.50 / 6.89 | 9.37 / 2.70 | 0.637957 | 0.788574 | 1.381 / 0.867 / 0.974432 |
+| extended_512 | 5.27 / 5.38 | 6.92 / 7.11 | 6.64 / 2.63 | 0.643532 | 0.856678 | 1.257 / 0.933 / 0.984375 |
+| extended_512_int8 | 5.13 / 5.24 | 8.09 / 8.22 | 6.82 / 2.64 | 0.688104 | 0.851497 | 1.271 / 0.933 / 0.985795 |
+| extended_512_palette4 | 5.20 / 5.31 | 7.01 / 7.15 | 7.13 / 2.70 | 0.645051 | 0.848505 | 1.374 / 0.800 / 0.977273 |
+| extended_512_palette6 | 5.19 / 5.30 | 6.97 / 7.10 | 6.85 / 2.55 | 0.683599 | 0.855897 | 1.258 / 0.933 / 0.985795 |
+| extended_512_w8a8 | 3.65 / 3.75 | 3.66 / 3.79 | 6.08 / 2.65 | 0.690892 | 0.852562 | 1.317 / 0.933 / 0.988636 |
 | ft_416 | 5.53 / 5.61 | 8.21 / 8.52 | 9.72 / 5.52 | 0.445153 | 0.818751 | 2.612 / 0.733 / 0.965909 |
 | ft_512 | 7.96 / 8.11 | 10.30 / 10.54 | 7.11 / 3.51 | 0.523646 | 0.828343 | 1.859 / 0.867 / 0.985795 |
 | ft_640 | 14.09 / 14.48 | 17.09 / 17.59 | 6.21 / 2.35 | 0.617925 | 0.832415 | 1.741 / 0.867 / 0.980114 |
@@ -213,6 +234,16 @@ Coordinates are source-image pixels. Fit disagreement counts either runtime lack
 | distill_resnet34_640_palette6 / ALL | 0.609 / 1.499 | 0.696 / 1.433 | 0.803 / 3.785 | 2.312 | 0 |
 | distill_resnet34_640_w8a8 / CPU_AND_NE | 0.466 / 1.019 | 0.484 / 1.007 | 0.559 / 2.322 | 1.344 | 0 |
 | distill_resnet34_640_w8a8 / ALL | 0.466 / 1.019 | 0.484 / 1.007 | 0.559 / 2.322 | 1.344 | 0 |
+| extended_512 / CPU_AND_NE | 1.640 / 2.560 | 0.837 / 2.313 | 0.883 / 2.979 | 2.000 | 0 |
+| extended_512 / ALL | 0.390 / 0.857 | 0.398 / 0.867 | 0.380 / 1.203 | 0.375 | 0 |
+| extended_512_int8 / CPU_AND_NE | 1.661 / 2.622 | 0.866 / 2.390 | 0.803 / 2.145 | 1.938 | 0 |
+| extended_512_int8 / ALL | 0.415 / 0.874 | 0.389 / 0.869 | 0.606 / 2.349 | 0.625 | 0 |
+| extended_512_palette4 / CPU_AND_NE | 2.337 / 4.146 | 1.373 / 3.792 | 1.359 / 4.659 | 2.906 | 0 |
+| extended_512_palette4 / ALL | 1.127 / 2.520 | 1.035 / 2.366 | 0.732 / 1.995 | 1.750 | 0 |
+| extended_512_palette6 / CPU_AND_NE | 1.584 / 2.851 | 0.891 / 2.534 | 0.808 / 2.535 | 2.062 | 0 |
+| extended_512_palette6 / ALL | 0.609 / 1.053 | 0.492 / 1.024 | 0.601 / 2.350 | 1.000 | 0 |
+| extended_512_w8a8 / CPU_AND_NE | 0.513 / 1.073 | 0.475 / 1.047 | 0.472 / 1.584 | 1.031 | 0 |
+| extended_512_w8a8 / ALL | 0.513 / 1.073 | 0.475 / 1.047 | 0.472 / 1.584 | 1.031 | 0 |
 | ft_416 / CPU_AND_NE | 0.444 / 0.887 | 1.859 / 1.112 | 4.941 / 28.681 | 2.375 | 0 |
 | ft_416 / ALL | 0.406 / 0.887 | 0.668 / 0.964 | 2.666 / 12.100 | 1.500 | 0 |
 | ft_512 / CPU_AND_NE | 1.254 / 2.643 | 1.267 / 2.408 | 2.670 / 6.313 | 3.594 | 0 |

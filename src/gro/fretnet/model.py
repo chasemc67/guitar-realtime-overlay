@@ -1,6 +1,6 @@
 """FretNet: a permissively licensed 50-keypoint fretboard model (model v3). No Ultralytics code or weights.
 
-Backbone: torchvision ResNet (BSD-3-Clause code, ImageNet weights from torchvision; see LICENSES.md). Head (ours): an
+Backbone: torchvision (BSD-3-Clause code, ImageNet weights from torchvision; see LICENSES.md). Head (ours): an
 FPN that merges strides 4..32 into one stride-4 map, one heatmap per keypoint, and one confidence map per keypoint, read
 at the predicted location (local evidence only, like a detector's per-anchor keypoint confidence). Input is
 the same 640x640 letterboxed RGB frame as v1, in [0, 1] (the ImageNet normalisation is inside the network), so every
@@ -21,7 +21,8 @@ Global-context variants (round 2, numbering is a global decision: inlay pattern,
 - SimCCNet: RTMPose-style SimCC. Each keypoint is a token made from the whole stride-16 map (a fully connected layer
   over all positions), the 50 tokens attend to each other, and each classifies its x and y over the full canvas in
   1D bins (split 2). Every coordinate is a global decision.
-Backbones: torchvision ResNet-18/34/50 or ConvNeXt-T (BSD-3-Clause code, ImageNet-1k weights; see LICENSES.md).
+Backbones: torchvision ResNet-18/34/50, MobileNetV3-Large, EfficientNet-B0, or ConvNeXt-T
+(BSD-3-Clause code, ImageNet-1k weights; see LICENSES.md).
 
 Round 2b:
 - RTDetrFretNet (arch "rtdetr_r50vd"): the backbone (ResNet-50-vd) and hybrid encoder (AIFI self-attention on stride 32
